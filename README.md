@@ -17,7 +17,7 @@
       - j
 - `water-controller-relay`
   - 概要
-    - Arduino のシリアル通信を受信して、WebSocket でクライアントに配信する中継サーバ
+    - Arduino のシリアル通信を受信して、WebSocket でクライアントに配信する中継サーバ（リレーサーバ）
   - 技術スタック
     - Rust
 - `water-controller-app`

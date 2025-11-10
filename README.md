@@ -24,7 +24,7 @@ HOMEWORKS 2026 出展作品「水コントローラー」のリポジトリ
 
 - Auduino 2.3.6（おそらく 2 系なら OK）
 - Rust 1.90.x
-- TODO: Electron 関係の依存
+- Node.js 22.21.x (おそらく 22 系なら OK)
 
 ## システム構成
 
@@ -78,9 +78,44 @@ cargo --version
 # cargo 1.90.0 (840b83a10 2025-07-30)
 ```
 
-### TODO: Electron 関係の依存
+### Node.js のインストール
 
-TODO
+nvm（Node.js バージョンマネージャ）をインストールした後、Node.js v22.21.1 をインストールする：
+
+ref: https://nodejs.org/en/download
+
+```sh
+# nvm をインストール
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# シェルを再起動する前に以下を実行
+\. "$HOME/.nvm/nvm.sh"
+
+# Node.js v22.21.1 をインストール
+nvm install v22.21.1
+
+# インストールされている Node.js の一覧
+nvm ls
+
+# Node.js v22.21.1 を使用する
+nvm use v22.21.1
+
+# Node.js v22.21.1 の確認
+node -v # "v22.21.1" と出力されれば OK
+
+# npm の確認
+npm -v # "10.9.4" と出力されれば OK
+```
+
+pnpm をインストール：
+
+```sh
+# pnpm をインストール
+npm install -g pnpm@latest-10
+
+# pnpm のバージョン確認
+pnpm -v # "10.x.x" と出力されれば OK
+```
 
 ## 実行
 

@@ -84,27 +84,28 @@ TODO
 
 ## 実行
 
-### ファームウェア
+### ファームウェア `water-controller-firmware`
 
 1. マイコン（Arduino UNO R3）を PC に接続
 2. Arduino IDE 経由でスケッチ `water-controller-firmware/WaterControllerFirmwareProto/WaterControllerFirmwareProto.ino` をコンパイルし、マイコンに書き込む
 3. マイコンを起動する
 
-### `water-controller-relay`
+### センサー中継サーバ `water-controller-relay`
 
-- ビルド
+作業ディレクトリへ移動：
 
 ```sh
 cd water-controller-relay
-cargo build
 ```
 
-（以降、ビルド済み、かつ `water-controller-relay` ディレクトリにいる前提）
+以降、`water-controller-relay` ディレクトリで作業することを前提とする。
+
+#### 開発環境
 
 - 使用可能なシリアルデバイスの一覧
 
 ```sh
-./target/debug/water-controller-relay device-list
+cargo run -- device-list
 ```
 
 <details>
@@ -127,14 +128,30 @@ name: /dev/tty.usbmodem1101, type=UsbPort(UsbPortInfo { vid: 0x2341, pid: 0x0043
 - 実行
 
 ```sh
-./target/debug/water-controller-relay --port "/dev/cu.usbmodem1101" --baud-rate 115200
+cargo run -- --port "/dev/cu.usbmodem1101" --baud-rate 115200
 
 # 省略形
-./target/debug/water-controller-relay -p "/dev/cu.usbmodem1101" -b 115200
+cargo run -- -p "/dev/cu.usbmodem1101" -b 115200
 ```
 
 - ヘルプ
 
 ```sh
-./target/debug/water-controller-relay help
+cargo run -- help
+```
+
+#### 本番環境
+
+- ビルド
+
+```sh
+cargo build --release
+```
+
+- 実行
+
+```sh
+./target/release/water-controller-relay -p "/dev/cu.usbmodem1101" -b 115200
+```
+
 ```

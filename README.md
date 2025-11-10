@@ -193,4 +193,45 @@ cargo build --release
 ./target/release/water-controller-relay -p "/dev/cu.usbmodem1101" -b 115200
 ```
 
+### デスクトップアプリ `water-controller-app`
+
+作業ディレクトリへ移動：
+
+```sh
+cd water-controller-app
+```
+
+以降、`water-controller-app` ディレクトリで作業することを前提とする。
+
+#### 開発環境
+
+- 初回セットアップ：依存関係のインストール（初回のみ実行）
+
+```sh
+pnpm install
+```
+
+- 開発サーバの実行
+  - デスクトップアプリが起動する
+
+```sh
+pnpm dev
+```
+
+#### 本番環境（macOS 前提）
+
+- デスクトップアプリのビルド
+  - 本番環境を立ち上げるときだけアプリケーションバンドルを作る。開発環境では `pnpm dev` で十分。
+  - 環境によるが 30 秒 ~ 1 分程度かかる。
+  - 配布しないのでコード署名を無効化してビルドする。
+
+```sh
+CSC_IDENTITY_AUTO_DISCOVERY=false pnpm build:mac
+```
+
+- デスクトップアプリの起動
+
+```sh
+open dist/mac-arm64/WaterController.app
+# デスクトップアプリが起動すれば OK!
 ```

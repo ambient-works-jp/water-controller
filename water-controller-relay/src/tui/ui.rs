@@ -5,7 +5,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::Line,
-    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Tabs},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Tabs},
 };
 
 use super::app::{AppState, Tab};
@@ -97,7 +97,6 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
     let cell_width = 6;
     let cell_height = 3;
     let gap = 1; // 要素間の隙間
-    let vertical_gap_to_button = 2; // ボタンと上下 LOW の間隔
 
     // 中央座標を計算
     let center_x = area.x + area.width / 2;
@@ -106,26 +105,26 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
     // 各要素の位置を計算
     // 上方向（2段階）
     let up_high_x = center_x - cell_width / 2;
-    let up_high_y = center_y - (cell_height * 2 + gap + vertical_gap_to_button);
+    let up_high_y = center_y - (cell_height * 2 + gap + 2);
     let up_low_x = center_x - cell_width / 2;
-    let up_low_y = center_y - (cell_height + vertical_gap_to_button);
+    let up_low_y = center_y - (cell_height + 2);
 
     // 下方向（2段階）
     let down_low_x = center_x - cell_width / 2;
-    let down_low_y = center_y + vertical_gap_to_button;
+    let down_low_y = center_y + 3;
     let down_high_x = center_x - cell_width / 2;
-    let down_high_y = center_y + cell_height + gap + vertical_gap_to_button;
+    let down_high_y = center_y + cell_height + gap + 3;
 
     // 左方向（2段階）
-    let left_high_x = center_x - (cell_width * 2 + gap * 2) - cell_width / 2;
+    let left_high_x = center_x - (cell_width * 2 + gap * 4) - cell_width / 2;
     let left_high_y = center_y - cell_height / 2;
-    let left_low_x = center_x - (cell_width + gap) - cell_width / 2;
+    let left_low_x = center_x - (cell_width + gap * 2) - cell_width / 2;
     let left_low_y = center_y - cell_height / 2;
 
     // 右方向（2段階）
-    let right_low_x = center_x + gap + cell_width / 2;
+    let right_low_x = center_x + gap * 2 + cell_width / 2;
     let right_low_y = center_y - cell_height / 2;
-    let right_high_x = center_x + (cell_width + gap * 2) + cell_width / 2;
+    let right_high_x = center_x + (cell_width + gap * 4) + cell_width / 2;
     let right_high_y = center_y - cell_height / 2;
 
     // ボタン（中央）

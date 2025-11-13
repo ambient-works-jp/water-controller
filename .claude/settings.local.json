@@ -9,6 +9,9 @@
       "mcp__serena__get_symbols_overview"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/nukopy/Projects/Rust/chat-app-rs/"
+    ]
   }
 }

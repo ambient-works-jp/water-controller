@@ -3,6 +3,14 @@ name = "water-controller-relay"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
+
+[[bin]]
+name = "client"
+path = "src/bin/client.rs"
+
 [dependencies]
 axum = { version = "0.8.6", features = ["macros", "ws"] }
 chrono = "0.4"

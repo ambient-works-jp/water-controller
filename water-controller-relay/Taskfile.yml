@@ -1,0 +1,108 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  default:
+    aliases: [help]
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # ----------------------------------------------------------------------------
+  # basic tasks
+  # ----------------------------------------------------------------------------
+
+  fmt:
+    desc: Format code with rustfmt
+    cmds:
+      - cargo fmt
+
+  lint:
+    desc: Run clippy linter
+    cmds:
+      - cargo clippy --all-targets --all-features
+
+  check:
+    desc: Run cargo check
+    cmds:
+      - cargo check --all-targets --all-features
+
+  test:
+    desc: Run all tests
+    cmds:
+      - cargo test --all-targets --all-features --verbose
+
+  # ----------------------------------------------------------------------------
+  # CI tasks
+  # ----------------------------------------------------------------------------
+  _ci-before-test:
+    internal: true
+    desc: Run before test tasks
+    deps: [fmt, lint, check]
+
+  ci:
+    desc: Run all CI checks (_ci-before-test, test)
+    deps: [_ci-before-test, test]
+
+  # ----------------------------------------------------------------------------
+  # Build tasks
+  # ----------------------------------------------------------------------------
+
+  build:
+    desc: Build all packages in debug mode
+    cmds:
+      - cargo build
+
+  build-release:
+    aliases: [release, buildr]
+    desc: Build all packages in release mode
+    cmds:
+      - cargo build --release
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - cargo clean
+
+  # ----------------------------------------------------------------------------
+  # Run tasks
+  # ----------------------------------------------------------------------------
+
+  run-server:
+    desc: Run WebSocket server
+    summary: |
+      Run with:
+        - task run-server
+        - task run-server SERIAL_PORT=/dev/cu.usbmodem2101 BAUD_RATE=115200 WS_PORT=8080
+    vars:
+      SERIAL_PORT: '{{ .SERIAL_PORT | default "/dev/cu.usbmodem2101" }}'
+      BAUD_RATE: "{{ .BAUD_RATE | default 115200 }}"
+      WS_PORT: "{{ .WS_PORT | default 8080 }}"
+    cmds:
+      - |
+        cargo run --bin server -- \
+          --port {{.SERIAL_PORT}} \
+          --baud-rate {{.BAUD_RATE}} \
+          --ws-port {{.WS_PORT}}
+
+  run-cli:
+    desc: "Run CLI client"
+    aliases: [run-client-cli]
+    vars:
+      URL: '{{ .URL | default "ws://127.0.0.1:8080/ws" }}'
+    cmds:
+      - |
+        cargo run --bin client -- --url {{.URL}}
+
+  # デバッグ用途
+  run-tui:
+    desc: "[for debug] Run CLI client (use CLIENT_ID env var or default to 'bob')"
+    aliases: [run-client-tui]
+    vars:
+      CLIENT_ID: '{{ .CLIENT_ID | default "bob" }}'
+      URL: '{{ .URL | default "ws://127.0.0.1:8080/ws" }}'
+    cmds:
+      - |
+        cargo run --bin tui-client -- --url {{.URL}}

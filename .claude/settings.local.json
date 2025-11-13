@@ -6,7 +6,11 @@
       "Bash(cargo build:*)",
       "Bash(cargo fmt:*)",
       "Bash(cargo clippy:*)",
-      "mcp__serena__get_symbols_overview"
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__initial_instructions",
+      "mcp__serena__get_current_config",
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed"
     ],
     "deny": [],
     "ask": [],

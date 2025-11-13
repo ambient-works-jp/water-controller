@@ -182,6 +182,12 @@ cargo run --bin client -- --url "ws://127.0.0.1:8080/ws"
 cargo run --bin client -- -u "ws://127.0.0.1:8080/ws"
 ```
 
+- TUI クライアント実行（別ターミナル）
+
+```sh
+cargo run --bin tui-client -- --url "ws://127.0.0.1:8080/ws"
+```
+
 - ヘルプ
 
 ```sh

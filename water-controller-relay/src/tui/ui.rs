@@ -307,11 +307,15 @@ fn render_monitor_info(f: &mut Frame, area: Rect, app_state: &AppState) {
     };
 
     // FPS 表示（接続時: White、切断時: Gray）
-    let fps_num_text = format!(" FPS: {:.2}", app_state.fps);
-    let (fps_text, fps_color) = if app_state.is_connected {
-        (fps_num_text.as_str(), Color::White)
+    let fps_color = if app_state.is_connected {
+        Color::White
     } else {
-        (" FPS: N/A", Color::Gray)
+        Color::DarkGray
+    };
+    let fps_text = if app_state.is_connected {
+        format!(" FPS: {:.2}", app_state.fps)
+    } else {
+        " FPS: N/A".to_string()
     };
     let fps_line = Line::from(vec![ratatui::text::Span::styled(
         fps_text,
@@ -319,10 +323,10 @@ fn render_monitor_info(f: &mut Frame, area: Rect, app_state: &AppState) {
     )]);
 
     // 接続状態表示
-    let (status_label_text, status_label_color) = if app_state.is_connected {
-        (" Connection Status: ", Color::White)
+    let status_label_color = if app_state.is_connected {
+        Color::White
     } else {
-        (" Connection Status: ", Color::Gray)
+        Color::DarkGray
     };
     let (status_text, status_color) = if app_state.is_connected {
         ("Connected", Color::LightGreen)
@@ -330,8 +334,11 @@ fn render_monitor_info(f: &mut Frame, area: Rect, app_state: &AppState) {
         ("Disconnected", Color::Red)
     };
     let connection_line = Line::from(vec![
-        ratatui::text::Span::styled(status_label_text, Style::default().fg(status_label_color)),
-        ratatui::text::Span::styled(status_text, Style::default().fg(status_color)),
+        ratatui::text::Span::styled(
+            " Connection Status: ".to_string(),
+            Style::default().fg(status_label_color),
+        ),
+        ratatui::text::Span::styled(status_text.to_string(), Style::default().fg(status_color)),
     ]);
 
     let info_paragraph = Paragraph::new(vec![fps_line, connection_line]);

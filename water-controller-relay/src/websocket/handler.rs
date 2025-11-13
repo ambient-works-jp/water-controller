@@ -38,7 +38,8 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
     let mut send_task = tokio::spawn(async move {
         while let Ok(json) = rx.recv().await {
             debug!(message = %json, "Broadcasting to client");
-            if sender.send(Message::Text(json.into())).await.is_err() {
+            if let Err(e) = sender.send(Message::Text(json.into())).await {
+                warn!(error = %e, "Failed to send message to client");
                 break;
             }
         }
@@ -69,8 +70,18 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
 
     // どちらかのタスクが完了したら、もう一方を中止
     tokio::select! {
-        _ = &mut send_task => recv_task.abort(),
-        _ = &mut recv_task => send_task.abort(),
+        result = &mut send_task => {
+            recv_task.abort();
+            if let Err(e) = result {
+                warn!(error = %e, "Send task panicked");
+            }
+        }
+        result = &mut recv_task => {
+            send_task.abort();
+            if let Err(e) = result {
+                warn!(error = %e, "Receive task panicked");
+            }
+        }
     };
 
     info!("WebSocket client disconnected");

@@ -61,7 +61,7 @@ fn render_tab_bar(f: &mut Frame, area: Rect, app_state: &AppState) {
         .style(Style::default().fg(Color::White))
         .highlight_style(
             Style::default()
-                .fg(Color::Yellow)
+                .fg(Color::LightCyan)
                 .add_modifier(Modifier::BOLD),
         );
 
@@ -371,7 +371,7 @@ fn render_history_tab(f: &mut Frame, area: Rect, app_state: &mut AppState) {
 
     let list = List::new(items)
         .block(block)
-        .highlight_style(Style::default().fg(Color::Yellow));
+        .highlight_style(Style::default().add_modifier(Modifier::REVERSED));
 
     f.render_stateful_widget(list, area, &mut app_state.history_scroll_state);
 }
@@ -435,7 +435,7 @@ fn render_log_tab(f: &mut Frame, area: Rect, app_state: &mut AppState) {
 
     let list = List::new(items)
         .block(block)
-        .highlight_style(Style::default().fg(Color::Yellow));
+        .highlight_style(Style::default().add_modifier(Modifier::REVERSED));
 
     f.render_stateful_widget(list, area, &mut app_state.log_scroll_state);
 }

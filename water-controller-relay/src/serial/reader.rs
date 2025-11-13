@@ -4,6 +4,11 @@ use std::{
 };
 
 use serialport::SerialPort;
+use tokio::sync::broadcast;
+use tracing::{debug, warn};
+
+use super::input::parse_input_line;
+use crate::websocket::message::{ButtonInputMessage, ControllerInputMessage};
 
 pub struct SerialReader {
     port: Box<dyn SerialPort>,
@@ -45,5 +50,60 @@ impl SerialReader {
 
         String::from_utf8(buf)
             .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err.utf8_error()))
+    }
+
+    /// シリアル読み取りループ（ブロッキング処理）
+    ///
+    /// シリアルポートからデータを読み取り、パースして WebSocket ブロードキャストチャネルに送信する。
+    pub fn run_read_loop(&mut self, broadcast_tx: broadcast::Sender<String>) -> io::Result<()> {
+        loop {
+            let line = match self.read_line() {
+                Ok(line) => line,
+                Err(err) => {
+                    warn!(error = %err, "Failed to read serial line");
+                    continue;
+                }
+            };
+            debug!(%line, "Received raw serial line");
+
+            match parse_input_line(&line) {
+                Ok(input) => {
+                    debug!(input = %input, "Parsed input successfully");
+                    debug!("{input}");
+
+                    // button-input メッセージを送信
+                    let button_msg = ButtonInputMessage::new(&input.button);
+                    match serde_json::to_string(&button_msg) {
+                        Ok(json) => {
+                            debug!(message = %json, "Broadcasting button-input");
+                            if let Err(e) = broadcast_tx.send(json) {
+                                warn!(error = %e, "Failed to broadcast button-input");
+                            }
+                        }
+                        Err(e) => {
+                            warn!(error = %e, "Failed to serialize button-input");
+                        }
+                    }
+
+                    // controller-input メッセージを送信
+                    let controller_msg = ControllerInputMessage::new(&input.controller);
+                    match serde_json::to_string(&controller_msg) {
+                        Ok(json) => {
+                            debug!(message = %json, "Broadcasting controller-input");
+                            if let Err(e) = broadcast_tx.send(json) {
+                                warn!(error = %e, "Failed to broadcast controller-input");
+                            }
+                        }
+                        Err(e) => {
+                            warn!(error = %e, "Failed to serialize controller-input");
+                        }
+                    }
+                }
+                Err(err) => {
+                    warn!(error = %err, raw_line = %line, "Failed to parse serial line");
+                    eprintln!("failed to parse line '{line}': {err}");
+                }
+            }
+        }
     }
 }

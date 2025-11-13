@@ -42,7 +42,7 @@ pub fn logger_init_tui(level: Level) -> io::Result<mpsc::UnboundedReceiver<Strin
         .with_thread_names(false)
         .with_file(false)
         .with_line_number(false)
-        .with_ansi(false) // ANSI カラーコードを無効化
+        .with_ansi(true) // ANSI カラーコードを有効化
         .with_writer(move || writer.clone())
         .finish();
 

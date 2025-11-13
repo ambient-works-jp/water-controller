@@ -312,21 +312,25 @@ fn render_connection_tab(f: &mut Frame, area: Rect, app_state: &AppState) {
     // URL をパース
     let (protocol, host, port) = parse_url(&app_state.ws_url);
 
-    let status = if app_state.is_connected {
-        "Connected"
+    let (status_text, status_color) = if app_state.is_connected {
+        ("Connected", Color::LightGreen)
     } else {
-        "Disconnected"
+        ("Disconnected", Color::Red)
     };
 
-    let info = [
-        format!("URL:      {}", app_state.ws_url),
-        format!("Protocol: {}", protocol),
-        format!("Host:     {}", host),
-        format!("Port:     {}", port),
-        format!("Status:   {}", status),
+    // 各行を Line として作成し、Status だけ色を変える
+    let lines = vec![
+        Line::from(format!("URL:      {}", app_state.ws_url)),
+        Line::from(format!("Protocol: {}", protocol)),
+        Line::from(format!("Host:     {}", host)),
+        Line::from(format!("Port:     {}", port)),
+        Line::from(vec![
+            "Status:   ".into(),
+            ratatui::text::Span::styled(status_text, Style::default().fg(status_color)),
+        ]),
     ];
 
-    let paragraph = Paragraph::new(info.join("\n")).style(Style::default().fg(Color::White));
+    let paragraph = Paragraph::new(lines).style(Style::default().fg(Color::White));
     f.render_widget(paragraph, inner);
 }
 
@@ -337,10 +341,20 @@ fn render_log_tab(f: &mut Frame, area: Rect, app_state: &mut AppState) {
         .title("Log - tracing Log (↑↓: scroll)");
 
     // 最新のログを下に表示（降順）
+    // ANSI カラーコードを解析して表示
     let items: Vec<ListItem> = app_state
         .log_messages
         .iter()
-        .map(|msg| ListItem::new(msg.as_str()))
+        .map(|msg| {
+            // ANSI エスケープコードを ratatui の Text に変換
+            match ansi_to_tui::IntoText::into_text(msg) {
+                Ok(text) => ListItem::new(text),
+                Err(_) => {
+                    // パースに失敗した場合はプレーンテキストとして表示
+                    ListItem::new(msg.as_str())
+                }
+            }
+        })
         .collect();
 
     let list = List::new(items)

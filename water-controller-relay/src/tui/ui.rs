@@ -1,11 +1,11 @@
 //! UI 描画
 
 use ratatui::{
+    Frame,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::Line,
     widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Tabs},
-    Frame,
 };
 
 use super::app::{AppState, Tab};
@@ -97,6 +97,7 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
     let cell_width = 6;
     let cell_height = 3;
     let gap = 1; // 要素間の隙間
+    let vertical_gap_to_button = 2; // ボタンと上下 LOW の間隔
 
     // 中央座標を計算
     let center_x = area.x + area.width / 2;
@@ -105,15 +106,15 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
     // 各要素の位置を計算
     // 上方向（2段階）
     let up_high_x = center_x - cell_width / 2;
-    let up_high_y = center_y - (cell_height * 2 + gap * 2);
+    let up_high_y = center_y - (cell_height * 2 + gap + vertical_gap_to_button);
     let up_low_x = center_x - cell_width / 2;
-    let up_low_y = center_y - (cell_height + gap);
+    let up_low_y = center_y - (cell_height + vertical_gap_to_button);
 
     // 下方向（2段階）
     let down_low_x = center_x - cell_width / 2;
-    let down_low_y = center_y + gap;
+    let down_low_y = center_y + vertical_gap_to_button;
     let down_high_x = center_x - cell_width / 2;
-    let down_high_y = center_y + cell_height + gap * 2;
+    let down_high_y = center_y + cell_height + gap + vertical_gap_to_button;
 
     // 左方向（2段階）
     let left_high_x = center_x - (cell_width * 2 + gap * 2) - cell_width / 2;
@@ -132,6 +133,9 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
     let button_y = center_y - cell_height / 2;
 
     // 各要素を描画
+    // 接続が切れている場合は全て DarkGray にする
+    let disconnected_color = Color::DarkGray;
+
     // 上 HIGH
     render_square(
         f,
@@ -139,7 +143,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         up_high_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.up, 2),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.up, 2)
+        } else {
+            disconnected_color
+        },
     );
 
     // 上 LOW
@@ -149,7 +157,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         up_low_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.up, 1),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.up, 1)
+        } else {
+            disconnected_color
+        },
     );
 
     // 下 LOW
@@ -159,7 +171,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         down_low_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.down, 1),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.down, 1)
+        } else {
+            disconnected_color
+        },
     );
 
     // 下 HIGH
@@ -169,7 +185,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         down_high_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.down, 2),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.down, 2)
+        } else {
+            disconnected_color
+        },
     );
 
     // 左 HIGH
@@ -179,7 +199,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         left_high_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.left, 2),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.left, 2)
+        } else {
+            disconnected_color
+        },
     );
 
     // 左 LOW
@@ -189,7 +213,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         left_low_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.left, 1),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.left, 1)
+        } else {
+            disconnected_color
+        },
     );
 
     // 右 LOW
@@ -199,7 +227,11 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         right_low_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.right, 1),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.right, 1)
+        } else {
+            disconnected_color
+        },
     );
 
     // 右 HIGH
@@ -209,27 +241,28 @@ fn render_controller_visual(f: &mut Frame, area: Rect, app_state: &AppState) {
         right_high_y,
         cell_width,
         cell_height,
-        controller_value_color(app_state.controller.right, 2),
+        if app_state.is_connected {
+            controller_value_color(app_state.controller.right, 2)
+        } else {
+            disconnected_color
+        },
     );
 
     // ボタン（中央、丸）
-    let button_color = if app_state.button_pushed {
-        Color::LightYellow
+    let button_color = if app_state.is_connected {
+        if app_state.button_pushed {
+            Color::LightYellow
+        } else {
+            Color::White
+        }
     } else {
-        Color::White
+        disconnected_color
     };
     render_circle(f, button_x, button_y, cell_width, cell_height, button_color);
 }
 
 /// 正方形（十字キーの一部）を描画
-fn render_square(
-    f: &mut Frame,
-    x: u16,
-    y: u16,
-    width: u16,
-    height: u16,
-    bg_color: Color,
-) {
+fn render_square(f: &mut Frame, x: u16, y: u16, width: u16, height: u16, bg_color: Color) {
     let area = Rect {
         x,
         y,
@@ -238,21 +271,14 @@ fn render_square(
     };
 
     let block = Block::default()
-        .borders(Borders::ALL)
+        .borders(Borders::NONE)
         .style(Style::default().bg(bg_color));
 
     f.render_widget(block, area);
 }
 
 /// ボタン（丸）を描画
-fn render_circle(
-    f: &mut Frame,
-    x: u16,
-    y: u16,
-    width: u16,
-    height: u16,
-    bg_color: Color,
-) {
+fn render_circle(f: &mut Frame, x: u16, y: u16, width: u16, height: u16, bg_color: Color) {
     let area = Rect {
         x,
         y,
@@ -262,8 +288,7 @@ fn render_circle(
 
     // ボタンは丸みを帯びた見た目にする（ROUNDED borders を使用）
     let block = Block::default()
-        .borders(Borders::ALL)
-        .border_type(BorderType::Rounded)
+        .borders(Borders::NONE)
         .style(Style::default().bg(bg_color));
 
     f.render_widget(block, area);

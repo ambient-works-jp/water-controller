@@ -352,8 +352,8 @@ fn controller_value_color(value: u8, expected_level: u8) -> Color {
     // expected_level=1 (LOW): LightRed
     if value >= expected_level {
         match expected_level {
-            2 => Color::Red,       // HIGH
-            1 => Color::LightRed,  // LOW
+            2 => Color::Red,      // HIGH
+            1 => Color::LightRed, // LOW
             _ => Color::White,
         }
     } else {

@@ -11,6 +11,10 @@ path = "src/bin/server.rs"
 name = "client"
 path = "src/bin/client.rs"
 
+[[bin]]
+name = "tui-client"
+path = "src/bin/tui-client.rs"
+
 [dependencies]
 axum = { version = "0.8.6", features = ["macros", "ws"] }
 chrono = "0.4"

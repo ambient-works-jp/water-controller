@@ -63,12 +63,17 @@ pub async fn run(ws_url: String, mut log_rx: mpsc::UnboundedReceiver<String>) ->
     })?;
 
     // WebSocket 通信用のチャネル
+    // WebSocket 接続タスクを起動
     let (ws_tx, mut ws_rx) = mpsc::unbounded_channel::<String>();
 
-    // WebSocket 接続タスクを起動
     tokio::spawn(async move {
-        if let Err(e) = websocket_task(ws_url, ws_tx).await {
-            error!("WebSocket task error: {}", e);
+        loop {
+            let ws_url = ws_url.clone();
+            let ws_tx = ws_tx.clone();
+            if let Err(e) = websocket_task(ws_url, ws_tx).await {
+                error!("WebSocket task error: {}\nRetrying... in 1 second", e);
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
         }
     });
 

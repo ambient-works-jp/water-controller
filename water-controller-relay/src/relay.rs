@@ -52,11 +52,11 @@ pub async fn run_loop(
                 match reader.run_read_loop(broadcast_tx.clone()) {
                     Ok(()) => break,
                     Err(e) => {
-                        error!(error = %e, "Serial read loop failed");
+                        error!(error = %e, "Serial read loop failed, retrying...");
+                        std::thread::sleep(Duration::from_millis(RETRY_INTERVAL_MS));
+                        continue;
                     }
                 }
-                warn!("Serial read loop failed, retrying...");
-                std::thread::sleep(Duration::from_millis(RETRY_INTERVAL_MS));
             }
 
             Ok(())

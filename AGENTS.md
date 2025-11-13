@@ -20,9 +20,8 @@
 
 ### water-controller-relay (Rust)
 
-- `cargo run -- --port "/dev/cu.usbmodem1101" --baud-rate 115200`：Arduino と WebSocket の橋渡しをするサーバを実行。
-- `cargo build --release`：展示用の自己完結バイナリを生成。
-- `cargo fmt -- --check` と `cargo clippy -- -D warnings`：スタイル維持と未定義挙動の検出をコミット前に行います。
+[Rust 開発ガイドライン](./docs/documentations/rust-development-guidelines.md)
+を参照してください。
 
 ### water-controller-firmware (Arduino IDE)
 
@@ -31,8 +30,16 @@
 
 ## コーディングスタイルと命名
 
+### water-controller-app (TypeScript)
+
 - TypeScript/React は Prettier（2 スペース）と eslint.config.mjs のルールに従い、コンポーネントは PascalCase、hooks/ユーティリティは camelCase。`src/renderer/components/SamplePanel.tsx` のように用途を示すサフィックスを付けます。
-- Rust は `rustfmt` 既定（4 スペース）で snake_case を守り、CLI オプション名は `--port` のように実体をそのまま表す英語小文字を使用。
+
+### water-controller-relay (Rust)
+
+[Rust 開発ガイドライン](./docs/documentations/rust-development-guidelines.md)を参照してください。
+
+### water-controller-firmware (Arduino IDE)
+
 - Arduino スケッチは 2 スペースで揃え、ピン定義や I2C アドレスは `k` から始まる定数名でまとめると差分が追いやすくなります。
 
 ## テスト指針

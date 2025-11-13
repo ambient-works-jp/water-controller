@@ -136,6 +136,12 @@ impl AppState {
         if self.message_log.len() > 100 {
             self.message_log.pop_front();
         }
+
+        // スクロール位置を最下部に設定
+        if !self.message_log.is_empty() {
+            self.history_scroll_state
+                .select(Some(self.message_log.len() - 1));
+        }
     }
 
     /// tracing ログに追加
@@ -145,6 +151,12 @@ impl AppState {
         // ログの上限を 100 件に設定（メモリリーク防止）
         if self.log_messages.len() > 100 {
             self.log_messages.pop_front();
+        }
+
+        // スクロール位置を最下部に設定
+        if !self.log_messages.is_empty() {
+            self.log_scroll_state
+                .select(Some(self.log_messages.len() - 1));
         }
     }
 

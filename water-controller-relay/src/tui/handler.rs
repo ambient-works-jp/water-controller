@@ -25,42 +25,38 @@ pub fn handle_key_event(app_state: &mut AppState, key: KeyCode) -> bool {
         KeyCode::Left => app_state.prev_tab(),
         KeyCode::Right => app_state.next_tab(),
         // スクロール（矢印キー：上下）- History または Log タブのみ
-        KeyCode::Up => {
-            match app_state.current_tab {
-                Tab::History => {
-                    let i = app_state
-                        .history_scroll_state
-                        .selected()
-                        .unwrap_or(0)
-                        .saturating_sub(1);
-                    app_state.history_scroll_state.select(Some(i));
-                }
-                Tab::Log => {
-                    let i = app_state
-                        .log_scroll_state
-                        .selected()
-                        .unwrap_or(0)
-                        .saturating_sub(1);
-                    app_state.log_scroll_state.select(Some(i));
-                }
-                _ => {}
+        KeyCode::Up => match app_state.current_tab {
+            Tab::History => {
+                let i = app_state
+                    .history_scroll_state
+                    .selected()
+                    .unwrap_or(0)
+                    .saturating_sub(1);
+                app_state.history_scroll_state.select(Some(i));
             }
-        }
-        KeyCode::Down => {
-            match app_state.current_tab {
-                Tab::History => {
-                    let i = app_state.history_scroll_state.selected().unwrap_or(0) + 1;
-                    let max = app_state.message_log.len().saturating_sub(1);
-                    app_state.history_scroll_state.select(Some(i.min(max)));
-                }
-                Tab::Log => {
-                    let i = app_state.log_scroll_state.selected().unwrap_or(0) + 1;
-                    let max = app_state.log_messages.len().saturating_sub(1);
-                    app_state.log_scroll_state.select(Some(i.min(max)));
-                }
-                _ => {}
+            Tab::Log => {
+                let i = app_state
+                    .log_scroll_state
+                    .selected()
+                    .unwrap_or(0)
+                    .saturating_sub(1);
+                app_state.log_scroll_state.select(Some(i));
             }
-        }
+            _ => {}
+        },
+        KeyCode::Down => match app_state.current_tab {
+            Tab::History => {
+                let i = app_state.history_scroll_state.selected().unwrap_or(0) + 1;
+                let max = app_state.message_log.len().saturating_sub(1);
+                app_state.history_scroll_state.select(Some(i.min(max)));
+            }
+            Tab::Log => {
+                let i = app_state.log_scroll_state.selected().unwrap_or(0) + 1;
+                let max = app_state.log_messages.len().saturating_sub(1);
+                app_state.log_scroll_state.select(Some(i.min(max)));
+            }
+            _ => {}
+        },
         _ => {}
     }
     false

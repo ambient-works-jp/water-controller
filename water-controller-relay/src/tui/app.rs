@@ -127,6 +127,13 @@ impl AppState {
 
     /// メッセージログに追加（タイムスタンプ付き）
     pub fn add_log(&mut self, message: String) {
+        // 追加前に最下部にいるかチェック
+        let was_at_bottom = self.message_log.is_empty()
+            || self
+                .history_scroll_state
+                .selected()
+                .is_none_or(|pos| pos >= self.message_log.len().saturating_sub(1));
+
         let timestamp = Local::now().format("%H:%M:%S%.3f");
         let log_entry = format!("[{}] {}", timestamp, message);
         self.message_log.push_back(log_entry);
@@ -137,8 +144,8 @@ impl AppState {
             self.message_log.pop_front();
         }
 
-        // スクロール位置を最下部に設定
-        if !self.message_log.is_empty() {
+        // 最下部にいた場合のみ自動スクロール
+        if was_at_bottom && !self.message_log.is_empty() {
             self.history_scroll_state
                 .select(Some(self.message_log.len() - 1));
         }
@@ -146,6 +153,13 @@ impl AppState {
 
     /// tracing ログに追加
     pub fn add_log_message(&mut self, message: String) {
+        // 追加前に最下部にいるかチェック
+        let was_at_bottom = self.log_messages.is_empty()
+            || self
+                .log_scroll_state
+                .selected()
+                .is_none_or(|pos| pos >= self.log_messages.len().saturating_sub(1));
+
         self.log_messages.push_back(message);
 
         // ログの上限を 100 件に設定（メモリリーク防止）
@@ -153,8 +167,8 @@ impl AppState {
             self.log_messages.pop_front();
         }
 
-        // スクロール位置を最下部に設定
-        if !self.log_messages.is_empty() {
+        // 最下部にいた場合のみ自動スクロール
+        if was_at_bottom && !self.log_messages.is_empty() {
             self.log_scroll_state
                 .select(Some(self.log_messages.len() - 1));
         }

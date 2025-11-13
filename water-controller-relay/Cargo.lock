@@ -1619,6 +1619,7 @@ dependencies = [
  "axum",
  "chrono",
  "clap",
+ "crossterm",
  "futures-util",
  "ratatui",
  "serde",

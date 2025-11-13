@@ -198,6 +198,9 @@ WebSocket サーバーの起動に失敗する場合や、クライアント接�
 # 実行中のサーバープロセスを確認
 ps aux | grep -E "target/debug|target/release|cargo run" | grep -v grep
 
+# ポート番号で検索
+lsof -i:8080
+
 # プロセスを停止（PID は上記コマンドで確認）
 kill <PID>
 

@@ -25,6 +25,7 @@ HOMEWORKS 2026 出展作品「水コントローラー」のリポジトリ
 - Auduino 2.3.6（おそらく 2 系なら OK）
 - Rust 1.90.x
 - Node.js 22.21.x (おそらく 22 系なら OK)
+- (Optional) [Task](https://taskfile.dev/docs/installation) 3.45.5
 
 ## システム構成
 
@@ -139,7 +140,7 @@ cd water-controller-relay
 
 以降、`water-controller-relay` ディレクトリで作業することを前提とする。
 
-#### 開発環境
+#### 開発コマンド
 
 - 使用可能なシリアルデバイスの一覧
 
@@ -219,6 +220,68 @@ cargo build --release
 ./target/release/tui-client -u "ws://127.0.0.1:8080/ws"
 ```
 
+#### 開発コマンド with Task
+
+- ヘルプ
+  - コマンドを何も入力せずに実行すると、実行できるタスク一覧が表示される。
+
+```sh
+task
+```
+
+- format / lint / check / test
+
+```sh
+task fmt
+task lint
+task check
+task test
+
+# 全部実行
+task ci
+```
+
+- サーバ実行
+  - シリアルポート、ボーレート、WebSocket ポートを指定
+  - 省略時は `SERIAL_PORT=/dev/cu.usbmodem1101`, `BAUD_RATE=115200`, `WS_PORT=8080`
+
+```sh
+task run-server
+
+# option 設定
+# 下記はデフォルト値。指定しない場合はデフォルト値が適用される。
+task run-server SERIAL_PORT=/dev/cu.usbmodem2101 BAUD_RATE=115200 WS_PORT=8080
+```
+
+- WebSocket サーバのテスト用クライアント実行
+
+```sh
+task run-cli
+
+# option 設定
+# 下記はデフォルト値。指定しない場合はデフォルト値が適用される。
+task run-cli URL=ws://127.0.0.1:8080/ws
+```
+
+- TUI クライアント実行
+
+```sh
+task run-tui
+
+# option 設定
+# 下記はデフォルト値。指定しない場合はデフォルト値が適用される。
+task run-tui URL=ws://127.0.0.1:8080/ws
+```
+
+- ビルド
+
+```sh
+# debug ビルド
+task build
+
+# release ビルド
+task build-release
+```
 
 #### tips: トラブルシューティング
 

@@ -1,24 +1,55 @@
 //! WebSocket 接続タスク
 
 use std::io;
+use std::time::Duration;
 
 use futures_util::StreamExt;
 use tokio::sync::mpsc;
+use tokio::time::sleep;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 use tracing::{debug, error, info, warn};
+
+const MAX_RETRY_COUNT: u32 = 10;
+const RETRY_INTERVAL_SECS: u64 = 3;
 
 /// WebSocket 接続タスク
 pub async fn websocket_task(url: String, tx: mpsc::UnboundedSender<String>) -> io::Result<()> {
     info!("Connecting to WebSocket server: {}", url);
 
-    // WebSocket サーバに接続
-    let (ws_stream, response) = connect_async(&url).await.map_err(|e| {
-        error!("Failed to connect to WebSocket server: {}", e);
-        io::Error::new(
-            io::ErrorKind::ConnectionRefused,
-            format!("WebSocket connection failed: {}", e),
-        )
-    })?;
+    // 再接続ループ（最大 MAX_RETRY_COUNT 回）
+    let (ws_stream, response) = {
+        let mut retry_count = 0;
+
+        loop {
+            match connect_async(&url).await {
+                Ok((stream, resp)) => break (stream, resp),
+                Err(e) => {
+                    retry_count += 1;
+
+                    if retry_count >= MAX_RETRY_COUNT {
+                        error!(
+                            "Failed to connect after {} attempts: {}",
+                            MAX_RETRY_COUNT, e
+                        );
+                        return Err(io::Error::new(
+                            io::ErrorKind::ConnectionRefused,
+                            format!(
+                                "WebSocket connection failed after {} attempts: {}",
+                                MAX_RETRY_COUNT, e
+                            ),
+                        ));
+                    }
+
+                    warn!(
+                        "Connection attempt {} failed: {}. Retrying in {} seconds...",
+                        retry_count, e, RETRY_INTERVAL_SECS
+                    );
+
+                    sleep(Duration::from_secs(RETRY_INTERVAL_SECS)).await;
+                }
+            }
+        }
+    };
 
     info!(
         "Connected to WebSocket server (status: {})",

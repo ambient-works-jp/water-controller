@@ -64,10 +64,22 @@ pub async fn run_loop(
     };
 
     // WebSocket サーバタスクを起動
-    let ws_task = {
+    let ws_task: tokio::task::JoinHandle<Result<(), io::Error>> = {
         let broadcast_tx = broadcast_tx.clone();
         let ws_host = ws_host.to_string();
-        tokio::spawn(async move { run_websocket_server(&ws_host, ws_port, broadcast_tx).await })
+        tokio::spawn(async move {
+            loop {
+                match run_websocket_server(&ws_host, ws_port, broadcast_tx.clone()).await {
+                    Ok(_) => break,
+                    Err(e) => {
+                        error!(error = %e, "WebSocket server failed, retrying...");
+                        tokio::time::sleep(Duration::from_millis(RETRY_INTERVAL_MS)).await;
+                    }
+                }
+            }
+
+            Err(io::Error::other("WebSocket server failed"))
+        })
     };
 
     // 両方のタスクを並行実行

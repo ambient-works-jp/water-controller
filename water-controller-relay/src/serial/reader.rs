@@ -57,6 +57,9 @@ impl SerialReader {
     /// シリアルポートからデータを読み取り、パースして WebSocket ブロードキャストチャネルに送信する。
     pub fn run_read_loop(&mut self, broadcast_tx: broadcast::Sender<String>) -> io::Result<()> {
         loop {
+            // WebSocket 接続の有無に関わらず、常にシリアルを読み取る必要がある。
+            // 理由：シリアルバッファの溢れを防ぎ、再接続時に古いデータを送信しないため。
+            // 詳細：docs/notes/20251113_serial-broadcast-strategy.md
             let line = match self.read_line() {
                 Ok(line) => line,
                 Err(err) => {
@@ -75,9 +78,12 @@ impl SerialReader {
                     let button_msg = ButtonInputMessage::new(&input.button);
                     match serde_json::to_string(&button_msg) {
                         Ok(json) => {
-                            debug!(message = %json, "Broadcasting button-input");
-                            if let Err(e) = broadcast_tx.send(json) {
-                                warn!(error = %e, "Failed to broadcast button-input");
+                            // 接続中のクライアントがいる場合のみブロードキャスト
+                            if broadcast_tx.receiver_count() > 0 {
+                                debug!(message = %json, "Broadcasting button-input");
+                                if let Err(e) = broadcast_tx.send(json) {
+                                    warn!(error = %e, "Failed to broadcast button-input");
+                                }
                             }
                         }
                         Err(e) => {
@@ -89,9 +95,12 @@ impl SerialReader {
                     let controller_msg = ControllerInputMessage::new(&input.controller);
                     match serde_json::to_string(&controller_msg) {
                         Ok(json) => {
-                            debug!(message = %json, "Broadcasting controller-input");
-                            if let Err(e) = broadcast_tx.send(json) {
-                                warn!(error = %e, "Failed to broadcast controller-input");
+                            // 接続中のクライアントがいる場合のみブロードキャスト
+                            if broadcast_tx.receiver_count() > 0 {
+                                debug!(message = %json, "Broadcasting controller-input");
+                                if let Err(e) = broadcast_tx.send(json) {
+                                    warn!(error = %e, "Failed to broadcast controller-input");
+                                }
                             }
                         }
                         Err(e) => {

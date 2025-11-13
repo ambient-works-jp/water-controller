@@ -14,7 +14,7 @@ const PACKAGE_NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// UI 描画
-pub fn ui(f: &mut Frame, app_state: &AppState) {
+pub fn ui(f: &mut Frame, app_state: &mut AppState) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -32,7 +32,8 @@ pub fn ui(f: &mut Frame, app_state: &AppState) {
         Tab::Monitor => render_monitor_tab(f, chunks[1], app_state),
         Tab::History => render_history_tab(f, chunks[1], app_state),
         Tab::Connection => render_connection_tab(f, chunks[1], app_state),
-        Tab::Close => render_close_tab(f, chunks[1]),
+        Tab::Log => render_log_tab(f, chunks[1], app_state),
+        Tab::Help => render_help_tab(f, chunks[1]),
     }
 
     // フッター
@@ -279,21 +280,24 @@ fn controller_value_color(value: u8, expected_level: u8) -> Color {
     }
 }
 
-/// History タブ描画
-fn render_history_tab(f: &mut Frame, area: Rect, app_state: &AppState) {
+/// History タブ描画（スクロール可能）
+fn render_history_tab(f: &mut Frame, area: Rect, app_state: &mut AppState) {
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("History - Message Log");
+        .title("History - Message Log (↑↓: scroll)");
 
+    // 最新のログを下に表示（降順）
     let items: Vec<ListItem> = app_state
         .message_log
         .iter()
-        .rev() // 最新のログを上に表示
         .map(|msg| ListItem::new(msg.as_str()))
         .collect();
 
-    let list = List::new(items).block(block);
-    f.render_widget(list, area);
+    let list = List::new(items)
+        .block(block)
+        .highlight_style(Style::default().fg(Color::Yellow));
+
+    f.render_stateful_widget(list, area, &mut app_state.history_scroll_state);
 }
 
 /// Connection タブ描画
@@ -326,26 +330,53 @@ fn render_connection_tab(f: &mut Frame, area: Rect, app_state: &AppState) {
     f.render_widget(paragraph, inner);
 }
 
-/// Close タブ描画
-fn render_close_tab(f: &mut Frame, area: Rect) {
+/// Log タブ描画（スクロール可能）
+fn render_log_tab(f: &mut Frame, area: Rect, app_state: &mut AppState) {
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("Close - Exit Application");
+        .title("Log - tracing Log (↑↓: scroll)");
+
+    // 最新のログを下に表示（降順）
+    let items: Vec<ListItem> = app_state
+        .log_messages
+        .iter()
+        .map(|msg| ListItem::new(msg.as_str()))
+        .collect();
+
+    let list = List::new(items)
+        .block(block)
+        .highlight_style(Style::default().fg(Color::Yellow));
+
+    f.render_stateful_widget(list, area, &mut app_state.log_scroll_state);
+}
+
+/// Help タブ描画
+fn render_help_tab(f: &mut Frame, area: Rect) {
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title("Help - Key Bindings");
 
     let inner = block.inner(area);
     f.render_widget(block, area);
 
-    let text = [
+    let help_text = [
         "",
-        "Are you sure you want to quit?",
+        "== Tab Navigation ==",
+        "  1-5           Switch to tab by number",
+        "  Tab           Next tab",
+        "  Shift+Tab     Previous tab",
+        "  ← →          Previous/Next tab",
         "",
-        "Press Y or Escape to quit",
-        "Press N to cancel",
-        "Press Q to force quit",
+        "== Scrolling (History/Log tabs) ==",
+        "  ↑ ↓          Scroll up/down",
+        "",
+        "== Application ==",
+        "  Escape, q     Quit application",
+        "",
     ];
 
-    let paragraph = Paragraph::new(text.join("\n"))
-        .style(Style::default().fg(Color::Yellow))
+    let paragraph = Paragraph::new(help_text.join("\n"))
+        .style(Style::default().fg(Color::White))
         .block(Block::default());
     f.render_widget(paragraph, inner);
 }

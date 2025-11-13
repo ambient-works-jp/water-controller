@@ -4,6 +4,7 @@
 
 pub mod app;
 pub mod handler;
+pub mod logger;
 pub mod ui;
 pub mod websocket;
 
@@ -26,7 +27,7 @@ use ui::ui;
 use websocket::websocket_task;
 
 /// TUI アプリケーションを起動
-pub async fn run(ws_url: String) -> io::Result<()> {
+pub async fn run(ws_url: String, mut log_rx: mpsc::UnboundedReceiver<String>) -> io::Result<()> {
     // パニック時にターミナルを確実に復元するためのフック
     setup_panic_hook();
 
@@ -72,7 +73,7 @@ pub async fn run(ws_url: String) -> io::Result<()> {
     });
 
     // メインループ
-    let result = run_app(&mut terminal, &mut app_state, &mut ws_rx).await;
+    let result = run_app(&mut terminal, &mut app_state, &mut ws_rx, &mut log_rx).await;
 
     // ターミナルの復元
     restore_terminal()?;
@@ -109,6 +110,7 @@ async fn run_app(
     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     app_state: &mut AppState,
     ws_rx: &mut mpsc::UnboundedReceiver<String>,
+    log_rx: &mut mpsc::UnboundedReceiver<String>,
 ) -> io::Result<()> {
     loop {
         // UI 描画
@@ -129,9 +131,9 @@ async fn run_app(
             handle_ws_message(app_state, msg);
         }
 
-        // Close タブで終了確認された場合
-        if app_state.should_quit {
-            break;
+        // tracing ログ処理
+        while let Ok(log_msg) = log_rx.try_recv() {
+            app_state.add_log_message(log_msg);
         }
     }
 

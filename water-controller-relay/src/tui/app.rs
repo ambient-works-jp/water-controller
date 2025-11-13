@@ -3,6 +3,7 @@
 use std::collections::VecDeque;
 
 use chrono::Local;
+use ratatui::widgets::ListState;
 use serde::Deserialize;
 
 /// タブの種類
@@ -11,12 +12,19 @@ pub enum Tab {
     Monitor,
     History,
     Connection,
-    Close,
+    Log,
+    Help,
 }
 
 impl Tab {
     pub fn all() -> Vec<Tab> {
-        vec![Tab::Monitor, Tab::History, Tab::Connection, Tab::Close]
+        vec![
+            Tab::Monitor,
+            Tab::History,
+            Tab::Connection,
+            Tab::Log,
+            Tab::Help,
+        ]
     }
 
     pub fn title(&self) -> &str {
@@ -24,7 +32,8 @@ impl Tab {
             Tab::Monitor => "Monitor",
             Tab::History => "History",
             Tab::Connection => "Connection",
-            Tab::Close => "Close",
+            Tab::Log => "Log",
+            Tab::Help => "Help",
         }
     }
 
@@ -32,17 +41,19 @@ impl Tab {
         match self {
             Tab::Monitor => Tab::History,
             Tab::History => Tab::Connection,
-            Tab::Connection => Tab::Close,
-            Tab::Close => Tab::Monitor,
+            Tab::Connection => Tab::Log,
+            Tab::Log => Tab::Help,
+            Tab::Help => Tab::Monitor,
         }
     }
 
     pub fn prev(&self) -> Tab {
         match self {
-            Tab::Monitor => Tab::Close,
+            Tab::Monitor => Tab::Help,
             Tab::History => Tab::Monitor,
             Tab::Connection => Tab::History,
-            Tab::Close => Tab::Connection,
+            Tab::Log => Tab::Connection,
+            Tab::Help => Tab::Log,
         }
     }
 }
@@ -65,16 +76,20 @@ pub struct AppState {
     pub button_pushed: bool,
     /// コントローラの入力状態
     pub controller: ControllerState,
-    /// メッセージログ（タイムスタンプ付き）
+    /// メッセージログ（タイムスタンプ付き）- WebSocket メッセージ
     pub message_log: VecDeque<String>,
+    /// tracing ログ（タイムスタンプ付き）
+    pub log_messages: VecDeque<String>,
+    /// History タブのスクロール状態
+    pub history_scroll_state: ListState,
+    /// Log タブのスクロール状態
+    pub log_scroll_state: ListState,
     /// WebSocket URL
     pub ws_url: String,
     /// 接続状態
     pub is_connected: bool,
     /// 受信メッセージ数（内部カウント用）
     pub message_count: usize,
-    /// Close タブでの終了確認フラグ
-    pub should_quit: bool,
 }
 
 impl AppState {
@@ -84,10 +99,12 @@ impl AppState {
             button_pushed: false,
             controller: ControllerState::default(),
             message_log: VecDeque::new(),
+            log_messages: VecDeque::new(),
+            history_scroll_state: ListState::default(),
+            log_scroll_state: ListState::default(),
             ws_url,
             is_connected: false,
             message_count: 0,
-            should_quit: false,
         }
     }
 
@@ -111,6 +128,16 @@ impl AppState {
         // VecDeque::pop_front() は O(1)
         if self.message_log.len() > 100 {
             self.message_log.pop_front();
+        }
+    }
+
+    /// tracing ログに追加
+    pub fn add_log_message(&mut self, message: String) {
+        self.log_messages.push_back(message);
+
+        // ログの上限を 100 件に設定（メモリリーク防止）
+        if self.log_messages.len() > 100 {
+            self.log_messages.pop_front();
         }
     }
 }

@@ -10,7 +10,6 @@ use std::io;
 
 use clap::Parser;
 use tracing::{Level, info};
-use water_controller_relay::logger::logger_init;
 use water_controller_relay::tui;
 
 const DEFAULT_WS_URL: &str = "ws://127.0.0.1:8080/ws";
@@ -26,8 +25,8 @@ struct CliArgs {
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    // ロガーの初期化
-    logger_init(Level::INFO)?;
+    // TUI 用ロガーの初期化（メモリ保持）
+    let log_rx = tui::logger::logger_init_tui(Level::INFO)?;
 
     // コマンドライン引数のパース
     info!("Starting water-controller-relay TUI client");
@@ -35,5 +34,5 @@ async fn main() -> io::Result<()> {
     info!("args: {:#?}", args);
 
     // TUI アプリケーションを起動
-    tui::run(args.url).await
+    tui::run(args.url, log_rx).await
 }

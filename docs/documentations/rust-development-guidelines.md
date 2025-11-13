@@ -5,7 +5,8 @@
 - `cargo fmt` : Rustfmt で全ファイルを整形し、PR 直前に必ず実行します。
 - `cargo clippy --all-targets --all-features` : Axum マクロや Tokio の非同期コードを含め lint します。
 - `cargo test` : 追加した単体・統合テストを一括実行し、フェイル時は `-- --nocapture` で詳細を追跡します。
-- `cargo run -- --port "/dev/cu.usbmodem1101" --baud-rate 115200`：Arduino と WebSocket の橋渡しをするサーバを実行。
+- `cargo run --bin server -- --port "/dev/cu.usbmodem1101" --baud-rate 115200`：Arduino と WebSocket の橋渡しをするサーバを実行。
+- `cargo run --bin client -- --url "ws://127.0.0.1:8080/ws"`：WebSocket クライアントを実行し、受信したメッセージをログ出力。
 - `cargo build --release`：展示用の自己完結バイナリを生成。
 
 実装タスクを行ったとき、必ず `cargo fmt`、`cargo clippy --all-targets --all-features`、`cargo test` を実行してください。これらが通るまでタスクを終了しないでください。

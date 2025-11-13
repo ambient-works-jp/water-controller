@@ -1,6 +1,7 @@
 //! TUI アプリケーションの状態管理
 
 use std::collections::VecDeque;
+use std::time::Instant;
 
 use chrono::Local;
 use ratatui::widgets::ListState;
@@ -90,6 +91,10 @@ pub struct AppState {
     pub is_connected: bool,
     /// 受信メッセージ数（内部カウント用）
     pub message_count: usize,
+    /// 最後のフレームの時刻（FPS 計算用）
+    pub last_frame_time: Option<Instant>,
+    /// FPS（指数移動平均）
+    pub fps: f64,
 }
 
 impl AppState {
@@ -105,6 +110,8 @@ impl AppState {
             ws_url,
             is_connected: false,
             message_count: 0,
+            last_frame_time: None,
+            fps: 0.0,
         }
     }
 
@@ -139,6 +146,23 @@ impl AppState {
         if self.log_messages.len() > 100 {
             self.log_messages.pop_front();
         }
+    }
+
+    /// FPS を更新（指数移動平均を使用）
+    pub fn update_fps(&mut self) {
+        let now = Instant::now();
+
+        if let Some(last_time) = self.last_frame_time {
+            let frame_time = now.duration_since(last_time).as_secs_f64();
+            if frame_time > 0.0 {
+                let instant_fps = 1.0 / frame_time;
+                // EMA: alpha = 0.1 で滑らかに平均化
+                const ALPHA: f64 = 0.1;
+                self.fps = ALPHA * instant_fps + (1.0 - ALPHA) * self.fps;
+            }
+        }
+
+        self.last_frame_time = Some(now);
     }
 }
 

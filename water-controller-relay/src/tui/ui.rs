@@ -79,6 +79,9 @@ fn render_monitor_tab(f: &mut Frame, area: Rect, app_state: &AppState) {
 
     // 十字キーとボタンの可視化
     render_controller_visual(f, inner, app_state);
+
+    // 左下に FPS と接続状態を表示
+    render_monitor_info(f, inner, app_state);
 }
 
 /// コントローラの視覚化（十字キー + ボタン）
@@ -291,6 +294,48 @@ fn render_circle(f: &mut Frame, x: u16, y: u16, width: u16, height: u16, bg_colo
         .style(Style::default().bg(bg_color));
 
     f.render_widget(block, area);
+}
+
+/// Monitor タブの情報表示（FPS と接続状態）
+fn render_monitor_info(f: &mut Frame, area: Rect, app_state: &AppState) {
+    // 左下に配置するため、area の最下部に 3 行分のスペースを確保
+    let info_area = Rect {
+        x: area.x,
+        y: area.y + area.height.saturating_sub(2),
+        width: area.width,
+        height: 3,
+    };
+
+    // FPS 表示（接続時: White、切断時: Gray）
+    let fps_num_text = format!(" FPS: {:.2}", app_state.fps);
+    let (fps_text, fps_color) = if app_state.is_connected {
+        (fps_num_text.as_str(), Color::White)
+    } else {
+        (" FPS: N/A", Color::Gray)
+    };
+    let fps_line = Line::from(vec![ratatui::text::Span::styled(
+        fps_text,
+        Style::default().fg(fps_color),
+    )]);
+
+    // 接続状態表示
+    let (status_label_text, status_label_color) = if app_state.is_connected {
+        (" Connection Status: ", Color::White)
+    } else {
+        (" Connection Status: ", Color::Gray)
+    };
+    let (status_text, status_color) = if app_state.is_connected {
+        ("Connected", Color::LightGreen)
+    } else {
+        ("Disconnected", Color::Red)
+    };
+    let connection_line = Line::from(vec![
+        ratatui::text::Span::styled(status_label_text, Style::default().fg(status_label_color)),
+        ratatui::text::Span::styled(status_text, Style::default().fg(status_color)),
+    ]);
+
+    let info_paragraph = Paragraph::new(vec![fps_line, connection_line]);
+    f.render_widget(info_paragraph, info_area);
 }
 
 /// コントローラの値に基づく色を返す

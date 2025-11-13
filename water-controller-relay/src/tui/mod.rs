@@ -118,6 +118,9 @@ async fn run_app(
     log_rx: &mut mpsc::UnboundedReceiver<String>,
 ) -> io::Result<()> {
     loop {
+        // FPS を更新
+        app_state.update_fps();
+
         // UI 描画
         terminal.draw(|f| ui(f, app_state))?;
 

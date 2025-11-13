@@ -347,10 +347,15 @@ fn render_monitor_info(f: &mut Frame, area: Rect, app_state: &AppState) {
 
 /// コントローラの値に基づく色を返す
 fn controller_value_color(value: u8, expected_level: u8) -> Color {
-    // value が expected_level 以上の場合は LightRed、そうでない場合は White
-    // 例: value=2(HIGH) の場合、expected_level=1(LOW) と expected_level=2(HIGH) 両方が赤になる
+    // value が expected_level 以上の場合に色を付ける
+    // expected_level=2 (HIGH): Red
+    // expected_level=1 (LOW): LightRed
     if value >= expected_level {
-        Color::LightRed
+        match expected_level {
+            2 => Color::Red,       // HIGH
+            1 => Color::LightRed,  // LOW
+            _ => Color::White,
+        }
     } else {
         Color::White
     }

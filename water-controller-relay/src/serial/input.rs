@@ -1,5 +1,7 @@
 use std::{error::Error, fmt, io, num::ParseIntError};
 
+use serde::Serialize;
+
 const FIELD_COUNT: usize = 9;
 
 pub fn list_serial_devices() -> io::Result<()> {
@@ -18,18 +20,21 @@ pub fn list_serial_devices() -> io::Result<()> {
     Ok(())
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SerialInput {
     pub button: ButtonInput,
     pub controller: ControllerInput,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ButtonInput {
     pub is_pushed: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ControllerInput {
     pub left: ControllerValue,
     pub right: ControllerValue,
@@ -37,7 +42,8 @@ pub struct ControllerInput {
     pub down: ControllerValue,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(untagged)]
 pub enum ControllerValue {
     Noinput(i32),
     Low(i32),

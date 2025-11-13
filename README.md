@@ -192,9 +192,35 @@ cargo run --bin tui-client -- --url "ws://127.0.0.1:8080/ws"
 
 ```sh
 cargo run --bin server -- help
+cargo run --bin client -- help
+cargo run --bin tui-client -- help
 ```
 
-#### トラブルシューティング
+- ビルド
+
+```sh
+# debug ビルド
+cargo build
+
+# release ビルド
+cargo build --release
+```
+
+- [本番環境] サーバ実行
+
+```sh
+# server
+./target/release/server -p "/dev/cu.usbmodem1101" -b 115200
+
+# client
+./target/release/client -u "ws://127.0.0.1:8080/ws"
+
+# tui-client
+./target/release/tui-client -u "ws://127.0.0.1:8080/ws"
+```
+
+
+#### tips: トラブルシューティング
 
 - **古いサーバープロセスが残っている場合**
 
@@ -215,26 +241,6 @@ kill 12345
 ```
 
 複数のプロセスが見つかった場合は、すべて停止してから新しいサーバーを起動してください。
-
-#### 本番環境
-
-- ビルド
-
-```sh
-cargo build --release
-```
-
-- サーバ実行
-
-```sh
-./target/release/server -p "/dev/cu.usbmodem1101" -b 115200
-```
-
-- WebSocket サーバのテスト用クライアント実行（別ターミナル）
-
-```sh
-./target/release/client -u "ws://127.0.0.1:8080/ws"
-```
 
 ### デスクトップアプリ `water-controller-app`
 

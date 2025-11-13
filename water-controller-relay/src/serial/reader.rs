@@ -63,8 +63,10 @@ impl SerialReader {
             let line = match self.read_line() {
                 Ok(line) => line,
                 Err(err) => {
+                    // 'Broken pipe' エラーは、シリアルポートが閉じられたことを意味する。
+                    // この場合は、エラーを返して再接続を試みる。
                     warn!(error = %err, "Failed to read serial line");
-                    continue;
+                    return Err(err);
                 }
             };
             debug!(%line, "Received raw serial line");

@@ -1,11 +1,12 @@
 use std::{io, time::Duration};
 
 use tokio::sync::broadcast;
-use tracing::info;
+use tracing::{error, info, warn};
 
 use crate::{serial::SerialReader, websocket::server::run_websocket_server};
 
 const READ_TIMEOUT_MS: u64 = 100;
+const RETRY_INTERVAL_MS: u64 = 100;
 
 /// シリアルポートからのデータの読み取りが秒間 100 回行われる場合に、ブロードキャストチャネルのサイズを設定する
 const BROADCAST_CHANNEL_SIZE: usize = 100;
@@ -31,13 +32,34 @@ pub async fn run_loop(
     let serial_task = {
         let broadcast_tx = broadcast_tx.clone();
         let port_name = port_name.to_string();
-        tokio::task::spawn_blocking(move || {
-            info!(port = %port_name, baud = baud_rate, "Opening serial port");
-            let timeout = Duration::from_millis(READ_TIMEOUT_MS);
-            let mut reader = SerialReader::open(&port_name, baud_rate, timeout)?;
-            info!(port = %port_name, "Serial port ready; entering read loop");
 
-            reader.run_read_loop(broadcast_tx)
+        tokio::task::spawn_blocking(move || -> io::Result<()> {
+            loop {
+                // シリアルポートを開く
+                info!(port = %port_name, baud = baud_rate, "Opening serial port");
+                let timeout = Duration::from_millis(READ_TIMEOUT_MS);
+                let mut reader = match SerialReader::open(&port_name, baud_rate, timeout) {
+                    Ok(reader) => reader,
+                    Err(e) => {
+                        warn!(error = %e, "Failed to open serial port, retrying...");
+                        std::thread::sleep(Duration::from_millis(RETRY_INTERVAL_MS));
+                        continue;
+                    }
+                };
+                info!(port = %port_name, "Serial port ready! Entering read loop...");
+
+                // シリアルポートからの読み取りループを開始
+                match reader.run_read_loop(broadcast_tx.clone()) {
+                    Ok(()) => break,
+                    Err(e) => {
+                        error!(error = %e, "Serial read loop failed");
+                    }
+                }
+                warn!("Serial read loop failed, retrying...");
+                std::thread::sleep(Duration::from_millis(RETRY_INTERVAL_MS));
+            }
+
+            Ok(())
         })
     };
 
@@ -52,7 +74,7 @@ pub async fn run_loop(
     tokio::select! {
         result = serial_task => {
             match result {
-                Ok(Ok(())) => info!("Serial task completed normally"),
+                Ok(Ok(_)) => info!("Serial task completed normally"),
                 Ok(Err(e)) => {
                     return Err(io::Error::other(
                         format!("Serial task failed: {}", e),

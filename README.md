@@ -40,11 +40,11 @@ ref: [2025.10.28 HOMEWORKS 2026 - 水コントローラー システム構成](h
     - 静電容量センサー（[Adafruit MPR121](https://www.switch-science.com/products/1867?srsltid=AfmBOopVHqa4pcuXX1mcOF-6RVSKLl7RrhzxnQegAAV37uN7NLxMTKxW)）の値（0 / 1）を取得し、シリアルポートに出力するファームウェア
   - 技術スタック
     - Arduino
+    - ハードウェア
       - Adafruit MPR121 1.2.0
-      - j
 - `water-controller-relay`
   - 概要
-    - Arduino のシリアル通信を受信して、WebSocket でクライアントに配信する中継サーバ（リレーサーバ）
+    - 水コントローラのシリアルポートからデータを読み取り、WebSocket でクライアントに配信する中継サーバ（リレーサーバ）
   - 技術スタック
     - Rust
 - `water-controller-app`

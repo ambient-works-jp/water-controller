@@ -144,7 +144,7 @@ cd water-controller-relay
 - 使用可能なシリアルデバイスの一覧
 
 ```sh
-cargo run -- device-list
+cargo run --bin server -- device-list
 ```
 
 <details>
@@ -164,20 +164,48 @@ name: /dev/tty.usbmodem1101, type=UsbPort(UsbPortInfo { vid: 0x2341, pid: 0x0043
 
 </details>
 
-- 実行
+- サーバ実行（シリアル読み取り & WebSocket 配信）
 
 ```sh
-cargo run -- --port "/dev/cu.usbmodem1101" --baud-rate 115200
+cargo run --bin server -- --port "/dev/cu.usbmodem1101" --baud-rate 115200 --ws-port 8080
 
 # 省略形
-cargo run -- -p "/dev/cu.usbmodem1101" -b 115200
+cargo run --bin server -- -p "/dev/cu.usbmodem1101" -b 115200
+```
+
+- WebSocket サーバのテスト用クライアント実行（別ターミナル）
+
+```sh
+cargo run --bin client -- --url "ws://127.0.0.1:8080/ws"
+
+# 省略形
+cargo run --bin client -- -u "ws://127.0.0.1:8080/ws"
 ```
 
 - ヘルプ
 
 ```sh
-cargo run -- help
+cargo run --bin server -- help
 ```
+
+#### トラブルシューティング
+
+- **古いサーバープロセスが残っている場合**
+
+WebSocket サーバーの起動に失敗する場合や、クライアント接続時にエラーが発生する場合、古いサーバープロセスが残っている可能性があります。
+
+```sh
+# 実行中のサーバープロセスを確認
+ps aux | grep -E "target/debug|target/release|cargo run" | grep -v grep
+
+# プロセスを停止（PID は上記コマンドで確認）
+kill <PID>
+
+# 例：PID が 12345 の場合
+kill 12345
+```
+
+複数のプロセスが見つかった場合は、すべて停止してから新しいサーバーを起動してください。
 
 #### 本番環境
 
@@ -187,10 +215,16 @@ cargo run -- help
 cargo build --release
 ```
 
-- 実行
+- サーバ実行
 
 ```sh
-./target/release/water-controller-relay -p "/dev/cu.usbmodem1101" -b 115200
+./target/release/server -p "/dev/cu.usbmodem1101" -b 115200
+```
+
+- WebSocket サーバのテスト用クライアント実行（別ターミナル）
+
+```sh
+./target/release/client -u "ws://127.0.0.1:8080/ws"
 ```
 
 ### デスクトップアプリ `water-controller-app`

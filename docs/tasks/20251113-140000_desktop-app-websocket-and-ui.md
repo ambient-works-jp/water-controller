@@ -72,9 +72,18 @@
 
 #### WebSocket クライアントの実装
 
+**実装方針**: Renderer プロセスで直接 WebSocket 接続を行う（[ADR 001](../adr/adr-001-websocket-connection-in-renderer.md) を参照）
+
+- 理由:
+  - リアルタイム性が重要（IPC のオーバーヘッドを避ける）
+  - 実装がシンプル（Web 開発と同じパターン）
+  - デバッグのしやすさ（Chrome DevTools で確認可能）
+  - 接続の永続性は不要（展示会では問題なし）
+- 参考: [Electron での WebSocket 接続パターン](../notes/electron-websocket-patterns.md)
+
 - [ ] WebSocket クライアントの実装
   - [ ] WebSocket サーバへの接続機能
-  - [ ] 再接続機能の実装
+  - [ ] 再接続機能の実装（自動再接続、指数バックオフ）
   - [ ] 切断処理の実装
   - [ ] エラーハンドリングの実装
 
@@ -232,6 +241,7 @@
 
 ## 参考資料
 
+- [Electron 基礎ガイド for React 開発者](../documentations/electorn-basic.md) - React と Electron の違い、プロセス構造、IPC 通信
 - [シリアル通信と WebSocket サーバの実装タスク](./20251109233530_serial-communication-and-websocket-server.md)
 - プロジェクトルートの `spec.md` - 通信仕様
 - `water-controller-app/` - Electron アプリのコードベース

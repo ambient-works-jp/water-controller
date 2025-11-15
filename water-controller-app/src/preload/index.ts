@@ -6,13 +6,9 @@ console.log('[preload] Loading preload.ts...')
 
 // Custom APIs for renderer
 const api: RendererApi = {
-  getVersions: () => ({
-    electron: process.versions.electron,
-    chrome: process.versions.chrome,
-    node: process.versions.node
-  }),
   ipc: {
-    sendPing: async () => ipcRenderer.invoke('ping') as Promise<PingResponse>
+    sendPing: async () => ipcRenderer.invoke('ping') as Promise<PingResponse>,
+    getVersions: async () => ipcRenderer.invoke('getVersions') as Promise<EnvironmentVersions>
   }
 }
 

@@ -1,7 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function Versions(): React.JSX.Element {
-  const [versions] = useState(window.electron.process.versions)
+  const [versions, setVersions] = useState<{
+    electron: string
+    chrome: string
+    node: string
+  } | null>(null)
+
+  useEffect(() => {
+    window.api.ipc.getVersions().then(setVersions)
+  }, [])
+
+  if (!versions) {
+    return <div>Loading versions...</div>
+  }
 
   return (
     <ul className="versions">

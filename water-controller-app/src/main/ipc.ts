@@ -10,4 +10,13 @@ export function registerIpcHandlers(): void {
     console.log('Received ping message from renderer process: ', { response })
     return response
   })
+
+  // バージョン情報を取得
+  ipcMain.handle('getVersions', () => {
+    return {
+      electron: process.versions.electron,
+      chrome: process.versions.chrome,
+      node: process.versions.node
+    }
+  })
 }

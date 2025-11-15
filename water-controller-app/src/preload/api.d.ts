@@ -11,6 +11,6 @@ export type EnvironmentVersions = {
 export type RendererApi = {
   ipc: {
     sendPing: () => Promise<PingResponse>
+    getVersions: () => Promise<EnvironmentVersions>
   }
-  getVersions: () => EnvironmentVersions
 }

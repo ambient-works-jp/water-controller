@@ -11,7 +11,8 @@
       "mcp__serena__get_current_config",
       "mcp__serena__activate_project",
       "mcp__serena__check_onboarding_performed",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": [],

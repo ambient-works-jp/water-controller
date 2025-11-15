@@ -52,5 +52,7 @@ export type RendererApi = {
     loadConfig: () => Promise<LoadConfigResponse>
     saveConfig: (config: Config) => Promise<SaveConfigResponse>
     loadLog: () => Promise<LoadLogResponse>
+    toggleDevTools: () => Promise<void>
+    quitApp: () => Promise<void>
   }
 }

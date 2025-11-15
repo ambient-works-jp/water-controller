@@ -7,7 +7,9 @@ export const IpcChannelNames = {
   getVersions: 'getVersions',
   loadConfig: 'loadConfig',
   saveConfig: 'saveConfig',
-  loadLog: 'loadLog'
+  loadLog: 'loadLog',
+  toggleDevTools: 'toggleDevTools',
+  quitApp: 'quitApp'
 } as const
 
 /**

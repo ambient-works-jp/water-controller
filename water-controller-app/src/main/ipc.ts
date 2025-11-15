@@ -1,4 +1,4 @@
-import { ipcMain, app } from 'electron'
+import { ipcMain, app, BrowserWindow } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 import { loadConfig, getDefaultConfig, saveConfig } from './config'
@@ -133,6 +133,27 @@ class IpcHandlers {
       }
     }
   }
+
+  /**
+   * DevTools を開く/閉じるハンドラ
+   */
+  static handleToggleDevTools(): void {
+    const window = BrowserWindow.getFocusedWindow()
+    if (window) {
+      window.webContents.toggleDevTools()
+      logger.info('DevTools toggled')
+    } else {
+      logger.warn('No focused window to toggle DevTools')
+    }
+  }
+
+  /**
+   * アプリケーションを終了するハンドラ
+   */
+  static handleQuitApp(): void {
+    logger.info('Quitting application')
+    app.quit()
+  }
 }
 
 /**
@@ -154,4 +175,10 @@ export function registerIpcHandlers(): void {
 
   // ログファイルを読み込む
   ipcMain.handle(IpcChannelNames.loadLog, IpcHandlers.handleLoadLog)
+
+  // DevTools を開く/閉じる
+  ipcMain.handle(IpcChannelNames.toggleDevTools, IpcHandlers.handleToggleDevTools)
+
+  // アプリケーションを終了する
+  ipcMain.handle(IpcChannelNames.quitApp, IpcHandlers.handleQuitApp)
 }

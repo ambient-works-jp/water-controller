@@ -347,3 +347,21 @@ CSC_IDENTITY_AUTO_DISCOVERY=false pnpm build:mac
 open dist/mac-arm64/WaterController.app
 # デスクトップアプリが起動すれば OK!
 ```
+
+#### ログの確認方法
+
+アプリケーションのログは JSON Lines 形式で以下の場所に出力されます：
+
+```bash
+# macOS
+~/Library/Logs/water-controller-app/main.log
+```
+
+ログファイルをリアルタイムで監視：
+
+```bash
+# macOS/Linux
+tail -f ~/Library/Logs/water-controller-app/main.log
+```
+
+[docs/notes/logging-strategy.md](./docs/notes/logging-strategy.md) を参照してください。

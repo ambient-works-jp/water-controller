@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Contents } from './components/Contents'
 import { DebugOverlay } from './components/DebugOverlay'
 import { SettingsButton } from './components/SettingsButton'
@@ -8,6 +8,15 @@ import { useWebSocket } from './hooks/useWebSocket'
 import { useKeyboardShortcut } from './hooks/useKeyboardShortcut'
 import type { WsMessage } from '../../lib/types/websocket'
 import type { Config } from '../../lib/types/config'
+
+const messageHandler = (message: WsMessage) => {
+  // console.log('[WebSocket] Message received:', message)
+  if (message.type === 'button-input') {
+    console.log(`[WebSocket] Button: ${message.isPushed ? 'PUSHED' : 'RELEASED'}`)
+  } else if (message.type === 'controller-input') {
+    console.log(`[WebSocket] Controller: left=${message.left}, right=${message.right}, up=${message.up}, down=${message.down}`)
+  }
+}
 
 function App(): React.JSX.Element {
   const [debugMode, setDebugMode] = useState(false)
@@ -65,18 +74,7 @@ function App(): React.JSX.Element {
 
   // WebSocket クライアントの初期化（設定から URL を取得、未ロード時はデフォルト URL）
   const wsUrl = config?.wsUrl || 'ws://127.0.0.1:8080/ws'
-  const { status, lastMessage } = useWebSocket(wsUrl, (message: WsMessage) => {
-    // メッセージ受信時のコールバック
-    console.log('[WebSocket] Message received:', message)
-
-    if (message.type === 'button-input') {
-      console.log(`[WebSocket] Button: ${message.isPushed ? 'PUSHED' : 'RELEASED'}`)
-    } else if (message.type === 'controller-input') {
-      console.log(
-        `[WebSocket] Controller: left=${message.left}, right=${message.right}, up=${message.up}, down=${message.down}`
-      )
-    }
-  })
+  const { status, lastMessage } = useWebSocket(wsUrl, messageHandler)
 
   // 接続状態の変化をログ出力
   useEffect(() => {
@@ -119,7 +117,6 @@ function App(): React.JSX.Element {
     }
 
     void saveDebugMode()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debugMode, isInitialLoad])
 
   // 設定画面を閉じる（アニメーション付き）

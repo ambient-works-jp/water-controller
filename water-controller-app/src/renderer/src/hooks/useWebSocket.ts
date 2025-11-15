@@ -73,7 +73,7 @@ export function useWebSocket(
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data) as WsMessage
-          logger.debug('WebSocket message received:', data)
+          // logger.debug('WebSocket message received:', data)
           setLastMessage(data)
 
           if (onMessage) {

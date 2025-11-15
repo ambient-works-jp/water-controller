@@ -40,6 +40,7 @@ export function SettingsPanel({
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [logPath, setLogPath] = useState<string>('')
   const [logContent, setLogContent] = useState<string>('')
+  const [isClosing, setIsClosing] = useState(false)
   const logViewerRef = useRef<HTMLDivElement>(null)
 
   // 設定の再読み込み
@@ -97,13 +98,21 @@ export function SettingsPanel({
     }
   }, [logContent])
 
+  // 閉じるアニメーション付きで閉じる
+  const handleClose = (): void => {
+    setIsClosing(true)
+    setTimeout(() => {
+      onClose()
+    }, 500) // CSS のアニメーション時間と同じ
+  }
+
   return (
-    <div className="settings-panel-overlay">
-      <div className="settings-panel">
+    <div className={`settings-panel-overlay ${isClosing ? 'closing' : ''}`}>
+      <div className={`settings-panel ${isClosing ? 'closing' : ''}`}>
         {/* ヘッダー */}
         <div className="settings-header">
           <h1 className="settings-title">Settings</h1>
-          <button className="close-button" onClick={onClose} aria-label="閉じる">
+          <button className="close-button" onClick={handleClose} aria-label="閉じる">
             ✕
           </button>
         </div>

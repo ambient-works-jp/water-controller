@@ -10,7 +10,7 @@
   align-items: stretch;
   justify-content: stretch;
   z-index: 10000;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
@@ -19,6 +19,20 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* オーバーレイ閉じるアニメーション */
+.settings-panel-overlay.closing {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -42,6 +56,22 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 閉じるアニメーション */
+.settings-panel.closing {
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
   }
 }
 

@@ -43,6 +43,8 @@ export function SettingsPanel({
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [logPath, setLogPath] = useState<string>('')
   const [logContent, setLogContent] = useState<string>('')
+  const [connectionTestResult, setConnectionTestResult] = useState<string>('')
+  const [isTestingConnection, setIsTestingConnection] = useState(false)
   const logViewerRef = useRef<HTMLDivElement>(null)
 
   // 設定の再読み込み
@@ -90,6 +92,66 @@ export function SettingsPanel({
     } catch (error) {
       console.error('Failed to load log:', error)
       setErrorMessage('ログファイルの読み込みに失敗しました')
+    }
+  }
+
+  // WebSocket 接続テスト
+  const handleTestConnection = async (): Promise<void> => {
+    setIsTestingConnection(true)
+    setConnectionTestResult('')
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
+    try {
+      const testWs = new WebSocket(wsUrl)
+      let isSuccess = false
+
+      // タイムアウト設定（10秒）
+      const timeout = setTimeout(() => {
+        if (!isSuccess) {
+          testWs.close(1000, 'Test timeout')
+          setConnectionTestResult('❌ 接続テスト失敗: タイムアウト（10秒）')
+          setIsTestingConnection(false)
+        }
+      }, 10000)
+
+      testWs.onopen = () => {
+        clearTimeout(timeout)
+        isSuccess = true
+        setConnectionTestResult('✅ 接続テスト成功: 101 Switching Protocols')
+        setSuccessMessage('WebSocket サーバへの接続に成功しました')
+        setIsTestingConnection(false)
+        // 少し待ってから正常終了コード (1000) で閉じる
+        setTimeout(() => {
+          testWs.close(1000, 'Connection test successful')
+        }, 100)
+      }
+
+      testWs.onerror = (error) => {
+        if (!isSuccess) {
+          clearTimeout(timeout)
+          console.error('WebSocket test error:', error)
+          setConnectionTestResult('❌ 接続テスト失敗: エラーが発生しました')
+          setErrorMessage('WebSocket サーバへの接続に失敗しました')
+          setIsTestingConnection(false)
+        }
+      }
+
+      testWs.onclose = (event) => {
+        if (!isSuccess) {
+          clearTimeout(timeout)
+          setConnectionTestResult(
+            `❌ 接続テスト失敗: 接続が閉じられました (code: ${event.code}, reason: ${event.reason || '不明'})`
+          )
+          setErrorMessage('WebSocket 接続が予期せず閉じられました')
+          setIsTestingConnection(false)
+        }
+      }
+    } catch (error) {
+      console.error('Connection test failed:', error)
+      setConnectionTestResult('❌ 接続テスト失敗: 例外が発生しました')
+      setErrorMessage('接続テストに失敗しました')
+      setIsTestingConnection(false)
     }
   }
 
@@ -217,13 +279,27 @@ export function SettingsPanel({
             <div className="tab-content">
               <h2>接続状態</h2>
 
-              <button
-                className="reload-button"
-                onClick={() => window.location.reload()}
-                style={{ marginBottom: '24px' }}
-              >
-                再接続
-              </button>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                <button
+                  className="reload-button"
+                  onClick={() => window.location.reload()}
+                >
+                  再接続
+                </button>
+                <button
+                  className="reload-button"
+                  onClick={handleTestConnection}
+                  disabled={isTestingConnection}
+                >
+                  {isTestingConnection ? '接続テスト中...' : '接続テスト'}
+                </button>
+              </div>
+
+              {connectionTestResult && (
+                <div className="connection-test-result" style={{ marginBottom: '24px' }}>
+                  <p style={{ margin: 0, fontSize: '14px' }}>{connectionTestResult}</p>
+                </div>
+              )}
 
               <div className="connection-info">
                 <div className="info-row">

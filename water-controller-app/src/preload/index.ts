@@ -1,7 +1,14 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import log from 'electron-log/renderer'
-import type { RendererApi, PingResponse, EnvironmentVersions } from './api.d.ts'
+import { IpcChannelNames } from '../lib/ipc'
+import type {
+  RendererApi,
+  PingResponse,
+  EnvironmentVersions,
+  LoadConfigResponse,
+  LoadLogResponse
+} from './api.d.ts'
 
 log.info('[preload] Loading preload.ts...')
 console.log('[preload] Loading preload.ts...')
@@ -9,8 +16,10 @@ console.log('[preload] Loading preload.ts...')
 // Custom APIs for renderer
 const api: RendererApi = {
   ipc: {
-    sendPing: async () => ipcRenderer.invoke('ping') as Promise<PingResponse>,
-    getVersions: async () => ipcRenderer.invoke('getVersions') as Promise<EnvironmentVersions>
+    sendPing: async () => ipcRenderer.invoke(IpcChannelNames.ping) as Promise<PingResponse>,
+    getVersions: async () => ipcRenderer.invoke(IpcChannelNames.getVersions) as Promise<EnvironmentVersions>,
+    loadConfig: async () => ipcRenderer.invoke(IpcChannelNames.loadConfig) as Promise<LoadConfigResponse>,
+    loadLog: async () => ipcRenderer.invoke(IpcChannelNames.loadLog) as Promise<LoadLogResponse>
   }
 }
 

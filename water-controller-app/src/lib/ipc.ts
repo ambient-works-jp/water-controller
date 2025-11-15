@@ -6,6 +6,7 @@ export const IpcChannelNames = {
   ping: 'ping',
   getVersions: 'getVersions',
   loadConfig: 'loadConfig',
+  saveConfig: 'saveConfig',
   loadLog: 'loadLog'
 } as const
 

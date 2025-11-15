@@ -143,3 +143,72 @@ export function loadConfig():
 export function getDefaultConfig(): Config {
   return DEFAULT_CONFIG
 }
+
+/**
+ * 設定ファイルを保存する
+ *
+ * @param config - 保存する設定オブジェクト
+ * @returns 保存結果
+ */
+export function saveConfig(
+  config: Config
+): { success: true } | { success: false; error: string; details?: string } {
+  try {
+    // 設定ディレクトリを作成（存在しない場合）
+    ensureConfigDirectory()
+
+    // バリデーション
+    if (!config.wsUrl || typeof config.wsUrl !== 'string') {
+      throw new Error('Invalid config: wsUrl is required and must be a string')
+    }
+
+    if (!Array.isArray(config.contents)) {
+      throw new Error('Invalid config: contents must be an array')
+    }
+
+    if (typeof config.debugMode !== 'boolean') {
+      throw new Error('Invalid config: debugMode must be a boolean')
+    }
+
+    // JSON 形式で保存
+    const configStr = JSON.stringify(config, null, 2)
+    fs.writeFileSync(CONFIG_FILE, configStr, 'utf-8')
+
+    logger.info('Config saved successfully')
+    return { success: true }
+  } catch (error) {
+    logger.error('Failed to save config:', error)
+
+    if (error instanceof Error) {
+      // バリデーションエラー
+      if (error.message.includes('Invalid config')) {
+        return {
+          success: false,
+          error: '設定ファイルの内容が不正です。',
+          details: error.message
+        }
+      }
+
+      // ファイル書き込みエラー（権限エラーなど）
+      if ('code' in error && error.code === 'EACCES') {
+        return {
+          success: false,
+          error: '設定ファイルの書き込み権限がありません。',
+          details: error.message
+        }
+      }
+
+      // その他のエラー
+      return {
+        success: false,
+        error: '設定ファイルの保存に失敗しました。',
+        details: error.message
+      }
+    }
+
+    return {
+      success: false,
+      error: '設定ファイルの保存に失敗しました。'
+    }
+  }
+}

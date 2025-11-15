@@ -22,6 +22,16 @@ export type LoadConfigResponse =
       config: Config
     }
 
+export type SaveConfigResponse =
+  | {
+      success: true
+    }
+  | {
+      success: false
+      error: string
+      details?: string
+    }
+
 export type LoadLogResponse =
   | {
       success: true
@@ -40,6 +50,7 @@ export type RendererApi = {
     sendPing: () => Promise<PingResponse>
     getVersions: () => Promise<EnvironmentVersions>
     loadConfig: () => Promise<LoadConfigResponse>
+    saveConfig: (config: Config) => Promise<SaveConfigResponse>
     loadLog: () => Promise<LoadLogResponse>
   }
 }

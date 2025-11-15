@@ -1,7 +1,7 @@
 import { ipcMain, app } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
-import { loadConfig, getDefaultConfig } from './config'
+import { loadConfig, getDefaultConfig, saveConfig } from './config'
 import { createLogger } from './logger'
 import { IpcChannelNames } from '../lib/ipc'
 import type { Config } from '../lib/types/config'
@@ -61,6 +61,16 @@ class IpcHandlers {
         config: getDefaultConfig()
       }
     }
+  }
+
+  /**
+   * 設定ファイル保存ハンドラ
+   */
+  static handleSaveConfig(
+    _event: Electron.IpcMainInvokeEvent,
+    config: Config
+  ): { success: true } | { success: false; error: string; details?: string } {
+    return saveConfig(config)
   }
 
   /**
@@ -138,6 +148,9 @@ export function registerIpcHandlers(): void {
 
   // 設定ファイルを読み込む
   ipcMain.handle(IpcChannelNames.loadConfig, IpcHandlers.handleLoadConfig)
+
+  // 設定ファイルを保存する
+  ipcMain.handle(IpcChannelNames.saveConfig, IpcHandlers.handleSaveConfig)
 
   // ログファイルを読み込む
   ipcMain.handle(IpcChannelNames.loadLog, IpcHandlers.handleLoadLog)

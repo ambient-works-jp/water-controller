@@ -2,11 +2,13 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import log from 'electron-log/renderer'
 import { IpcChannelNames } from '../lib/ipc'
+import type { Config } from '../lib/types/config'
 import type {
   RendererApi,
   PingResponse,
   EnvironmentVersions,
   LoadConfigResponse,
+  SaveConfigResponse,
   LoadLogResponse
 } from './api.d.ts'
 
@@ -17,8 +19,12 @@ console.log('[preload] Loading preload.ts...')
 const api: RendererApi = {
   ipc: {
     sendPing: async () => ipcRenderer.invoke(IpcChannelNames.ping) as Promise<PingResponse>,
-    getVersions: async () => ipcRenderer.invoke(IpcChannelNames.getVersions) as Promise<EnvironmentVersions>,
-    loadConfig: async () => ipcRenderer.invoke(IpcChannelNames.loadConfig) as Promise<LoadConfigResponse>,
+    getVersions: async () =>
+      ipcRenderer.invoke(IpcChannelNames.getVersions) as Promise<EnvironmentVersions>,
+    loadConfig: async () =>
+      ipcRenderer.invoke(IpcChannelNames.loadConfig) as Promise<LoadConfigResponse>,
+    saveConfig: async (config: Config) =>
+      ipcRenderer.invoke(IpcChannelNames.saveConfig, config) as Promise<SaveConfigResponse>,
     loadLog: async () => ipcRenderer.invoke(IpcChannelNames.loadLog) as Promise<LoadLogResponse>
   }
 }

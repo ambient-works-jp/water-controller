@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Contents } from './components/Contents'
 import { DebugOverlay } from './components/DebugOverlay'
 import { SettingsButton } from './components/SettingsButton'
@@ -12,6 +12,7 @@ import type { Config } from '../../lib/types/config'
 function App(): React.JSX.Element {
   const [debugMode, setDebugMode] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [isClosingSettings, setIsClosingSettings] = useState(false)
   const [config, setConfig] = useState<Config | null>(null)
   const [configLoadError, setConfigLoadError] = useState<{
     message: string
@@ -111,12 +112,44 @@ function App(): React.JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debugMode, isInitialLoad])
 
+  // 設定画面を閉じる（アニメーション付き）
+  const handleCloseSettings = useCallback((): void => {
+    console.log('[Settings] Starting close animation')
+    setIsClosingSettings(true)
+    setTimeout(() => {
+      console.log('[Settings] Close animation complete, hiding panel')
+      setShowSettings(false)
+      setIsClosingSettings(false)
+    }, 500)
+  }, [])
+
+  // 設定画面をトグル
+  const handleToggleSettings = useCallback((): void => {
+    setShowSettings((prev) => {
+      console.log('[Settings] Toggle called, current showSettings:', prev)
+      if (prev) {
+        // 閉じる処理
+        console.log('[Settings] Starting close animation')
+        setIsClosingSettings(true)
+        setTimeout(() => {
+          console.log('[Settings] Close animation complete, hiding panel')
+          setShowSettings(false)
+          setIsClosingSettings(false)
+        }, 500)
+        return prev // すぐには変更しない（アニメーション後に変更）
+      } else {
+        // 開く処理
+        return true
+      }
+    })
+  }, [])
+
   // キーボードショートカット
   useKeyboardShortcut(
     [
       {
         key: 'm',
-        handler: () => setShowSettings((prev) => !prev),
+        handler: handleToggleSettings,
         description: '設定画面を開く'
       },
       {
@@ -141,7 +174,7 @@ function App(): React.JSX.Element {
       // Cmd + R: ページをリロード (Electron の optimizer.watchWindowShortcuts が処理)
       // F12: DevTools を開く (Electron の optimizer.watchWindowShortcuts が処理)
     ],
-    []
+    [handleToggleSettings]
   )
 
   return (
@@ -163,12 +196,13 @@ function App(): React.JSX.Element {
       {/* 設定画面 */}
       {showSettings && (
         <SettingsPanel
-          onClose={() => setShowSettings(false)}
           wsStatus={status}
           wsUrl={wsUrl}
           debugMode={debugMode}
           onDebugModeChange={setDebugMode}
           initialConfig={config}
+          onClose={handleCloseSettings}
+          isClosing={isClosingSettings}
         />
       )}
     </>

@@ -4,8 +4,6 @@ import type { ConnectionStatus } from '../../../lib/types/websocket'
 import './SettingsPanel.css'
 
 interface SettingsPanelProps {
-  /** 設定画面を閉じる */
-  onClose: () => void
   /** WebSocket 接続状態 */
   wsStatus: ConnectionStatus
   /** WebSocket URL */
@@ -16,6 +14,10 @@ interface SettingsPanelProps {
   onDebugModeChange: (enabled: boolean) => void
   /** 初期設定 */
   initialConfig: Config | null
+  /** 設定画面を閉じる */
+  onClose: () => void
+  /** 閉じるアニメーション中かどうか */
+  isClosing: boolean
 }
 
 type TabType = 'settings' | 'connection' | 'logs' | 'help'
@@ -26,12 +28,13 @@ type TabType = 'settings' | 'connection' | 'logs' | 'help'
  * 3 タブ構成: 設定、接続状態、ヘルプ
  */
 export function SettingsPanel({
-  onClose,
   wsStatus,
   wsUrl,
   debugMode,
   onDebugModeChange,
-  initialConfig
+  initialConfig,
+  onClose,
+  isClosing
 }: SettingsPanelProps): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<TabType>('settings')
   const [config, setConfig] = useState<Config | null>(initialConfig)
@@ -40,7 +43,6 @@ export function SettingsPanel({
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [logPath, setLogPath] = useState<string>('')
   const [logContent, setLogContent] = useState<string>('')
-  const [isClosing, setIsClosing] = useState(false)
   const logViewerRef = useRef<HTMLDivElement>(null)
 
   // 設定の再読み込み
@@ -98,13 +100,10 @@ export function SettingsPanel({
     }
   }, [logContent])
 
-  // 閉じるアニメーション付きで閉じる
-  const handleClose = (): void => {
-    setIsClosing(true)
-    setTimeout(() => {
-      onClose()
-    }, 500) // CSS のアニメーション時間と同じ
-  }
+  // デバッグ: isClosing の変化を監視
+  useEffect(() => {
+    console.log('[SettingsPanel] isClosing changed:', isClosing)
+  }, [isClosing])
 
   return (
     <div className={`settings-panel-overlay ${isClosing ? 'closing' : ''}`}>
@@ -112,7 +111,7 @@ export function SettingsPanel({
         {/* ヘッダー */}
         <div className="settings-header">
           <h1 className="settings-title">Settings</h1>
-          <button className="close-button" onClick={handleClose} aria-label="閉じる">
+          <button className="close-button" onClick={onClose} aria-label="閉じる">
             ✕
           </button>
         </div>

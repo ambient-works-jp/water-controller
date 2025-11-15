@@ -1,7 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { RendererApi, PingResponse } from './api.d.ts'
+import log from 'electron-log/renderer'
+import type { RendererApi, PingResponse, EnvironmentVersions } from './api.d.ts'
 
+log.info('[preload] Loading preload.ts...')
 console.log('[preload] Loading preload.ts...')
 
 // Custom APIs for renderer
@@ -33,4 +35,5 @@ function registerApi(api: RendererApi): void {
 
 registerApi(api)
 
-console.log('[preload] Loaded preload.ts.')
+log.info('[preload] Loaded preload.ts. API registered:', { hasApi: !!api, hasIpc: !!api.ipc })
+console.log('[preload] Loaded preload.ts. API registered:', { hasApi: !!api, hasIpc: !!api.ipc })

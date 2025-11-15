@@ -2,13 +2,20 @@ import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createWindow } from './window'
 import { registerIpcHandlers } from './ipc'
+import { initMainLogger, createLogger } from './logger'
+
+// ロガーの初期化（アプリの初期化前に実行）
+initMainLogger()
+
+// モジュールごとのロガーを作成
+const logger = createLogger('main.index')
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 // `ready` イベントは、Electron アプリが初期化され、ウィンドウを作成する準備ができたことを示します。
 app.whenReady().then(() => {
-  console.log('Electron has finished initialization and is ready to create browser windows.')
+  logger.info('Electron has finished initialization and is ready to create browser windows.')
 
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')

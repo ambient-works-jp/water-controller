@@ -1,44 +1,15 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
+import { app, BrowserWindow } from 'electron'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { createWindow } from './window'
+import { registerIpcHandlers } from './ipc'
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+// `ready` イベントは、Electron アプリが初期化され、ウィンドウを作成する準備ができたことを示します。
 app.whenReady().then(() => {
+  console.log('Electron has finished initialization and is ready to create browser windows.')
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -49,18 +20,24 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  // IPC handler の登録
+  registerIpcHandlers()
 
+  // Electron アプリのウィンドウを作成する
   createWindow()
 
-  app.on('activate', function () {
+  // on macOS: ウィンドウが activate になったとき、ウィンドウを作成する
+  // ref: www.electronjs.org/ja/docs/latest/tutorial/tutorial-first-app#%E9%96%8B%E3%81%84%E3%81%9F%E3%82%A6%E3%82%A4%E3%83%B3%E3%83%89%E3%82%A6%E3%81%8C%E3%81%AA%E3%81%84%E5%A0%B4%E5%90%88%E3%81%AB%E3%82%A6%E3%82%A4%E3%83%B3%E3%83%89%E3%82%A6%E3%82%92%E9%96%8B%E3%81%8F-macos
+  https: app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
+// 全てのウィンドウが閉じたときにアプリを終了する (Windows と Linux のみ)
+// ref: https://www.electronjs.org/ja/docs/latest/tutorial/tutorial-first-app#%E5%85%A8%E3%82%A6%E3%82%A4%E3%83%B3%E3%83%89%E3%82%A6%E3%82%92%E9%96%89%E3%81%98%E3%81%9F%E6%99%82%E3%81%AB%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E7%B5%82%E4%BA%86%E3%81%99%E3%82%8B-windows--linux
+//
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.

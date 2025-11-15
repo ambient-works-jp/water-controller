@@ -301,7 +301,11 @@ export function SettingsPanel({
                 </li>
                 <li>
                   <kbd>Cmd</kbd> + <kbd>I</kbd> or <kbd>F12</kbd>
-                  <span className="shortcut-description">Inspector を開く</span>
+                  <span className="shortcut-description">DevTools を開く</span>
+                </li>
+                <li>
+                  <kbd>Cmd</kbd> + <kbd>Q</kbd>
+                  <span className="shortcut-description">アプリケーションを終了</span>
                 </li>
               </ul>
             </div>

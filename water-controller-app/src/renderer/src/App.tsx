@@ -123,9 +123,22 @@ function App(): React.JSX.Element {
         key: 'd',
         handler: () => setDebugMode((prev) => !prev),
         description: 'デバッグモードをオン・オフ'
+      },
+      {
+        key: 'i',
+        handler: async () => {
+          await window.api.ipc.toggleDevTools()
+        },
+        description: 'DevTools を開く/閉じる'
+      },
+      {
+        key: 'q',
+        handler: async () => {
+          await window.api.ipc.quitApp()
+        },
+        description: 'アプリケーションを終了'
       }
       // Cmd + R: ページをリロード (Electron の optimizer.watchWindowShortcuts が処理)
-      // Cmd + I: Inspector を開く (Electron の optimizer.watchWindowShortcuts が処理)
       // F12: DevTools を開く (Electron の optimizer.watchWindowShortcuts が処理)
     ],
     []

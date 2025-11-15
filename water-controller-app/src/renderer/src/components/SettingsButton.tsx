@@ -26,7 +26,6 @@ export function SettingsButton({
     let timeoutId: NodeJS.Timeout
 
     const handleMouseMove = (): void => {
-      console.log('handleMouseMove: 3 秒後に歯車ボタンを非表示にする')
       setShowButton(true)
       clearTimeout(timeoutId)
       timeoutId = setTimeout(() => {

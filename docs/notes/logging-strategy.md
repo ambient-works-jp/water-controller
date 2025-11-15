@@ -339,6 +339,38 @@ water-controller-app/
 
 **注**: ログ出力先は electron-log のデフォルト（`app.getPath('logs')`）を使用し、環境変数での変更は不可とします。
 
+## ログファイルの動作
+
+### ファイルへの書き込み方法
+
+electron-log のデフォルト動作では、ログファイルは**末尾に追記（append）**されます：
+
+- **通常時**: アプリを起動するたびに、既存のログファイルの末尾に追記される
+- **リセット不要**: 過去のログを確認できるため、通常は追記される方が便利
+
+### ログローテーション
+
+ファイルサイズが一定サイズ（デフォルトで **1 MB**）を超えると、古いログファイルが自動的にローテーションされます：
+
+1. `main.log` → `main.old.log` にリネーム
+2. 新しい `main.log` が作成される
+3. 次回起動時から新しい `main.log` に追記される
+
+### 開発時のログリセット
+
+開発中にログをリセットしたい場合は、手動で削除してから起動します：
+
+```bash
+# macOS/Linux
+rm -rf ~/Library/Logs/water-controller-app/ && pnpm dev
+
+# Windows (PowerShell)
+Remove-Item -Recurse -Force $env:USERPROFILE\AppData\Roaming\water-controller-app\logs\
+pnpm dev
+```
+
+**注**: 現在の実装では、ファイルサイズやローテーションの設定を明示的にしていないため、electron-log のデフォルト動作（1 MB でローテーション）が適用されます。
+
 ## 参考リンク
 
 - [electron-log - GitHub](https://github.com/megahertz/electron-log)

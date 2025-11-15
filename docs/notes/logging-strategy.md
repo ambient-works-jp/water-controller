@@ -20,15 +20,17 @@ water-controller-app のロギング戦略とカスタムロガーの実装仕�
 
 | プロセス | コンソール出力 | ログファイル出力 |
 |---------|--------------|----------------|
-| **メインプロセス** | 標準出力（人間が読みやすい形式） | `~/Library/Logs/WaterController/main.log` (macOS, JSON Lines) |
-| **レンダラープロセス** | DevTools Console（人間が読みやすい形式） | IPC 経由 → `~/Library/Logs/WaterController/renderer.log` (macOS, JSON Lines) |
-| **プリロードスクリプト** | DevTools Console（人間が読みやすい形式） | IPC 経由 → `~/Library/Logs/WaterController/renderer.log` (macOS, JSON Lines) |
+| **メインプロセス** | 標準出力（人間が読みやすい形式） | `~/Library/Logs/water-controller-app/main.log` (macOS, JSON Lines) |
+| **レンダラープロセス** | DevTools Console（人間が読みやすい形式） | IPC 経由 → `~/Library/Logs/water-controller-app/main.log` (macOS, JSON Lines) |
+| **プリロードスクリプト** | DevTools Console（人間が読みやすい形式） | IPC 経由 → `~/Library/Logs/water-controller-app/main.log` (macOS, JSON Lines) |
+
+**注**: すべてのログ（メインプロセス、レンダラープロセス、プリロードスクリプト）は `main.log` に統合して出力されます。レンダラープロセスとプリロードスクリプトのログは electron-log の IPC トランスポートにより自動的にメインプロセスに送信され、時系列で記録されます。
 
 **ログファイルのパス**（`app.getPath('logs')` が返す値）:
 
-- macOS: `~/Library/Logs/{app name}/*.log`
-- Windows: `%USERPROFILE%\AppData\Roaming\{app name}\logs\*.log`
-- Linux: `~/.config/{app name}/logs/*.log`
+- macOS: `~/Library/Logs/{app name}/main.log`
+- Windows: `%USERPROFILE%\AppData\Roaming\{app name}\logs\main.log`
+- Linux: `~/.config/{app name}/logs/main.log`
 
 ## アーキテクチャ
 
@@ -43,16 +45,10 @@ water-controller-app のロギング戦略とカスタムロガーの実装仕�
          │ IPC (自動)
          ▼
 ┌─────────────────┐      ┌──────────────────────────────────────┐
-│  Main Process   │─────▶│~/Library/Logs/WaterController/       │
-│   electron-log  │      │  main.log                            │
+│  Main Process   │─────▶│~/Library/Logs/water-controller-app/  │
+│   electron-log  │      │  main.log (すべてのログを統合)       │
 │     /main       │      └──────────────────────────────────────┘
-└────────┬────────┘
-         │ write
-         ▼
-┌──────────────────────────────────────┐
-│~/Library/Logs/WaterController/       │
-│  renderer.log                        │
-└──────────────────────────────────────┘
+└─────────────────┘
 ```
 
 **注**:
@@ -65,11 +61,11 @@ water-controller-app のロギング戦略とカスタムロガーの実装仕�
 1. **レンダラープロセスとプリロードスクリプトはファイルシステムに直接アクセスできない**
    - Context Isolation により Node.js API が利用不可
    - electron-log の内蔵 IPC トランスポートで自動的にメインプロセスにログを送信
-   - プリロードスクリプトのログも `renderer.log` に出力される
+   - プリロードスクリプトのログも `main.log` に出力される
 
 2. **メインプロセスが一元管理**
    - すべてのログをメインプロセスで受信
-   - ログファイルは `main.log` と `renderer.log` の2つに分割
+   - すべてのログを `main.log` に時系列で統合して記録
 
 3. **複数の出力先設定**
    - すべての環境でコンソール（標準出力/DevTools）とログファイルの両方に出力
@@ -156,9 +152,9 @@ export type CreateLogger = (moduleName: string) => Logger
    - `message.date.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' })` で生成
    - ISO 8601 形式に変換
 
-5. **ログファイルの分割**
-   - `log.transports.file.resolvePathFn` で出力先を制御
-   - プロセスタイプに応じて `main.log`, `renderer.log` に振り分け
+5. **ログファイルの統合**
+   - `log.transports.file.resolvePathFn` で出力先を `main.log` に統一
+   - すべてのプロセス（メイン、レンダラー、プリロード）のログを時系列で記録
    - 出力先は electron-log のデフォルトパス（`app.getPath('logs')`）を使用
 
 6. **グローバルエラーハンドリング**
@@ -214,12 +210,10 @@ export function initMainLogger(): void {
 
   // ファイル設定（JSON Lines 形式）
   log.transports.file.format = jsonLinesFormat
-  log.transports.file.resolvePathFn = (variables) => {
-   if (variables.processType === 'renderer') {
-    return path.join(app.getPath('logs'), 'renderer.log')
-   }
-
-   return path.join(app.getPath('logs'), 'main.log')
+  log.transports.file.resolvePathFn = () => {
+    // すべてのログを main.log に出力
+    // レンダラープロセスのログも IPC 経由で main.log に記録される
+    return path.join(app.getPath('logs'), 'main.log')
   }
 
   // グローバルエラーハンドリング
@@ -266,7 +260,7 @@ log.info('[preload] Loaded preload.ts.')
 **注意**:
 
 - プリロードスクリプトは Node.js コンテキストで実行されるため、`electron-log/main` も使用可能ですが、論理的には `electron-log/renderer` を使用する方が適切です
-- `console.log` を使用した場合も、ログは自動的に `renderer.log` に記録されます（electron-log の自動プリロード注入により）
+- `console.log` を使用した場合も、ログは自動的に `main.log` に記録されます（electron-log の自動プリロード注入により）
 
 ## 使用例
 
@@ -333,7 +327,7 @@ water-controller-app/
         └── logger.ts          # レンダラープロセス用ロガー実装
 
 # ログファイルは electron-log のデフォルトパスに出力（app.getPath('logs')）
-# macOS の場合: ~/Library/Logs/WaterController/*.log
+# macOS の場合: ~/Library/Logs/water-controller-app/main.log
 ```
 
 ## 環境変数

@@ -159,6 +159,28 @@ export function DebugOverlay({
           <span className="error-text">WebSocket connection lost. Reconnecting...</span>
         </div>
       )}
+
+      {/* キーボードショートカット一覧 */}
+      <div className="keyboard-shortcuts">
+        <div className="shortcuts-title">Keyboard Shortcuts</div>
+        <div className="shortcuts-list">
+          <div className="shortcut-item">
+            <kbd>⌘</kbd>+<kbd>M</kbd> 設定画面を開く
+          </div>
+          <div className="shortcut-item">
+            <kbd>⌘</kbd>+<kbd>R</kbd> ページをリロード
+          </div>
+          <div className="shortcut-item">
+            <kbd>⌘</kbd>+<kbd>D</kbd> デバッグモードをオン・オフ
+          </div>
+          <div className="shortcut-item">
+            <kbd>⌘</kbd>+<kbd>I</kbd> DevTools を開く
+          </div>
+          <div className="shortcut-item">
+            <kbd>⌘</kbd>+<kbd>Q</kbd> アプリケーションを終了
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

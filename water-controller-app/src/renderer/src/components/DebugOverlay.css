@@ -177,3 +177,52 @@
 .error-text {
   color: #f87171;
 }
+
+/* キーボードショートカット一覧 */
+.keyboard-shortcuts {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px 28px;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.6;
+  min-width: 340px;
+}
+
+.shortcuts-title {
+  font-weight: 700;
+  margin-bottom: 16px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+}
+
+.shortcut-item kbd {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}

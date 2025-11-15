@@ -34,6 +34,18 @@
 
 - TypeScript/React は Prettier（2 スペース）と eslint.config.mjs のルールに従い、コンポーネントは PascalCase、hooks/ユーティリティは camelCase。`src/renderer/components/SamplePanel.tsx` のように用途を示すサフィックスを付けます。
 
+#### 型安全性の指針
+
+- **`as any` 型キャストは原則禁止**: 型安全性を損なうため、不用意な使用は避けること。保守性が著しく低下します。
+- **外部ライブラリの型定義との整合性**: 型エラーが発生した場合、まずライブラリの型定義を確認し、適切な型変換関数を実装すること。
+  - 例: `electron-log` の `LogLevel` 型（`'error' | 'warn' | 'info' | 'verbose' | 'debug' | 'silly'`）に合わせて環境変数を変換する関数を実装
+- **型変換は明示的に**: 環境変数などの文字列を特定の型に変換する場合、switch 文や型ガード関数を使用して明示的に変換すること。
+- **型アサーションの代替手段**:
+  - インターフェースの拡張（declaration merging）
+  - 型ガード関数の実装
+  - ユーティリティ型（`Partial<T>`, `Pick<T, K>` など）の活用
+- **やむを得ず型キャストが必要な場合**: コメントで理由を明記し、将来の改善点として TODO コメントを残すこと。
+
 ### water-controller-relay (Rust)
 
 [Rust 開発ガイドライン](./docs/documentations/rust-development-guidelines.md)を参照してください。
@@ -47,6 +59,7 @@
 ### water-controller-app (TypeScript)
 
 - デスクトップアプリは自動テスト未整備のため、`pnpm dev` 実行中に WebSocket 受信、描画、サウンドなど主要シーンを手動確認し、再現手順を PR に記録します。
+- テスト駆動開発（TDD）については、[t_wada による Kent Beck の TDD 本の解説](https://t-wada.hatenablog.jp/entry/canon-tdd-by-kent-beck) を参考にしてください。
 
 ### water-controller-relay (Rust)
 

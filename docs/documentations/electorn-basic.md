@@ -532,7 +532,10 @@ const mainWindow = new BrowserWindow({
 - **`contextIsolation: true`**: Renderer と Preload のコンテキストを分離
 - **`preload`**: 安全な API のみを公開する Preload スクリプトを指定
 
-**詳細**: これらの設定の詳細な説明とセキュリティのベストプラクティスについては、[BrowserWindow の設定とセキュリティ](../notes/electron-BrowserWindow.md) を参照してください。
+**詳細**:
+
+- これらの設定の詳細な説明とセキュリティのベストプラクティスについては、[BrowserWindow の設定とセキュリティ](../notes/electron-BrowserWindow.md) を参照してください
+- `contextIsolation` について詳しく知りたい場合は、[contextIsolation（コンテキスト分離）](../notes/electron-context-isolation.md) を参照してください
 
 #### Preload スクリプトの役割
 
@@ -1078,6 +1081,7 @@ app.on('ready', () => {
 ### プロジェクト内の関連ドキュメント
 
 - [BrowserWindow の設定とセキュリティ](../notes/electron-BrowserWindow.md) - `nodeIntegration`とセキュリティのベストプラクティス
+- [contextIsolation（コンテキスト分離）](../notes/electron-context-isolation.md) - `contextIsolation`の詳細な説明
 
 ### プロジェクト内の関連ファイル
 

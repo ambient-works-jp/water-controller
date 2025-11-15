@@ -5,6 +5,7 @@
 このドキュメントでは、Electronの`BrowserWindow`における重要な設定、特に`nodeIntegration`とセキュリティ設定について説明します。
 
 **関連ドキュメント**：
+
 - [Electron 基礎ガイド for React 開発者](../documentations/electorn-basic.md)
 - [BrowserWindow 公式ドキュメント](https://www.electronjs.org/ja/docs/latest/api/browser-window)
 - [セキュリティガイド（公式）](https://www.electronjs.org/ja/docs/latest/tutorial/security)
@@ -33,8 +34,9 @@ function App() {
 }
 ```
 
-**エラー例**：
-```
+**エラー例**:
+
+```txt
 Uncaught ReferenceError: require is not defined
 ```
 
@@ -99,7 +101,10 @@ console.log(result)  // 'pong'
 | **Preload スクリプト** | ✅ 使える | ✅ 使える | 特権的な立場。Node.js APIにもアクセス可能 |
 | **Main プロセス** | ✅ 使える | ✅ 使える | Node.js環境 |
 
+**詳細**: `contextIsolation` がどのように動作するかについては、[contextIsolation（コンテキスト分離）](./electron-context-isolation.md) を参照してください。
+
 **ポイント**：
+
 - **Renderer プロセス自体**は Node.js API を直接使えない（`nodeIntegration: false`）
 - しかし**Preload スクリプト**は Node.js API にアクセスできる
 - Preload が `ipcRenderer` を使って Main プロセスと通信する
@@ -279,6 +284,7 @@ const mainWindow = new BrowserWindow({
 ```
 
 この設定により：
+
 - ✅ Renderer プロセスで Node.js API は直接使えない
 - ✅ IPC 通信は問題なく使える
 - ✅ Preload スクリプトで安全な API のみを公開
@@ -296,6 +302,7 @@ const mainWindow = new BrowserWindow({
 | **ベストプラクティス** | ✅ 推奨 | ❌ 避けるべき |
 
 **結論**：
+
 - `nodeIntegration: false` でも、**IPC は問題なく使えます**
 - `nodeIntegration: false` + `contextIsolation: true` + Preload + IPC の組み合わせが**セキュリティのベストプラクティス**
 - デフォルトのping/pongが動いたのは、Preload スクリプトが `ipcRenderer` を使っているからです
@@ -313,9 +320,13 @@ const mainWindow = new BrowserWindow({
 - [Preload スクリプト](https://www.electronjs.org/ja/docs/latest/tutorial/tutorial-preload)
 - [サンドボックス](https://www.electronjs.org/ja/docs/latest/tutorial/sandbox)
 
-### プロジェクト内の関連ファイル
+### プロジェクト内の関連ドキュメント
 
 - [Electron 基礎ガイド](../documentations/electorn-basic.md)
+- [contextIsolation（コンテキスト分離）](./electron-context-isolation.md) - `contextIsolation` の詳細な説明
+
+### プロジェクト内の関連ファイル
+
 - `water-controller-app/src/main/index.ts` - Main プロセスの実装
 - `water-controller-app/src/preload/index.ts` - Preload スクリプトの実装
 - `water-controller-app/src/renderer/src/App.tsx` - React のルートコンポーネント

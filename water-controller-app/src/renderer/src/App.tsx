@@ -84,15 +84,25 @@ function App(): React.JSX.Element {
   }, [status])
 
   // debugMode 変更時に設定を保存
+  const configRef = useRef<Config | null>(config)
+
+  // config が変更されたら ref を更新
+  useEffect(() => {
+    configRef.current = config
+  }, [config])
+
   useEffect(() => {
     // 初回ロード時はスキップ
-    if (isInitialLoad || config === null) {
+    if (isInitialLoad) {
       return
     }
 
     const saveDebugMode = async (): Promise<void> => {
+      const currentConfig = configRef.current
+      if (!currentConfig) return
+
       const updatedConfig: Config = {
-        ...config,
+        ...currentConfig,
         debugMode
       }
 

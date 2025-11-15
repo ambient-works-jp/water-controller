@@ -103,6 +103,19 @@ export function DebugOverlay({
     }
   }
 
+  const getInputLevelClass = (level: InputLevel): string => {
+    switch (level) {
+      case 0:
+        return ''
+      case 1:
+        return 'active-low'
+      case 2:
+        return 'active-high'
+      default:
+        return ''
+    }
+  }
+
   return (
     <div className="debug-overlay">
       {/* 左下: 全体コンテナ */}
@@ -126,12 +139,12 @@ export function DebugOverlay({
           {/* 十字キー（十字配置） + 中央にボタン */}
           <div className="controller-dpad">
             <div className="dpad-spacer" />
-            <div className={`dpad-button ${controllerState.up > 0 ? 'active' : ''}`}>
+            <div className={`dpad-button ${getInputLevelClass(controllerState.up)}`}>
               ↑<span className="input-level">{getInputLevelLabel(controllerState.up)}</span>
             </div>
             <div className="dpad-spacer" />
 
-            <div className={`dpad-button ${controllerState.left > 0 ? 'active' : ''}`}>
+            <div className={`dpad-button ${getInputLevelClass(controllerState.left)}`}>
               ←<span className="input-level">{getInputLevelLabel(controllerState.left)}</span>
             </div>
             {/* 中央にボタン */}
@@ -139,12 +152,12 @@ export function DebugOverlay({
               <span className="button-label">Button</span>
               <span className="button-state">{buttonState ? 'PUSHED' : 'RELEASED'}</span>
             </div>
-            <div className={`dpad-button ${controllerState.right > 0 ? 'active' : ''}`}>
+            <div className={`dpad-button ${getInputLevelClass(controllerState.right)}`}>
               →<span className="input-level">{getInputLevelLabel(controllerState.right)}</span>
             </div>
 
             <div className="dpad-spacer" />
-            <div className={`dpad-button ${controllerState.down > 0 ? 'active' : ''}`}>
+            <div className={`dpad-button ${getInputLevelClass(controllerState.down)}`}>
               ↓<span className="input-level">{getInputLevelLabel(controllerState.down)}</span>
             </div>
             <div className="dpad-spacer" />

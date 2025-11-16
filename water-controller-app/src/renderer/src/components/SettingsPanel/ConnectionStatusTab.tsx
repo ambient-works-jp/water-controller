@@ -1,18 +1,14 @@
+import { useState } from 'react'
 import type { ConnectionStatus } from '../../../../lib/types/websocket'
+
+// 接続テストの結果が表示されてからフェードアウトするまでの遅延時間
+const CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS = 10000
 
 interface ConnectionStatusTabProps {
   /** WebSocket 接続状態 */
   wsStatus: ConnectionStatus
   /** WebSocket URL */
   wsUrl: string
-  /** 接続テストの結果 */
-  connectionTestResult: string
-  /** 接続テスト実行中フラグ */
-  isTestingConnection: boolean
-  /** フェードアウト中フラグ */
-  isResultFadingOut: boolean
-  /** 接続テスト実行 */
-  onTestConnection: () => Promise<void>
 }
 
 /**
@@ -22,35 +18,89 @@ interface ConnectionStatusTabProps {
  */
 export function ConnectionStatusTab({
   wsStatus,
-  wsUrl,
-  connectionTestResult,
-  isTestingConnection,
-  isResultFadingOut,
-  onTestConnection
+  wsUrl
 }: ConnectionStatusTabProps): React.JSX.Element {
+  const [connectionTestResult, setConnectionTestResult] = useState<string>('')
+  const [isTestingConnection, setIsTestingConnection] = useState(false)
+  const [isResultFadingOut, setIsResultFadingOut] = useState(false)
+
+  // 接続テスト結果をクリア
+  const handleClearTestResult = (): void => {
+    setIsResultFadingOut(true)
+    setTimeout(() => {
+      setConnectionTestResult('')
+      setIsResultFadingOut(false)
+    }, 300)
+  }
+
+  // WebSocket 接続テスト
+  const handleTestConnection = async (): Promise<void> => {
+    setIsTestingConnection(true)
+    setConnectionTestResult('')
+    setIsResultFadingOut(false)
+
+    const fadeOutAndClear = () => {
+      setIsResultFadingOut(true)
+      setTimeout(() => {
+        setConnectionTestResult('')
+        setIsResultFadingOut(false)
+      }, 300)
+    }
+
+    try {
+      const testWs = new WebSocket(wsUrl)
+      let isSuccess = false
+
+      const timeout = setTimeout(() => {
+        if (!isSuccess) {
+          testWs.close(1000, 'Test timeout')
+          setConnectionTestResult('❌ 接続テスト失敗: タイムアウト（10秒）')
+          setIsTestingConnection(false)
+          setTimeout(fadeOutAndClear, CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS)
+        }
+      }, 10000)
+
+      testWs.onopen = () => {
+        clearTimeout(timeout)
+        isSuccess = true
+        setConnectionTestResult('✅ 接続テスト成功: 101 Switching Protocols')
+        setIsTestingConnection(false)
+        setTimeout(fadeOutAndClear, CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS)
+        setTimeout(() => {
+          testWs.close(1000, 'Connection test successful')
+        }, 100)
+      }
+
+      testWs.onerror = (error) => {
+        if (!isSuccess) {
+          clearTimeout(timeout)
+          console.error('WebSocket test error:', error)
+          setConnectionTestResult('❌ 接続テスト失敗: エラーが発生しました')
+          setIsTestingConnection(false)
+          setTimeout(fadeOutAndClear, CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS)
+        }
+      }
+
+      testWs.onclose = (event) => {
+        if (!isSuccess) {
+          clearTimeout(timeout)
+          setConnectionTestResult(
+            `❌ 接続テスト失敗: 接続が閉じられました (code: ${event.code}, reason: ${event.reason || '不明'})`
+          )
+          setIsTestingConnection(false)
+          setTimeout(fadeOutAndClear, CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS)
+        }
+      }
+    } catch (error) {
+      console.error('Connection test failed:', error)
+      setConnectionTestResult('❌ 接続テスト失敗: 例外が発生しました')
+      setIsTestingConnection(false)
+      setTimeout(fadeOutAndClear, CONNECTION_TEST_RESULT_FADE_OUT_DELAY_MS)
+    }
+  }
+
   return (
     <div className="max-w-xl">
-      <div className="flex gap-3 pb-4">
-        <button className="btn btn-primary" onClick={() => window.location.reload()}>
-          再接続
-        </button>
-        <button
-          className={`btn btn-secondary ${isTestingConnection ? 'loading' : ''}`}
-          onClick={onTestConnection}
-          disabled={isTestingConnection}
-        >
-          {isTestingConnection ? '接続テスト中...' : '接続テスト'}
-        </button>
-      </div>
-
-      {connectionTestResult && (
-        <div
-          className={`alert ${connectionTestResult.startsWith('✅') ? 'alert-success' : 'alert-error'} text-lg py-4 ${isResultFadingOut ? 'alert-fade-out' : 'alert-fade-in'}`}
-        >
-          <span>{connectionTestResult}</span>
-        </div>
-      )}
-
       <div className="card bg-base-200">
         <div className="card-body">
           <div className="flex justify-between text-lg">
@@ -87,6 +137,34 @@ export function ConnectionStatusTab({
           </div>
         </div>
       </div>
+
+      <div className="flex gap-3 py-4">
+        <button className="btn btn-primary" onClick={() => window.location.reload()}>
+          再接続
+        </button>
+        <button
+          className={`btn btn-secondary ${isTestingConnection ? 'loading' : ''}`}
+          onClick={handleTestConnection}
+          disabled={isTestingConnection}
+        >
+          {isTestingConnection ? '接続テスト中...' : '接続テスト'}
+        </button>
+      </div>
+
+      {connectionTestResult && (
+        <div
+          className={`alert ${connectionTestResult.startsWith('✅') ? 'alert-success' : 'alert-error'} text-lg py-4 ${isResultFadingOut ? 'alert-fade-out' : 'alert-fade-in'}`}
+        >
+          <span>{connectionTestResult}</span>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={handleClearTestResult}
+            aria-label="閉じる"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   )
 }

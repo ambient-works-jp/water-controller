@@ -51,7 +51,7 @@ export type RendererApi = {
     getVersions: () => Promise<EnvironmentVersions>
     loadConfig: () => Promise<LoadConfigResponse>
     saveConfig: (config: Config) => Promise<SaveConfigResponse>
-    loadLog: () => Promise<LoadLogResponse>
+    loadLog: (tailLines?: number) => Promise<LoadLogResponse>
     toggleDevTools: () => Promise<void>
     quitApp: () => Promise<void>
   }

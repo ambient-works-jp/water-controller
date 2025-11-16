@@ -76,7 +76,10 @@ class IpcHandlers {
   /**
    * ログファイル読み込みハンドラ
    */
-  static handleLoadLog(): {
+  static handleLoadLog(
+    _event: Electron.IpcMainInvokeEvent,
+    tailLines?: number
+  ): {
     success: boolean
     logPath: string
     content: string
@@ -86,7 +89,7 @@ class IpcHandlers {
     const logsDir = app.getPath('logs')
     const logPath = path.join(logsDir, 'main.log')
 
-    logger.info('Getting log file info:', { logsDir, logPath })
+    logger.info('Getting log file info:', { logsDir, logPath, tailLines })
 
     try {
       // ログディレクトリの存在確認
@@ -115,8 +118,30 @@ class IpcHandlers {
         }
       }
 
-      const content = fs.readFileSync(logPath, 'utf-8')
-      logger.info('Log file read successfully, size:', content.length)
+      const fullContent = fs.readFileSync(logPath, 'utf-8')
+      logger.info('Log file read successfully, size:', fullContent.length)
+
+      // tailLines が指定されている場合は末尾から指定行数を取得
+      let content = fullContent
+      if (tailLines !== undefined) {
+        // tailLines が 0 の場合は空文字列を返す
+        if (tailLines === 0) {
+          content = ''
+          logger.info('Log file tail: 0 lines requested, returning empty string')
+        } else if (tailLines > 0) {
+          // 正の数の場合は末尾から指定行数を取得
+          const lines = fullContent.split('\n')
+          const startIndex = Math.max(0, lines.length - tailLines)
+          content = lines.slice(startIndex).join('\n')
+          logger.info('Log file tail extracted:', {
+            totalLines: lines.length,
+            tailLines,
+            startIndex,
+            actualLines: lines.length - startIndex
+          })
+        }
+        // tailLines が負の数の場合は全文を返す（undefined と同じ扱い）
+      }
 
       return {
         success: true,

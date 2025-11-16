@@ -25,7 +25,8 @@ const api: RendererApi = {
       ipcRenderer.invoke(IpcChannelNames.loadConfig) as Promise<LoadConfigResponse>,
     saveConfig: async (config: Config) =>
       ipcRenderer.invoke(IpcChannelNames.saveConfig, config) as Promise<SaveConfigResponse>,
-    loadLog: async () => ipcRenderer.invoke(IpcChannelNames.loadLog) as Promise<LoadLogResponse>,
+    loadLog: async (tailLines?: number) =>
+      ipcRenderer.invoke(IpcChannelNames.loadLog, tailLines) as Promise<LoadLogResponse>,
     toggleDevTools: async () => ipcRenderer.invoke(IpcChannelNames.toggleDevTools) as Promise<void>,
     quitApp: async () => ipcRenderer.invoke(IpcChannelNames.quitApp) as Promise<void>
   }

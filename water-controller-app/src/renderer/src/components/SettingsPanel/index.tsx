@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Config } from '../../../../lib/types/config'
 import type { ConnectionStatus } from '../../../../lib/types/websocket'
+import { MAX_LOG_TAIL_LINES } from '../constants'
 import { SettingsTab } from './SettingsTab'
 import { ConnectionStatusTab } from './ConnectionStatusTab'
 import { LogsTab } from './LogsTab'
@@ -78,9 +79,10 @@ export function SettingsPanel({
   }
 
   // ログファイルの読み込み
-  const handleLoadLogs = async (): Promise<void> => {
+  // useCallback
+  const handleLoadLogs = useCallback(async (): Promise<void> => {
     try {
-      const response = await window.api.ipc.loadLog()
+      const response = await window.api.ipc.loadLog(MAX_LOG_TAIL_LINES)
       setLogPath(response.logPath)
       setLogContent(response.content || 'ログファイルが空です')
 
@@ -91,7 +93,7 @@ export function SettingsPanel({
       console.error('Failed to load log:', error)
       setErrorMessage('ログファイルの読み込みに失敗しました')
     }
-  }
+  }, [])
 
   // WebSocket 接続テスト
   const handleTestConnection = async (): Promise<void> => {
@@ -221,7 +223,6 @@ export function SettingsPanel({
             className={`tab tab-lg text-lg ${activeTab === 'logs' ? 'tab-active text-primary border-primary' : ''}`}
             onClick={() => {
               setActiveTab('logs')
-              handleLoadLogs()
             }}
           >
             ログ
@@ -259,7 +260,7 @@ export function SettingsPanel({
           )}
 
           {activeTab === 'logs' && (
-            <LogsTab logPath={logPath} logContent={logContent} onLoadLogs={handleLoadLogs} />
+            <LogsTab logPath={logPath} logContent={logContent} loadLogFunction={handleLoadLogs} />
           )}
 
           {activeTab === 'help' && <HelpTab />}

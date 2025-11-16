@@ -30,7 +30,7 @@ export function ConnectionStatusTab({
 }: ConnectionStatusTabProps): React.JSX.Element {
   return (
     <div className="max-w-xl">
-      <div className="flex gap-2 pb-4">
+      <div className="flex gap-3 pb-4">
         <button className="btn btn-primary" onClick={() => window.location.reload()}>
           再接続
         </button>
@@ -52,32 +52,38 @@ export function ConnectionStatusTab({
       )}
 
       <div className="card bg-base-200">
-        <div className="card-body p-6">
-          <div className="space-y-4">
-            <div className="flex justify-between text-lg">
-              <span className="opacity-70">URL:</span>
-              <code className="font-mono text-base">{wsUrl}</code>
-            </div>
-            <div className="flex justify-between text-lg">
-              <span className="opacity-70">プロトコル:</span>
-              <span>WebSocket</span>
-            </div>
-            <div className="flex justify-between text-lg">
-              <span className="opacity-70">ホスト:</span>
-              <code className="font-mono text-base">{new URL(wsUrl).hostname}</code>
-            </div>
-            <div className="flex justify-between text-lg">
-              <span className="opacity-70">ポート:</span>
-              <code className="font-mono text-base">{new URL(wsUrl).port}</code>
-            </div>
-            <div className="flex justify-between items-center text-lg">
-              <span className="opacity-70">接続状態:</span>
-              <span
-                className={`badge ${wsStatus === 'connected' ? 'badge-success' : 'badge-error'}`}
-              >
-                {wsStatus.toUpperCase()}
-              </span>
-            </div>
+        <div className="card-body">
+          <div className="flex justify-between text-lg">
+            <span className="opacity-70">URL:</span>
+            <code className="font-mono text-base">{wsUrl}</code>
+          </div>
+          <div className="flex justify-between text-lg">
+            <span className="opacity-70">プロトコル:</span>
+            <span>WebSocket</span>
+          </div>
+          <div className="flex justify-between text-lg">
+            <span className="opacity-70">ホスト:</span>
+            <code className="font-mono text-base">{new URL(wsUrl).hostname}</code>
+          </div>
+          <div className="flex justify-between text-lg">
+            <span className="opacity-70">ポート:</span>
+            <code className="font-mono text-base">{new URL(wsUrl).port}</code>
+          </div>
+          <div className="flex justify-between items-center text-lg">
+            <span className="opacity-70">接続状態:</span>
+            <span
+              className="badge"
+              style={{
+                backgroundColor:
+                  wsStatus === 'connected' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.2)',
+                borderColor: wsStatus === 'connected' ? '#4ade80' : '#f87171',
+                color: wsStatus === 'connected' ? '#4ade80' : '#f87171',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+              }}
+            >
+              {wsStatus.toUpperCase()}
+            </span>
           </div>
         </div>
       </div>

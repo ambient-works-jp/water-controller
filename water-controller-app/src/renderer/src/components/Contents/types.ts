@@ -2,7 +2,17 @@
  * コンテンツの型定義
  */
 
-import type { ContentItem } from '../../../../lib/types/config'
+/**
+ * コンテンツのメタデータ
+ */
+export interface ContentMetadata {
+  /** コンテンツの一意な ID */
+  id: string
+  /** コンテンツの表示名 */
+  name: string
+  /** コンテンツの説明 */
+  description: string
+}
 
 /**
  * Canvas 2D コンテキストを使用するコンテンツの描画関数
@@ -23,8 +33,8 @@ export type ContentRenderer = (
  * コンテンツの定義
  */
 export interface Content {
-  /** メタデータ (Config の ContentItem と互換) */
-  metadata: ContentItem
+  /** メタデータ */
+  metadata: ContentMetadata
   /** 描画関数 */
   render: ContentRenderer
 }

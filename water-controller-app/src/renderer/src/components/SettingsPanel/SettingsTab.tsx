@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import type { Config } from '../../../../lib/types/config'
 import { ErrorDialog } from '../ErrorDialog'
 import { errorDialogId } from '../constants'
+import { PLAYLIST } from '../Contents/playlist'
+import { CONTENTS } from '../Contents'
 
 interface SettingsTabProps {
   /** 設定データ */
@@ -27,111 +30,168 @@ export function SettingsTab({
   onReloadConfig,
   onDebugModeChange
 }: SettingsTabProps): React.JSX.Element {
+  const [contentTab, setContentTab] = useState<'playlist' | 'all'>('playlist')
+
   return (
     <>
-      <div className="space-y-6 max-w-4xl">
-        {/* 設定ファイルセクション */}
-        <h2 className="text-xl font-bold pb-3">アプリ設定</h2>
-        <p className="text-base opacity-70 pb-3">
-          設定ファイルは{' '}
-          <code className="bg-base-300 px-2 py-0.5 rounded text-base">
-            $HOME/.water-controller-app/config.json
-          </code>{' '}
-          に保存されています。
-          <br />
-          変更したい場合、テキストエディタで編集後、「設定を再読み込み」ボタンを押してください。
-        </p>
-        <div className="card bg-base-200">
-          <div className="card-body p-5">
-            <div className="mb-3">
-              <button
-                className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
-                onClick={onReloadConfig}
-                disabled={isLoading}
-              >
-                {isLoading ? '読み込み中...' : '設定を再読み込み'}
-              </button>
+      <div className="flex gap-6 w-full">
+        {/* 左カラム: アプリ設定 & 開発用機能 */}
+        <div className="flex flex-col gap-6" style={{ width: '40%' }}>
+          {/* アプリ設定 */}
+          <div>
+            <h2 className="text-xl font-bold pb-2">アプリ設定</h2>
+            {/* 設定ファイルの説明 */}
+            <div className="text-sm opacity-60 pb-2">
+              <p>
+                設定ファイルは{' '}
+                <code className="bg-base-300 px-1.5 py-0.5 rounded">
+                  $HOME/.water-controller-app/config.json
+                </code>{' '}
+                に保存されています。
+              </p>
             </div>
 
-            {config && (
-              // flex で gap を使いたい
-              <div className="flex flex-col gap-2">
-                <div>
-                  <h4 className="text-lg font-bold pb-1">WebSocket 接続先</h4>
-                  <div className="text-base">
-                    <code className="block bg-base-300 px-3 py-2 rounded font-mono">
-                      {config.wsUrl}
-                    </code>
-                  </div>
+            <div className="card bg-base-200">
+              <div className="card-body p-5">
+                <div className="mb-4">
+                  <button
+                    className={`btn btn-primary btn-sm ${isLoading ? 'loading' : ''}`}
+                    onClick={onReloadConfig}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? '読み込み中...' : '設定を再読み込み'}
+                  </button>
                 </div>
 
-                <div>
-                  <h4 className="text-lg font-bold pb-1">コンテンツ一覧</h4>
-                  <div>
-                    {config.contents.length === 0 ? (
-                      <p className="text-base opacity-60 italic">コンテンツが登録されていません</p>
-                    ) : (
-                      <ul className="space-y-1.5">
-                        {config.contents.map((item) => (
-                          <li
-                            key={item.id}
-                            className={`flex items-center gap-2.5 p-2.5 rounded-lg ${
-                              item.enabled ? 'bg-base-300' : 'bg-base-300/50 opacity-50'
-                            }`}
-                          >
-                            <span className="badge badge-neutral">#{item.order}</span>
-                            <span className="flex-1 text-lg">{item.name}</span>
-                            <span
-                              className={`badge ${item.enabled ? 'badge-success' : 'badge-error'}`}
-                            >
-                              {item.enabled ? '有効' : '無効'}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                {config && (
+                  <div className="space-y-4">
+                    {/* WebSocket 接続先 URL */}
+                    <div>
+                      <h4 className="text-base font-bold pb-1">WebSocket 接続先 URL</h4>
+                      <div className="text-sm">
+                        <code className="block bg-base-300 px-3 py-2 rounded font-mono text-sm">
+                          {config.wsUrl}
+                        </code>
+                      </div>
+                    </div>
+
+                    {/* デバッグモード */}
+                    <div>
+                      <h4 className="text-base font-bold pb-1">デバッグモード</h4>
+                      <div className="form-control">
+                        <label className="label cursor-pointer justify-start gap-3 py-1">
+                          <input
+                            type="checkbox"
+                            checked={debugMode}
+                            onChange={(e) => onDebugModeChange(e.target.checked)}
+                            className="checkbox checkbox-primary checkbox-sm"
+                          />
+                          <div className="flex-1">
+                            <span className="label-text text-sm">デバッグオーバーレイを表示</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
                   </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 開発用機能 */}
+          <div>
+            <h2 className="text-xl font-bold pb-3">開発用機能</h2>
+            <div className="card bg-base-200">
+              <div className="card-body p-5">
+                <div>
+                  <h4 className="text-base font-bold pb-2">エラーダイアログのテスト</h4>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() =>
+                      (document.getElementById(errorDialogId) as HTMLDialogElement).showModal()
+                    }
+                  >
+                    エラーダイアログを表示
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
-        {/* 開発用セクション */}
-        <h2 className="text-xl font-bold py-3">開発用オプション</h2>
-        <div className="card bg-base-200">
-          <div className="card-body p-5 space-y-4">
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-3 py-2">
-                <input
-                  type="checkbox"
-                  checked={debugMode}
-                  onChange={(e) => onDebugModeChange(e.target.checked)}
-                  className="checkbox checkbox-primary"
-                />
-                <div className="flex-1">
-                  <span className="label-text font-medium text-lg">デバッグモード</span>
-                  <p className="text-base opacity-60 mt-0.5">
-                    デバッグオーバーレイ（接続状態、FPS、コントローラ入力）を表示します
-                    <br />
-                    ショートカット: <kbd className="kbd">Cmd</kbd> + <kbd className="kbd">D</kbd>
-                  </p>
-                </div>
-              </label>
+        {/* 右カラム: コンテンツ */}
+        <div className="flex flex-col gap-6" style={{ width: '40%' }}>
+          <div>
+            <h2 className="text-xl font-bold pb-2">コンテンツ</h2>
+            {/* 設定ファイルの説明 */}
+            <div className="text-sm opacity-60 pb-2">
+              <p>
+                「プレイリスト」を設定することでどのコンテンツを順番に再生するかを指定できます。
+              </p>
             </div>
 
-            <div className="divider my-2"></div>
+            <div className="card bg-base-200">
+              <div className="card-body p-5">
+                {/* タブ */}
+                <div role="tablist" className="tabs tabs-boxed mb-4">
+                  <button
+                    role="tab"
+                    className={`tab ${contentTab === 'playlist' ? 'tab-active' : ''}`}
+                    onClick={() => setContentTab('playlist')}
+                  >
+                    プレイリスト
+                  </button>
+                  <button
+                    role="tab"
+                    className={`tab ${contentTab === 'all' ? 'tab-active' : ''}`}
+                    onClick={() => setContentTab('all')}
+                  >
+                    コンテンツ一覧
+                  </button>
+                </div>
 
-            <div>
-              <h4 className="text-lg font-bold pb-2">テスト機能</h4>
-              <button
-                className="btn btn-warning"
-                onClick={() =>
-                  (document.getElementById(errorDialogId) as HTMLDialogElement).showModal()
-                }
-              >
-                エラーダイアログのテスト
-              </button>
+                {/* タブコンテンツ */}
+                {contentTab === 'playlist' ? (
+                  // プレイリストタブ
+                  PLAYLIST.length === 0 ? (
+                    <p className="text-sm opacity-60 italic">コンテンツが登録されていません</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {PLAYLIST.map((content, idx) => (
+                        <div
+                          key={content.metadata.id}
+                          className="p-3 rounded-lg bg-base-300 space-y-1.5"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-neutral badge-sm">#{idx + 1}</span>
+                            <span className="font-bold text-base">{content.metadata.name}</span>
+                          </div>
+                          <div className="text-xs opacity-70 font-mono">{content.metadata.id}</div>
+                          <div className="text-sm opacity-80">{content.metadata.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : // コンテンツ一覧タブ
+                CONTENTS.length === 0 ? (
+                  <p className="text-sm opacity-60 italic">コンテンツが登録されていません</p>
+                ) : (
+                  <div className="space-y-3">
+                    {CONTENTS.map((content) => (
+                      <div
+                        key={content.metadata.id}
+                        className="p-3 rounded-lg bg-base-300 space-y-1.5"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-base">{content.metadata.name}</span>
+                        </div>
+                        <div className="text-xs opacity-70 font-mono">{content.metadata.id}</div>
+                        <div className="text-sm opacity-80">{content.metadata.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

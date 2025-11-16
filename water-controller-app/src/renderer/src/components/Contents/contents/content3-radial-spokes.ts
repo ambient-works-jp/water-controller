@@ -9,8 +9,7 @@ export const radialSpokes: Content = {
   metadata: {
     id: 'radial-spokes',
     name: 'Radial Spokes',
-    enabled: true,
-    order: 2
+    description: '中心から放射状に伸びるスポークのアニメーション'
   },
   render: (ctx, t, vw, vh) => {
     // 背景

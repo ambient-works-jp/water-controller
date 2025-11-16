@@ -16,7 +16,6 @@ const DEFAULT_CONFIG_FILE = path.join(__dirname, '../../config/config.default.js
  */
 const DEFAULT_CONFIG: Config = {
   wsUrl: 'ws://127.0.0.1:8080/ws',
-  contents: [],
   debugMode: false
 }
 
@@ -78,10 +77,6 @@ export function loadConfig():
     // バリデーション
     if (!config.wsUrl || typeof config.wsUrl !== 'string') {
       throw new Error('Invalid config: wsUrl is required and must be a string')
-    }
-
-    if (!Array.isArray(config.contents)) {
-      throw new Error('Invalid config: contents must be an array')
     }
 
     if (typeof config.debugMode !== 'boolean') {
@@ -160,10 +155,6 @@ export function saveConfig(
     // バリデーション
     if (!config.wsUrl || typeof config.wsUrl !== 'string') {
       throw new Error('Invalid config: wsUrl is required and must be a string')
-    }
-
-    if (!Array.isArray(config.contents)) {
-      throw new Error('Invalid config: contents must be an array')
     }
 
     if (typeof config.debugMode !== 'boolean') {

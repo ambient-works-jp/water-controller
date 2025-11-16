@@ -9,8 +9,7 @@ export const waveLines: Content = {
   metadata: {
     id: 'wave-lines',
     name: 'Wave Lines',
-    enabled: true,
-    order: 1
+    description: '複数の波線が重なり合うアニメーション'
   },
   render: (ctx, t, vw, vh) => {
     // 背景

@@ -9,8 +9,7 @@ export const circularParticles: Content = {
   metadata: {
     id: 'circular-particles',
     name: 'Circular Particles',
-    enabled: true,
-    order: 0
+    description: '円周上を回転しながら移動するパーティクルのアニメーション'
   },
   render: (ctx, t, vw, vh) => {
     // 背景

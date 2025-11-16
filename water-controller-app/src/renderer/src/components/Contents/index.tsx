@@ -8,14 +8,12 @@ import type { WsMessage } from '../../../../lib/types/websocket'
  */
 
 import type { Content } from './types'
-import { circularParticles } from './contents/content1-circular-particles'
-import { waveLines } from './contents/content2-wave-lines'
-import { radialSpokes } from './contents/content3-radial-spokes'
+import { PLAYLIST } from './playlist'
 
 /**
  * 利用可能なすべてのコンテンツ
  */
-export const CONTENTS: Content[] = [circularParticles, waveLines, radialSpokes]
+export const CONTENTS: Content[] = PLAYLIST
 
 /**
  * コンテンツの総数

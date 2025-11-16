@@ -13,14 +13,6 @@
   --pc: 0 0% 100%; /* primary-content: 白 */
 }
 
-/* アクティブなタブに primary color を適用 */
-.tab-active {
-  color: hsl(var(--p)) !important;
-  border-color: hsl(var(--p)) !important;
-  border-bottom-width: 2px !important;
-  border-bottom-style: solid !important;
-}
-
 /* 接続テスト結果のフェードイン・フェードアウト */
 @keyframes alertFadeIn {
   from {

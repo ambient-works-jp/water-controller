@@ -7,6 +7,27 @@ import { ConnectionStatusTab } from './ConnectionStatusTab'
 import { LogsTab } from './LogsTab'
 import { HelpTab } from './HelpTab'
 
+interface TabButtonProps {
+  tab: TabType
+  label: string
+  activeTab: TabType
+  onClick: () => void
+}
+
+function TabButton({ tab, label, activeTab, onClick }: TabButtonProps): React.JSX.Element {
+  const isActive = activeTab === tab
+
+  return (
+    <button
+      role="tab"
+      className={`tab ${isActive ? 'text-primary font-bold border-primary border-b-2 border-solid' : ''}`}
+      onClick={onClick}
+    >
+      <span className="text-lg">{label}</span>
+    </button>
+  )
+}
+
 interface SettingsPanelProps {
   /** WebSocket 接続状態 */
   wsStatus: ConnectionStatus
@@ -124,36 +145,34 @@ export function SettingsPanel({
 
         {/* タブ */}
         <div role="tablist" className="tabs tabs-bordered px-8 pt-2">
-          <button
-            role="tab"
-            className={`tab tab-lg text-lg ${activeTab === 'settings' ? 'tab-active text-primary border-primary' : ''}`}
+          <TabButton
+            key="settings"
+            tab="settings"
+            label="設定"
+            activeTab={activeTab}
             onClick={() => setActiveTab('settings')}
-          >
-            設定
-          </button>
-          <button
-            role="tab"
-            className={`tab tab-lg text-lg ${activeTab === 'connection' ? 'tab-active text-primary border-primary' : ''}`}
+          />
+          <TabButton
+            key="connection"
+            tab="connection"
+            label="接続状態"
+            activeTab={activeTab}
             onClick={() => setActiveTab('connection')}
-          >
-            接続状態
-          </button>
-          <button
-            role="tab"
-            className={`tab tab-lg text-lg ${activeTab === 'logs' ? 'tab-active text-primary border-primary' : ''}`}
-            onClick={() => {
-              setActiveTab('logs')
-            }}
-          >
-            ログ
-          </button>
-          <button
-            role="tab"
-            className={`tab tab-lg text-lg ${activeTab === 'help' ? 'tab-active text-primary border-primary' : ''}`}
+          />
+          <TabButton
+            key="logs"
+            tab="logs"
+            label="ログ"
+            activeTab={activeTab}
+            onClick={() => setActiveTab('logs')}
+          />
+          <TabButton
+            key="help"
+            tab="help"
+            label="ヘルプ"
+            activeTab={activeTab}
             onClick={() => setActiveTab('help')}
-          >
-            ヘルプ
-          </button>
+          />
         </div>
 
         {/* コンテンツ */}

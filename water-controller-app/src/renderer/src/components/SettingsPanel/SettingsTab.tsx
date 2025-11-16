@@ -41,28 +41,25 @@ export function SettingsTab({
           <div>
             <h2 className="text-xl font-bold pb-2">アプリ設定</h2>
             {/* 設定ファイルの説明 */}
-            <div className="text-sm opacity-60 pb-2">
-              <p>
-                設定ファイルは{' '}
-                <code className="bg-base-300 px-1.5 py-0.5 rounded">
-                  $HOME/.water-controller-app/config.json
-                </code>{' '}
-                に保存されています。
-              </p>
+            <div className="flex flex-col gap-2 text-sm pb-3">
+              <div className="opacity-60">
+                <p>
+                  設定ファイルは{' '}
+                  <code className="bg-base-300 px-1.5 py-0.5 rounded">
+                    $HOME/.water-controller-app/config.json
+                  </code>{' '}
+                  に保存されています。
+                </p>
+                <p>
+                  接続先 URL、コンテンツを更新したい場合、テキストエディタで設定ファイルを編集し、
+                  <br />
+                  「設定を再読み込み」ボタンを押してください。
+                </p>
+              </div>
             </div>
 
             <div className="card bg-base-200">
               <div className="card-body p-5">
-                <div className="mb-4">
-                  <button
-                    className={`btn btn-primary btn-sm ${isLoading ? 'loading' : ''}`}
-                    onClick={onReloadConfig}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? '読み込み中...' : '設定を再読み込み'}
-                  </button>
-                </div>
-
                 {config && (
                   <div className="space-y-4">
                     {/* WebSocket 接続先 URL */}
@@ -95,6 +92,17 @@ export function SettingsTab({
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* 設定を再読み込みボタン */}
+            <div className="pt-3">
+              <button
+                className={`btn btn-primary btn-sm ${isLoading ? 'loading' : ''}`}
+                onClick={onReloadConfig}
+                disabled={isLoading}
+              >
+                {isLoading ? '読み込み中...' : '設定を再読み込み'}
+              </button>
             </div>
           </div>
 

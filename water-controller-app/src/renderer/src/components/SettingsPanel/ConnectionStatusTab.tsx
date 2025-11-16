@@ -143,7 +143,7 @@ export function ConnectionStatusTab({
           再接続
         </button>
         <button
-          className={`btn btn-warning ${isTestingConnection ? 'loading' : ''}`}
+          className={`btn btn-primary ${isTestingConnection ? 'loading' : ''}`}
           onClick={handleTestConnection}
           disabled={isTestingConnection}
         >

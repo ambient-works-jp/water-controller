@@ -11,6 +11,8 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
+    "build:css": "tailwindcss -i src/renderer/src/styles/input.css -o src/renderer/public/output.css",
+    "----- build desktop app -----": "",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
@@ -21,8 +23,11 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@tailwindcss/cli": "^4.1.17",
+    "daisyui": "^5.5.5",
     "electron-log": "^5.4.3",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

@@ -8,28 +8,28 @@ const keybindings: Keybinding[] = [
   {
     description: '設定画面を開く',
     key1: 'Cmd',
-    key2: 'M',
+    key2: 'M'
   },
   {
     description: 'ページをリロード',
     key1: 'Cmd',
-    key2: 'R',
+    key2: 'R'
   },
   {
     description: 'デバッグモードをオン・オフ',
     key1: 'Cmd',
-    key2: 'D',
+    key2: 'D'
   },
   {
     description: 'DevTools を開く',
     key1: 'Cmd',
-    key2: 'I',
+    key2: 'I'
   },
   {
     description: 'アプリケーションを終了',
     key1: 'Cmd',
-    key2: 'Q',
-  },
+    key2: 'Q'
+  }
 ]
 
 /**

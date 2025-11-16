@@ -32,7 +32,10 @@ export type KeyboardShortcut = {
  * ], [])
  * ```
  */
-export function useKeyboardShortcut(shortcuts: KeyboardShortcut[], deps: React.DependencyList): void {
+export function useKeyboardShortcut(
+  shortcuts: KeyboardShortcut[],
+  deps: React.DependencyList
+): void {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       // Meta キー（Cmd/Ctrl）が押されていない場合は何もしない

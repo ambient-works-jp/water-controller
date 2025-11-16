@@ -259,7 +259,7 @@ Electron アプリでは、CSP は特に重要です：
 
 ブラウザの開発者ツール（DevTools）のコンソールで、CSP 違反を確認できます：
 
-```
+```txt
 Refused to connect to 'ws://127.0.0.1:8080/ws' because it violates the
 following Content Security Policy directive: "default-src 'self'".
 Note that 'connect-src' was not explicitly set, so 'default-src' is used as a fallback.

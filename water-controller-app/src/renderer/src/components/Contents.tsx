@@ -1,6 +1,5 @@
 import Versions from './Versions'
 import electronLogo from '../assets/electron.svg'
-import './Contents.css'
 
 interface ContentsProps {
   onSendPing: () => void

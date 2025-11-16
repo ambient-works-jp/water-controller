@@ -9,6 +9,7 @@ import { useKeyboardShortcut } from './hooks/useKeyboardShortcut'
 import { messageHandler } from './features/network/websocket'
 import type { Config } from '../../lib/types/config'
 
+const FADE_ANIMATION_DURATION_MS = 300
 
 function App(): React.JSX.Element {
   const [debugMode, setDebugMode] = useState(false)
@@ -119,7 +120,7 @@ function App(): React.JSX.Element {
       console.log('[Settings] Close animation complete, hiding panel')
       setShowSettings(false)
       setIsClosingSettings(false)
-    }, 500)
+    }, FADE_ANIMATION_DURATION_MS)
   }, [])
 
   // 設定画面をトグル
@@ -134,7 +135,7 @@ function App(): React.JSX.Element {
           console.log('[Settings] Close animation complete, hiding panel')
           setShowSettings(false)
           setIsClosingSettings(false)
-        }, 500)
+        }, FADE_ANIMATION_DURATION_MS)
         return prev // すぐには変更しない（アニメーション後に変更）
       } else {
         // 開く処理

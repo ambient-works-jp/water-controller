@@ -51,6 +51,33 @@
   animation: alertFadeOut 0.3s ease-out forwards;
 }
 
+/* SettingsPanel のアニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
 // ------------------------------------------------------------
 // Electron デフォルトの main.css
 // ------------------------------------------------------------
@@ -475,7 +502,7 @@ code {
     background 0.3s ease,
     box-shadow 0.3s ease;
   opacity: 1;
-  animation: fadeIn 0.3s ease-out;
+  animation: settingsButtonFadeIn 0.3s ease-out;
   padding: 0;
   z-index: 10001;
 }
@@ -503,7 +530,7 @@ code {
   transition: transform 0.3s ease;
 }
 
-@keyframes fadeIn {
+@keyframes settingsButtonFadeIn {
   from {
     opacity: 0;
     transform: scale(0.8);
@@ -679,44 +706,6 @@ code {
 .button-state {
   font-size: 10px;
   opacity: 0.8;
-}
-
-/* エラーメッセージ */
-.error-message {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.9);
-  padding: 16px 24px;
-  border-radius: 12px;
-  border: 2px solid #f87171;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.error-icon {
-  font-size: 20px;
-}
-
-.error-text {
-  color: #f87171;
 }
 
 /* キーボードショートカット一覧 */

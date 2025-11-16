@@ -185,7 +185,7 @@ function App(): React.JSX.Element {
       )}
 
       {/* コンテンツ画面 */}
-      <Contents onSendPing={handleSendPing} />
+      <Contents onSendPing={handleSendPing} lastMessage={lastMessage} />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
       <SettingsButton onSettingsOpen={() => setShowSettings(true)} isSettingsOpen={showSettings} />

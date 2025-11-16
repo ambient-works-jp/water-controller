@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { WsMessage, ConnectionStatus } from '../../../lib/types/websocket'
 import { InputLevel } from '../../../lib/types/websocket'
+import { useAnimationFps } from '../hooks/useAnimationFps'
+import { useControllerFps } from '../hooks/useControllerFps'
 import './DebugOverlay.css'
 
 interface DebugOverlayProps {
@@ -22,7 +24,8 @@ export function DebugOverlay({
   lastMessage,
   debugMode
 }: DebugOverlayProps): React.JSX.Element | null {
-  const [fps, setFps] = useState(0)
+  const animationFps = useAnimationFps()
+  const controllerFps = useControllerFps(lastMessage)
   const [buttonState, setButtonState] = useState(false)
   const [controllerState, setControllerState] = useState({
     left: 0 as InputLevel,
@@ -30,29 +33,6 @@ export function DebugOverlay({
     up: 0 as InputLevel,
     down: 0 as InputLevel
   })
-
-  // FPS 計測
-  useEffect(() => {
-    let frameCount = 0
-    let lastTime = performance.now()
-
-    const measureFps = (): void => {
-      frameCount++
-      const currentTime = performance.now()
-      const elapsed = currentTime - lastTime
-
-      if (elapsed >= 1000) {
-        setFps(Math.round((frameCount * 1000) / elapsed))
-        frameCount = 0
-        lastTime = currentTime
-      }
-
-      requestAnimationFrame(measureFps)
-    }
-
-    const rafId = requestAnimationFrame(measureFps)
-    return () => cancelAnimationFrame(rafId)
-  }, [])
 
   // メッセージの状態を更新
   useEffect(() => {
@@ -128,9 +108,17 @@ export function DebugOverlay({
               {status.toUpperCase()}
             </span>
           </div>
+
+          {/* コントローラの FPS: */}
           <div className="fps-display">
-            <span className="fps-label">FPS:</span>
-            <span className="fps-value">{fps}</span>
+            <span className="fps-label">Controller FPS:</span>
+            <span className="fps-value">{controllerFps}</span>
+          </div>
+
+          {/* アニメーションの FPS: */}
+          <div className="fps-display">
+            <span className="fps-label">Animation FPS:</span>
+            <span className="fps-value">{animationFps}</span>
           </div>
         </div>
 

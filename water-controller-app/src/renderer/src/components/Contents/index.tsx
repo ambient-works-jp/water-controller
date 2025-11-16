@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import type { WsMessage } from '../../../../lib/types/websocket'
 
 /**
@@ -8,9 +8,9 @@ import type { WsMessage } from '../../../../lib/types/websocket'
  */
 
 import type { Content } from './types'
-import { circularParticles } from './content1-circular-particles'
-import { waveLines } from './content2-wave-lines'
-import { radialSpokes } from './content3-radial-spokes'
+import { circularParticles } from './contents/content1-circular-particles'
+import { waveLines } from './contents/content2-wave-lines'
+import { radialSpokes } from './contents/content3-radial-spokes'
 
 /**
  * 利用可能なすべてのコンテンツ

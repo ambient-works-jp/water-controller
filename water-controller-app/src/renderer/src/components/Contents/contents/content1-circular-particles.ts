@@ -1,4 +1,4 @@
-import type { Content } from './types'
+import type { Content } from '../types'
 
 /**
  * コンテンツ 1: 円形パーティクル

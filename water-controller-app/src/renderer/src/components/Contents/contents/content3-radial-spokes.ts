@@ -1,4 +1,4 @@
-import type { Content } from './types'
+import type { Content } from '../types'
 
 /**
  * コンテンツ 3: 放射状スポーク

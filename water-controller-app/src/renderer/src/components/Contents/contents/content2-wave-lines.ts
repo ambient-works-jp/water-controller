@@ -1,4 +1,4 @@
-import type { Content } from './types'
+import type { Content } from '../types'
 
 /**
  * コンテンツ 2: 波線

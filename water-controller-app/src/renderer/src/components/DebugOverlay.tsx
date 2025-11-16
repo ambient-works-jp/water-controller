@@ -3,7 +3,6 @@ import type { WsMessage, ConnectionStatus } from '../../../lib/types/websocket'
 import { InputLevel } from '../../../lib/types/websocket'
 import { useAnimationFps } from '../hooks/useAnimationFps'
 import { useControllerFps } from '../hooks/useControllerFps'
-import './DebugOverlay.css'
 
 interface DebugOverlayProps {
   /** WebSocket 接続状態 */
@@ -112,7 +111,7 @@ export function DebugOverlay({
           {/* コントローラの FPS: */}
           <div className="fps-display">
             <span className="fps-label">Controller FPS:</span>
-            <span className="fps-value">{controllerFps}</span>
+            <span className="fps-value">{status === 'disconnected' ? '-' : controllerFps}</span>
           </div>
 
           {/* アニメーションの FPS: */}

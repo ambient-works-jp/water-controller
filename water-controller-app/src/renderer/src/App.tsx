@@ -6,17 +6,9 @@ import { SettingsPanel } from './components/SettingsPanel'
 import { ErrorDialog } from './components/ErrorDialog'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useKeyboardShortcut } from './hooks/useKeyboardShortcut'
-import type { WsMessage } from '../../lib/types/websocket'
+import { messageHandler } from './features/network/websocket'
 import type { Config } from '../../lib/types/config'
 
-const messageHandler = (message: WsMessage) => {
-  // console.log('[WebSocket] Message received:', message)
-  if (message.type === 'button-input') {
-    console.log(`[WebSocket] Button: ${message.isPushed ? 'PUSHED' : 'RELEASED'}`)
-  } else if (message.type === 'controller-input') {
-    console.log(`[WebSocket] Controller: left=${message.left}, right=${message.right}, up=${message.up}, down=${message.down}`)
-  }
-}
 
 function App(): React.JSX.Element {
   const [debugMode, setDebugMode] = useState(false)

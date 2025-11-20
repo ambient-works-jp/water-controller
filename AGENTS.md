@@ -34,6 +34,14 @@
 
 - TypeScript/React は Prettier（2 スペース）と eslint.config.mjs のルールに従い、コンポーネントは PascalCase、hooks/ユーティリティは camelCase。`src/renderer/components/SamplePanel.tsx` のように用途を示すサフィックスを付けます。
 
+#### UI スタイリング
+
+- **daisyUI v4** を使用してスタイリングを行います。
+- daisyUI LLM 向けドキュメント: https://daisyui.com/llms.txt
+- Tailwind CSS v4 と組み合わせて使用
+- コンポーネントクラス（`btn`, `card`, `modal` など）を優先的に使用
+- カスタムスタイルが必要な場合のみ Tailwind のユーティリティクラスを追加
+
 #### 型安全性の指針
 
 - **`as any` 型キャストは原則禁止**: 型安全性を損なうため、不用意な使用は避けること。保守性が著しく低下します。

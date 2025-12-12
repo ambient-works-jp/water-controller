@@ -130,6 +130,28 @@ export const CONTENTS: ContentItem[] = [
 }
 ```
 
-## 注意
+## 備考
 
-現在、Three.js コンテンツ（`component` を使うコンテンツ）はまだ表示されません。Canvas 2D と React コンポーネントを切り替えて表示する仕組みを実装中です。
+### プレイリストでの混在
+Canvas 2D コンテンツと Three.js コンテンツを同じプレイリスト内で混在させることができます：
+
+```json
+{
+  "playlist": [
+    "circular-particles",  // Canvas 2D
+    "rotating-cube",       // Three.js
+    "wave-lines",          // Canvas 2D
+    "radial-spokes"        // Canvas 2D
+  ]
+}
+```
+
+### 既存のサンプルコンテンツ
+
+#### Canvas 2D
+- `circular-particles`: 円周上を回転するパーティクル
+- `wave-lines`: 重なり合う波線
+- `radial-spokes`: 放射状のスポーク
+
+#### Three.js
+- `rotating-cube`: 回転する立方体（OrbitControls 付き）

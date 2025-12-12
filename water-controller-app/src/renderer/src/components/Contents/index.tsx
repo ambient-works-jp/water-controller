@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import type { WsMessage } from '../../../../lib/types/websocket'
 import type { Config } from '../../../../lib/types/config'
 
@@ -51,6 +51,10 @@ export function Contents({
   // プレイリストの長さ
   const playlistLength = playlist.length
 
+  // React コンポーネントコンテンツ用の状態
+  const [componentTime, setComponentTime] = useState(0)
+  const [componentDimensions, setComponentDimensions] = useState({ width: 0, height: 0 })
+
   // アニメーション状態を ref で管理（再レンダリングを避ける）
   const currentIndexRef = useRef(0)
   const nextIndexRef = useRef(0)
@@ -59,6 +63,11 @@ export function Contents({
   const fadeRef = useRef(0)
   const playlistRef = useRef(playlist)
   const onContentChangeRef = useRef(onContentChange)
+
+  // 現在のコンテンツタイプを判定
+  const currentContent = playlist.length > 0 ? playlist[currentIndexRef.current % playlist.length] : null
+  const isCanvasContent = currentContent?.render !== undefined
+  const isComponentContent = currentContent?.component !== undefined
 
   // playlist が変更されたら ref を更新
   useEffect(() => {
@@ -98,13 +107,19 @@ export function Contents({
   const resize = useCallback(() => {
     const canvas = canvasRef.current
     const parent = containerRef.current
-    if (!canvas || !parent) return
+    if (!parent) return
+
+    const w = parent.clientWidth
+    const h = parent.clientHeight
+
+    // コンポーネント用のサイズを更新
+    setComponentDimensions({ width: w, height: h })
+
+    if (!canvas) return
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const w = parent.clientWidth
-    const h = parent.clientHeight
     const dpr = Math.min(2, window.devicePixelRatio || 1)
 
     canvas.width = Math.floor(w * dpr)
@@ -240,6 +255,27 @@ export function Contents({
     }
   }, [resize])
 
+  // React コンポーネント用の時間更新
+  useEffect(() => {
+    if (!isComponentContent) return
+
+    let raf = 0
+    let lastTime = performance.now()
+
+    const tick = (now: number): void => {
+      const dt = (now - lastTime) / 1000
+      lastTime = now
+      setComponentTime((t) => t + dt)
+      raf = requestAnimationFrame(tick)
+    }
+
+    raf = requestAnimationFrame(tick)
+
+    return () => {
+      cancelAnimationFrame(raf)
+    }
+  }, [isComponentContent, currentIndexRef.current])
+
   return (
     <div
       ref={containerRef}
@@ -247,10 +283,30 @@ export function Contents({
         width: '100%',
         height: '100vh',
         background: 'black',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}
     >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
+      {/* Canvas 2D コンテンツ */}
+      {isCanvasContent && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block'
+          }}
+        />
+      )}
+
+      {/* React コンポーネントコンテンツ */}
+      {isComponentContent && currentContent?.component && (
+        <currentContent.component
+          width={componentDimensions.width}
+          height={componentDimensions.height}
+          time={componentTime}
+        />
+      )}
     </div>
   )
 }

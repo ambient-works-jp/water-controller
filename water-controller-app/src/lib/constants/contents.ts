@@ -12,7 +12,8 @@ import type { ContentItem } from '../types/config'
 export const CONTENT_IDS = {
   CIRCULAR_PARTICLES: 'circular-particles',
   WAVE_LINES: 'wave-lines',
-  RADIAL_SPOKES: 'radial-spokes'
+  RADIAL_SPOKES: 'radial-spokes',
+  ROTATING_CUBE: 'rotating-cube'
 } as const
 
 /**
@@ -33,6 +34,11 @@ export const CONTENTS: ContentItem[] = [
     id: CONTENT_IDS.RADIAL_SPOKES,
     name: 'Radial Spokes',
     description: '中心から放射状に伸びるスポークのアニメーション'
+  },
+  {
+    id: CONTENT_IDS.ROTATING_CUBE,
+    name: 'Rotating Cube',
+    description: 'Three.js を使った回転する立方体'
   }
 ]
 

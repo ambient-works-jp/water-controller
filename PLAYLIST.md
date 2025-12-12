@@ -2,12 +2,12 @@
 
 ## 手順
 
-### 1. コンテンツファイルを作成
+### パターン A: Canvas 2D を使う場合
 
-`water-controller-app/src/renderer/src/components/Contents/contents/` に新しいファイルを作成：
+`water-controller-app/src/renderer/src/components/Contents/contents/` に `.ts` ファイルを作成：
 
 ```typescript
-// content4-example.ts
+// content-example.ts
 import type { Content } from '../types'
 
 export const example: Content = {
@@ -30,7 +30,67 @@ export const example: Content = {
 }
 ```
 
-### 2. CONTENTS に追加
+### パターン B: Three.js / React コンポーネントを使う場合
+
+`water-controller-app/src/renderer/src/components/Contents/contents/` に `.tsx` ファイルを作成：
+
+```tsx
+// content-three-example.tsx
+import { Canvas } from '@react-three/fiber'
+import type { Content, ContentComponentProps } from '../types'
+
+function ThreeScene({ width, height, time }: ContentComponentProps): React.JSX.Element {
+  return (
+    <Canvas style={{ width, height }}>
+      {/* Three.js コンテンツを記述 */}
+      <ambientLight intensity={0.5} />
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+    </Canvas>
+  )
+}
+
+export const threeExample: Content = {
+  metadata: {
+    id: 'three-example',
+    name: 'Three Example',
+    description: 'Three.js サンプル'
+  },
+  component: ThreeScene
+}
+```
+
+### 2. contents/index.ts に export を追加
+
+`water-controller-app/src/renderer/src/components/Contents/contents/index.ts` を編集：
+
+```typescript
+export { circularParticles } from './content1-circular-particles'
+export { waveLines } from './content2-wave-lines'
+export { radialSpokes } from './content3-radial-spokes'
+export { example } from './content-example' // 追加
+// または
+export { threeExample } from './content-three-example' // 追加
+```
+
+### 3. utils.ts に追加
+
+`water-controller-app/src/renderer/src/components/Contents/utils.ts` を編集：
+
+```typescript
+import { circularParticles, waveLines, radialSpokes, example } from './contents'
+
+const allContents: Record<string, Content> = {
+  [CONTENT_IDS.CIRCULAR_PARTICLES]: circularParticles,
+  [CONTENT_IDS.WAVE_LINES]: waveLines,
+  [CONTENT_IDS.RADIAL_SPOKES]: radialSpokes,
+  [CONTENT_IDS.EXAMPLE]: example // 追加（CONTENT_IDS.EXAMPLE を使う）
+}
+```
+
+### 4. lib/constants/contents.ts に追加
 
 `water-controller-app/src/lib/constants/contents.ts` を編集：
 
@@ -43,21 +103,7 @@ export const CONTENT_IDS = {
 } as const
 
 export const CONTENTS: ContentItem[] = [
-  {
-    id: CONTENT_IDS.CIRCULAR_PARTICLES,
-    name: 'Circular Particles',
-    description: '円周上を回転しながら移動するパーティクルのアニメーション'
-  },
-  {
-    id: CONTENT_IDS.WAVE_LINES,
-    name: 'Wave Lines',
-    description: '複数の波線が重なり合うアニメーション'
-  },
-  {
-    id: CONTENT_IDS.RADIAL_SPOKES,
-    name: 'Radial Spokes',
-    description: '中心から放射状に伸びるスポークのアニメーション'
-  },
+  // ... 既存のコンテンツ
   {
     id: CONTENT_IDS.EXAMPLE,
     name: 'Example Content',
@@ -66,26 +112,11 @@ export const CONTENTS: ContentItem[] = [
 ]
 ```
 
-### 3. utils.ts に追加
-
-`water-controller-app/src/renderer/src/components/Contents/utils.ts` を編集：
-
-```typescript
-import { example } from './contents/content4-example' // 追加
-
-const allContents: Record<string, Content> = {
-  [CONTENT_IDS.CIRCULAR_PARTICLES]: circularParticles,
-  [CONTENT_IDS.WAVE_LINES]: waveLines,
-  [CONTENT_IDS.RADIAL_SPOKES]: radialSpokes,
-  [CONTENT_IDS.EXAMPLE]: example // 追加
-}
-```
-
-### 4. アプリを起動
+### 5. アプリを起動
 
 アプリを起動すると、自動的に `config.json` の `contents` と `playlist` に追加されます。
 
-### 5. プレイリストを編集（オプション）
+### 6. プレイリストを編集（オプション）
 
 `~/.water-controller-app/config.json` で再生順序をカスタマイズ：
 
@@ -98,3 +129,7 @@ const allContents: Record<string, Content> = {
   ]
 }
 ```
+
+## 注意
+
+現在、Three.js コンテンツ（`component` を使うコンテンツ）はまだ表示されません。Canvas 2D と React コンポーネントを切り替えて表示する仕組みを実装中です。

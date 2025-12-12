@@ -164,7 +164,11 @@ export function Contents({
       const normalizedIndex =
         ((currentIndex % currentPlaylist.length) + currentPlaylist.length) % currentPlaylist.length
       const content = currentPlaylist[normalizedIndex]
-      content.render(ctx, t, vw, vh)
+
+      // Canvas 2D コンテンツの場合のみ描画（component の場合はスキップ）
+      if (content.render) {
+        content.render(ctx, t, vw, vh)
+      }
 
       // トランジション処理
       if (isTransitioning) {

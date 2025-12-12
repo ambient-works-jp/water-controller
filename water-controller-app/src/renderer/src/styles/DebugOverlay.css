@@ -34,6 +34,7 @@
   line-height: 1.6;
 }
 
+.content-info,
 .connection-status,
 .fps-display {
   display: flex;
@@ -42,17 +43,20 @@
   min-width: 240px;
 }
 
+.content-info:last-child,
 .connection-status:last-child,
 .fps-display:last-child {
   margin-bottom: 0;
 }
 
+.content-label,
 .status-label,
 .fps-label {
   font-weight: 600;
   margin-right: 16px;
 }
 
+.content-value,
 .status-value,
 .fps-value {
   font-weight: 700;

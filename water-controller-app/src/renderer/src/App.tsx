@@ -21,11 +21,22 @@ function App(): React.JSX.Element {
     details?: string
   } | null>(null)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [currentContent, setCurrentContent] = useState<{
+    name: string
+    index: number
+    total: number
+  } | null>(null)
 
   const handleSendPing = async (): Promise<void> => {
     const response = await window.api.ipc.sendPing()
     console.log('IPC Response from main process: ', response)
   }
+
+  // コンテンツ変更時のコールバック
+  const handleContentChange = useCallback((name: string, index: number, total: number) => {
+    console.log('[App] onContentChange:', name, index, total)
+    setCurrentContent({ name, index, total })
+  }, [])
 
   // 起動時に設定を読み込む
   useEffect(() => {
@@ -185,13 +196,23 @@ function App(): React.JSX.Element {
       )}
 
       {/* コンテンツ画面 */}
-      <Contents onSendPing={handleSendPing} lastMessage={lastMessage} />
+      <Contents
+        onSendPing={handleSendPing}
+        lastMessage={lastMessage}
+        config={config}
+        onContentChange={handleContentChange}
+      />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
       <SettingsButton onSettingsOpen={() => setShowSettings(true)} isSettingsOpen={showSettings} />
 
       {/* デバッグオーバーレイ */}
-      <DebugOverlay status={status} lastMessage={lastMessage} debugMode={debugMode} />
+      <DebugOverlay
+        status={status}
+        lastMessage={lastMessage}
+        debugMode={debugMode}
+        currentContent={currentContent}
+      />
 
       {/* 設定画面 */}
       {showSettings && (

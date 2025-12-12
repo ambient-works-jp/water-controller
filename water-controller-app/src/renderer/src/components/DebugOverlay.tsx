@@ -11,6 +11,12 @@ interface DebugOverlayProps {
   lastMessage: WsMessage | null
   /** デバッグモードのオン・オフ */
   debugMode: boolean
+  /** 現在再生中のコンテンツ情報 */
+  currentContent: {
+    name: string
+    index: number
+    total: number
+  } | null
 }
 
 /**
@@ -21,7 +27,8 @@ interface DebugOverlayProps {
 export function DebugOverlay({
   status,
   lastMessage,
-  debugMode
+  debugMode,
+  currentContent
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
@@ -32,6 +39,11 @@ export function DebugOverlay({
     up: 0 as InputLevel,
     down: 0 as InputLevel
   })
+
+  // currentContent の変更をログ出力
+  useEffect(() => {
+    console.log('[DebugOverlay] currentContent updated:', currentContent)
+  }, [currentContent])
 
   // メッセージの状態を更新
   useEffect(() => {
@@ -101,6 +113,16 @@ export function DebugOverlay({
       <div className="debug-info-container">
         {/* 接続情報と FPS */}
         <div className="debug-info">
+          {/* 現在再生中のコンテンツ */}
+          <div className="content-info">
+            <span className="content-label">Content:</span>
+            <span className="content-value">
+              {currentContent
+                ? `${currentContent.name} (${currentContent.index + 1}/${currentContent.total})`
+                : 'Loading...'}
+            </span>
+          </div>
+
           <div className="connection-status">
             <span className="status-label">WebSocket:</span>
             <span className="status-value" style={{ color: getStatusColor() }}>

@@ -54,6 +54,7 @@ export function Contents({
   // React コンポーネントコンテンツ用の状態
   const [componentTime, setComponentTime] = useState(0)
   const [componentDimensions, setComponentDimensions] = useState({ width: 0, height: 0 })
+  const [currentIndex, setCurrentIndex] = useState(0) // コンテンツインデックス（React state で管理）
 
   // アニメーション状態を ref で管理（再レンダリングを避ける）
   const currentIndexRef = useRef(0)
@@ -63,9 +64,10 @@ export function Contents({
   const fadeRef = useRef(0)
   const playlistRef = useRef(playlist)
   const onContentChangeRef = useRef(onContentChange)
+  const setCurrentIndexRef = useRef(setCurrentIndex) // state 更新関数を ref で保持
 
-  // 現在のコンテンツタイプを判定
-  const currentContent = playlist.length > 0 ? playlist[currentIndexRef.current % playlist.length] : null
+  // 現在のコンテンツタイプを判定（state を使用）
+  const currentContent = playlist.length > 0 ? playlist[currentIndex % playlist.length] : null
   const isCanvasContent = currentContent?.render !== undefined
   const isComponentContent = currentContent?.component !== undefined
 
@@ -78,6 +80,11 @@ export function Contents({
   useEffect(() => {
     onContentChangeRef.current = onContentChange
   }, [onContentChange])
+
+  // setCurrentIndex を ref に保持
+  useEffect(() => {
+    setCurrentIndexRef.current = setCurrentIndex
+  }, [setCurrentIndex])
 
   // 初期コンテンツ情報を通知
   useEffect(() => {
@@ -197,6 +204,9 @@ export function Contents({
             // フェードアウト完了 → 次のコンテンツへ切り替え
             currentIndexRef.current = nextIndex
             phaseRef.current = 'in'
+
+            // React の状態を更新（コンポーネントの再レンダリングをトリガー）
+            setCurrentIndexRef.current(nextIndex)
 
             // コンテンツ変更コールバックを呼び出し
             const newContent =

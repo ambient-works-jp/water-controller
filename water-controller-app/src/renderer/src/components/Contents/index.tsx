@@ -297,25 +297,36 @@ export function Contents({
         position: 'relative'
       }}
     >
-      {/* Canvas 2D コンテンツ */}
-      {isCanvasContent && (
-        <canvas
-          ref={canvasRef}
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'block'
-          }}
-        />
-      )}
+      {/* Canvas 2D コンテンツ（常に存在、表示/非表示を切り替え） */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          display: isCanvasContent ? 'block' : 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0
+        }}
+      />
 
       {/* React コンポーネントコンテンツ */}
       {isComponentContent && currentContent?.component && (
-        <currentContent.component
-          width={componentDimensions.width}
-          height={componentDimensions.height}
-          time={componentTime}
-        />
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        >
+          <currentContent.component
+            width={componentDimensions.width}
+            height={componentDimensions.height}
+            time={componentTime}
+          />
+        </div>
       )}
     </div>
   )

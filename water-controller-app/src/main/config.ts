@@ -3,20 +3,24 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { createLogger } from './logger'
 import type { Config } from '../lib/types/config'
+import { CONTENTS, DEFAULT_PLAYLIST_IDS } from '../lib/constants/contents'
 
 const logger = createLogger('main.config')
 
 // 設定ファイルのパス
 const CONFIG_DIR = path.join(app.getPath('home'), '.water-controller-app')
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
-const DEFAULT_CONFIG_FILE = path.join(__dirname, '../../config/config.default.json')
 
 /**
- * デフォルト設定
+ * デフォルト設定（動的に生成）
  */
-const DEFAULT_CONFIG: Config = {
-  wsUrl: 'ws://127.0.0.1:8080/ws',
-  debugMode: false
+function createDefaultConfig(): Config {
+  return {
+    wsUrl: 'ws://127.0.0.1:8080/ws',
+    debugMode: false,
+    contents: CONTENTS,
+    playlist: DEFAULT_PLAYLIST_IDS
+  }
 }
 
 /**
@@ -30,7 +34,7 @@ function ensureConfigDirectory(): void {
 }
 
 /**
- * 初回起動時にデフォルト設定をコピーする
+ * 初回起動時にデフォルト設定を作成する
  */
 function initializeConfigFile(): void {
   ensureConfigDirectory()
@@ -39,20 +43,36 @@ function initializeConfigFile(): void {
     logger.info('Config file not found. Creating default config file.')
 
     try {
-      // デフォルト設定ファイルが存在する場合はコピー
-      if (fs.existsSync(DEFAULT_CONFIG_FILE)) {
-        fs.copyFileSync(DEFAULT_CONFIG_FILE, CONFIG_FILE)
-        logger.info(`Copied default config from ${DEFAULT_CONFIG_FILE} to ${CONFIG_FILE}`)
-      } else {
-        // デフォルト設定ファイルが存在しない場合はハードコードされたデフォルト設定を使用
-        fs.writeFileSync(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2), 'utf-8')
-        logger.info(`Created default config file at ${CONFIG_FILE}`)
-      }
+      const defaultConfig = createDefaultConfig()
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(defaultConfig, null, 2), 'utf-8')
+      logger.info(`Created default config file at ${CONFIG_FILE}`)
     } catch (error) {
       logger.error('Failed to initialize config file:', error)
       throw error
     }
   }
+}
+
+/**
+ * 2回目以降の起動時に CONTENTS を config.contents に同期する
+ *
+ * @param config - 現在の設定
+ * @returns 同期後の設定
+ */
+function syncContents(config: Config): Config {
+  // CONTENTS を config.contents に常に上書き（コード側が正）
+  const syncedConfig = {
+    ...config,
+    contents: CONTENTS
+  }
+
+  // playlist が存在しない、または空の場合はデフォルト値を設定
+  if (!syncedConfig.playlist || syncedConfig.playlist.length === 0) {
+    logger.warn('config.playlist is empty or missing. Using default playlist.')
+    syncedConfig.playlist = DEFAULT_PLAYLIST_IDS
+  }
+
+  return syncedConfig
 }
 
 /**
@@ -72,7 +92,7 @@ export function loadConfig():
     const configStr = fs.readFileSync(CONFIG_FILE, 'utf-8')
 
     // JSON パース
-    const config = JSON.parse(configStr) as Config
+    let config = JSON.parse(configStr) as Config
 
     // バリデーション
     if (!config.wsUrl || typeof config.wsUrl !== 'string') {
@@ -81,6 +101,23 @@ export function loadConfig():
 
     if (typeof config.debugMode !== 'boolean') {
       throw new Error('Invalid config: debugMode must be a boolean')
+    }
+
+    if (!Array.isArray(config.contents)) {
+      throw new Error('Invalid config: contents must be an array')
+    }
+
+    if (!Array.isArray(config.playlist)) {
+      throw new Error('Invalid config: playlist must be an array')
+    }
+
+    // 2回目以降の起動時：CONTENTS を config.contents に同期
+    config = syncContents(config)
+
+    // 同期後の設定を保存
+    const saveResult = saveConfig(config)
+    if (!saveResult.success) {
+      logger.warn('Failed to save synced config:', saveResult.error)
     }
 
     logger.info('Config loaded successfully')
@@ -136,7 +173,7 @@ export function loadConfig():
  * デフォルト設定を取得する
  */
 export function getDefaultConfig(): Config {
-  return DEFAULT_CONFIG
+  return createDefaultConfig()
 }
 
 /**
@@ -159,6 +196,14 @@ export function saveConfig(
 
     if (typeof config.debugMode !== 'boolean') {
       throw new Error('Invalid config: debugMode must be a boolean')
+    }
+
+    if (!Array.isArray(config.contents)) {
+      throw new Error('Invalid config: contents must be an array')
+    }
+
+    if (!Array.isArray(config.playlist)) {
+      throw new Error('Invalid config: playlist must be an array')
     }
 
     // JSON 形式で保存

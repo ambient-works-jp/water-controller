@@ -1,5 +1,6 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 import type { WsMessage } from '../../../../lib/types/websocket'
+import type { Config } from '../../../../lib/types/config'
 
 /**
  * コンテンツの統括
@@ -7,33 +8,7 @@ import type { WsMessage } from '../../../../lib/types/websocket'
  * すべてのコンテンツをエクスポートし、コンテンツリストを提供します
  */
 
-import type { Content } from './types'
-import { PLAYLIST } from './playlist'
-
-/**
- * 利用可能なすべてのコンテンツ
- */
-export const CONTENTS: Content[] = PLAYLIST
-
-/**
- * コンテンツの総数
- */
-export const CONTENT_COUNT = CONTENTS.length
-
-/**
- * ID からコンテンツを取得
- */
-export function getContentById(id: string): Content | undefined {
-  return CONTENTS.find((content) => content.metadata.id === id)
-}
-
-/**
- * インデックスからコンテンツを取得（循環）
- */
-export function getContentByIndex(index: number): Content {
-  const normalizedIndex = ((index % CONTENT_COUNT) + CONTENT_COUNT) % CONTENT_COUNT
-  return CONTENTS[normalizedIndex]
-}
+import { generatePlaylist } from './playlist'
 
 // 型をエクスポート
 export type { Content, ContentRenderer } from './types'
@@ -45,6 +20,10 @@ interface ContentsProps {
   onSendPing: () => void
   /** 最新の WebSocket メッセージ */
   lastMessage: WsMessage | null
+  /** 設定（プレイリスト情報を含む） */
+  config: Config | null
+  /** コンテンツ変更時のコールバック */
+  onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
 }
 
 /**
@@ -53,9 +32,24 @@ interface ContentsProps {
  * Canvas を使用してアニメーションコンテンツを表示し、
  * ButtonInput メッセージで無限ループ切り替えを行います
  */
-export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
+export function Contents({
+  lastMessage,
+  config,
+  onContentChange
+}: ContentsProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // config.playlist からプレイリストを生成
+  const playlist = useMemo(() => {
+    if (!config || !config.playlist) {
+      return generatePlaylist([])
+    }
+    return generatePlaylist(config.playlist)
+  }, [config])
+
+  // プレイリストの長さ
+  const playlistLength = playlist.length
 
   // アニメーション状態を ref で管理（再レンダリングを避ける）
   const currentIndexRef = useRef(0)
@@ -63,6 +57,26 @@ export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
   const isTransitioningRef = useRef(false)
   const phaseRef = useRef<'idle' | 'out' | 'in'>('idle')
   const fadeRef = useRef(0)
+  const playlistRef = useRef(playlist)
+  const onContentChangeRef = useRef(onContentChange)
+
+  // playlist が変更されたら ref を更新
+  useEffect(() => {
+    playlistRef.current = playlist
+  }, [playlist])
+
+  // onContentChange が変更されたら ref を更新
+  useEffect(() => {
+    onContentChangeRef.current = onContentChange
+  }, [onContentChange])
+
+  // 初期コンテンツ情報を通知
+  useEffect(() => {
+    if (playlist.length > 0 && onContentChange) {
+      console.log('[Contents] Initial content:', playlist[0].metadata.name, 0, playlist.length)
+      onContentChange(playlist[0].metadata.name, 0, playlist.length)
+    }
+  }, [playlist, onContentChange])
 
   // ButtonInput メッセージを検知してコンテンツを切り替え
   useEffect(() => {
@@ -74,11 +88,11 @@ export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
     if (lastMessage.isPushed && !isTransitioningRef.current) {
       console.log('[Contents] Switching to next content')
       isTransitioningRef.current = true
-      nextIndexRef.current = (currentIndexRef.current + 1) % CONTENT_COUNT
+      nextIndexRef.current = (currentIndexRef.current + 1) % playlistLength
       phaseRef.current = 'out'
       fadeRef.current = 0
     }
-  }, [lastMessage])
+  }, [lastMessage, playlistLength])
 
   // Canvas のリサイズ処理
   const resize = useCallback(() => {
@@ -138,9 +152,18 @@ export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
       const nextIndex = nextIndexRef.current
       const phase = phaseRef.current
       const isTransitioning = isTransitioningRef.current
+      const currentPlaylist = playlistRef.current
 
-      // 現在のコンテンツを描画
-      const content = getContentByIndex(currentIndex)
+      // プレイリストから現在のコンテンツを取得
+      if (currentPlaylist.length === 0) {
+        // プレイリストが空の場合はスキップ
+        raf = requestAnimationFrame(loop)
+        return
+      }
+
+      const normalizedIndex =
+        ((currentIndex % currentPlaylist.length) + currentPlaylist.length) % currentPlaylist.length
+      const content = currentPlaylist[normalizedIndex]
       content.render(ctx, t, vw, vh)
 
       // トランジション処理
@@ -155,6 +178,26 @@ export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
             // フェードアウト完了 → 次のコンテンツへ切り替え
             currentIndexRef.current = nextIndex
             phaseRef.current = 'in'
+
+            // コンテンツ変更コールバックを呼び出し
+            const newContent =
+              currentPlaylist[
+                ((nextIndex % currentPlaylist.length) + currentPlaylist.length) %
+                  currentPlaylist.length
+              ]
+            if (onContentChangeRef.current && newContent) {
+              console.log(
+                '[Contents] Content changed:',
+                newContent.metadata.name,
+                nextIndex,
+                currentPlaylist.length
+              )
+              onContentChangeRef.current(
+                newContent.metadata.name,
+                nextIndex,
+                currentPlaylist.length
+              )
+            }
           }
         } else if (phase === 'in') {
           // フェードイン
@@ -177,7 +220,7 @@ export function Contents({ lastMessage }: ContentsProps): React.JSX.Element {
       ctx.textAlign = 'right'
       ctx.textBaseline = 'bottom'
       ctx.fillText(
-        `${content.metadata.name} (${currentIndexRef.current + 1}/${CONTENT_COUNT})`,
+        `${content.metadata.name} (${currentIndexRef.current + 1}/${currentPlaylist.length})`,
         vw - 12,
         vh - 10
       )

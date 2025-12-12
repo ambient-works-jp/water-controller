@@ -16,7 +16,6 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    // @ts-expect-error
     plugins: [react(), tailwindcss()]
   }
 })

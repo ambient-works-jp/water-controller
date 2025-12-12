@@ -2,8 +2,6 @@ import { useState } from 'react'
 import type { Config } from '../../../../lib/types/config'
 import { ErrorDialog } from '../ErrorDialog'
 import { errorDialogId } from '../constants'
-import { PLAYLIST } from '../Contents/playlist'
-import { CONTENTS } from '../Contents'
 
 interface SettingsTabProps {
   /** 設定データ */
@@ -159,45 +157,69 @@ export function SettingsTab({
                 </div>
 
                 {/* タブコンテンツ */}
-                {contentTab === 'playlist' ? (
-                  // プレイリストタブ
-                  PLAYLIST.length === 0 ? (
+                {config ? (
+                  contentTab === 'playlist' ? (
+                    // プレイリストタブ
+                    !config.playlist || config.playlist.length === 0 ? (
+                      <p className="text-sm opacity-60 italic">プレイリストが登録されていません</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {config.playlist.map((contentId, idx) => {
+                          // contentId から ContentItem を取得
+                          const contentItem = config.contents.find((item) => item.id === contentId)
+                          if (!contentItem) {
+                            return (
+                              <div
+                                key={contentId}
+                                className="p-3 rounded-lg bg-error/10 border border-error space-y-1.5"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="badge badge-error badge-sm">#{idx + 1}</span>
+                                  <span className="font-bold text-base text-error">
+                                    コンテンツが見つかりません
+                                  </span>
+                                </div>
+                                <div className="text-xs opacity-70 font-mono">{contentId}</div>
+                              </div>
+                            )
+                          }
+                          return (
+                            <div
+                              key={contentItem.id}
+                              className="p-3 rounded-lg bg-base-300 space-y-1.5"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="badge badge-neutral badge-sm">#{idx + 1}</span>
+                                <span className="font-bold text-base">{contentItem.name}</span>
+                              </div>
+                              <div className="text-xs opacity-70 font-mono">{contentItem.id}</div>
+                              <div className="text-sm opacity-80">{contentItem.description}</div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  ) : // コンテンツ一覧タブ
+                  !config.contents || config.contents.length === 0 ? (
                     <p className="text-sm opacity-60 italic">コンテンツが登録されていません</p>
                   ) : (
                     <div className="space-y-3">
-                      {PLAYLIST.map((content, idx) => (
+                      {config.contents.map((contentItem) => (
                         <div
-                          key={content.metadata.id}
+                          key={contentItem.id}
                           className="p-3 rounded-lg bg-base-300 space-y-1.5"
                         >
                           <div className="flex items-center gap-2">
-                            <span className="badge badge-neutral badge-sm">#{idx + 1}</span>
-                            <span className="font-bold text-base">{content.metadata.name}</span>
+                            <span className="font-bold text-base">{contentItem.name}</span>
                           </div>
-                          <div className="text-xs opacity-70 font-mono">{content.metadata.id}</div>
-                          <div className="text-sm opacity-80">{content.metadata.description}</div>
+                          <div className="text-xs opacity-70 font-mono">{contentItem.id}</div>
+                          <div className="text-sm opacity-80">{contentItem.description}</div>
                         </div>
                       ))}
                     </div>
                   )
-                ) : // コンテンツ一覧タブ
-                CONTENTS.length === 0 ? (
-                  <p className="text-sm opacity-60 italic">コンテンツが登録されていません</p>
                 ) : (
-                  <div className="space-y-3">
-                    {CONTENTS.map((content) => (
-                      <div
-                        key={content.metadata.id}
-                        className="p-3 rounded-lg bg-base-300 space-y-1.5"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-base">{content.metadata.name}</span>
-                        </div>
-                        <div className="text-xs opacity-70 font-mono">{content.metadata.id}</div>
-                        <div className="text-sm opacity-80">{content.metadata.description}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-sm opacity-60 italic">設定を読み込んでいません</p>
                 )}
               </div>
             </div>

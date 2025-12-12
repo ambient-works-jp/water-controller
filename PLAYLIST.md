@@ -30,7 +30,7 @@ export const example: Content = {
 }
 ```
 
-### パターン B: Three.js / React コンポーネントを使う場合
+### パターン B: Three.js を使う場合
 
 `water-controller-app/src/renderer/src/components/Contents/contents/` に `.tsx` ファイルを作成：
 
@@ -59,6 +59,49 @@ export const threeExample: Content = {
     description: 'Three.js サンプル'
   },
   component: ThreeScene
+}
+```
+
+### パターン C: p5.js を使う場合
+
+`water-controller-app/src/renderer/src/components/Contents/contents/` に `.tsx` ファイルを作成：
+
+```tsx
+// content-p5-example.tsx
+import { ReactP5Wrapper, type Sketch } from '@p5-wrapper/react'
+import type { Content, ContentComponentProps } from '../types'
+
+const sketch: Sketch = (p5) => {
+  p5.setup = () => {
+    p5.createCanvas(p5.windowWidth, p5.windowHeight)
+    // セットアップ処理
+  }
+
+  p5.draw = () => {
+    p5.background(0)
+    // 描画処理
+  }
+
+  p5.windowResized = () => {
+    p5.resizeCanvas(p5.windowWidth, p5.windowHeight)
+  }
+}
+
+function P5Scene({ width, height }: ContentComponentProps): React.JSX.Element {
+  return (
+    <div style={{ width, height }}>
+      <ReactP5Wrapper sketch={sketch} />
+    </div>
+  )
+}
+
+export const p5Example: Content = {
+  metadata: {
+    id: 'p5-example',
+    name: 'P5 Example',
+    description: 'p5.js サンプル'
+  },
+  component: P5Scene
 }
 ```
 
@@ -133,15 +176,16 @@ export const CONTENTS: ContentItem[] = [
 ## 備考
 
 ### プレイリストでの混在
-Canvas 2D コンテンツと Three.js コンテンツを同じプレイリスト内で混在させることができます：
+Canvas 2D、Three.js、p5.js のコンテンツを同じプレイリスト内で混在させることができます：
 
 ```json
 {
   "playlist": [
-    "circular-particles",  // Canvas 2D
-    "rotating-cube",       // Three.js
-    "wave-lines",          // Canvas 2D
-    "radial-spokes"        // Canvas 2D
+    "circular-particles",       // Canvas 2D
+    "rotating-cube",            // Three.js
+    "water-controller-text",    // p5.js
+    "wave-lines",               // Canvas 2D
+    "radial-spokes"             // Canvas 2D
   ]
 }
 ```
@@ -155,3 +199,6 @@ Canvas 2D コンテンツと Three.js コンテンツを同じプレイリスト
 
 #### Three.js
 - `rotating-cube`: 回転する立方体（OrbitControls 付き）
+
+#### p5.js
+- `water-controller-text`: "Water Controller" テキストアニメーション

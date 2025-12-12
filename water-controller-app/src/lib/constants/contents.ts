@@ -13,7 +13,8 @@ export const CONTENT_IDS = {
   CIRCULAR_PARTICLES: 'circular-particles',
   WAVE_LINES: 'wave-lines',
   RADIAL_SPOKES: 'radial-spokes',
-  ROTATING_CUBE: 'rotating-cube'
+  ROTATING_CUBE: 'rotating-cube',
+  WATER_CONTROLLER_TEXT: 'water-controller-text'
 } as const
 
 /**
@@ -39,6 +40,11 @@ export const CONTENTS: ContentItem[] = [
     id: CONTENT_IDS.ROTATING_CUBE,
     name: 'Rotating Cube',
     description: 'Three.js を使った回転する立方体'
+  },
+  {
+    id: CONTENT_IDS.WATER_CONTROLLER_TEXT,
+    name: 'Water Controller Text',
+    description: 'p5.js で "Water Controller" を表示'
   }
 ]
 

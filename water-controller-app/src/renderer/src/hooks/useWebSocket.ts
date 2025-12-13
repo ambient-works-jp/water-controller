@@ -86,7 +86,9 @@ export function useWebSocket(
 
       ws.onerror = (error) => {
         logger.error('WebSocket error:', error)
-        setStatus('error')
+        // エラー時も 'disconnected' 状態にして、再接続を試みる
+        // 'error' 状態にすると UI が混乱する可能性があるため
+        setStatus('disconnected')
       }
 
       ws.onclose = (event) => {
@@ -111,7 +113,7 @@ export function useWebSocket(
       }
     } catch (error) {
       logger.error('Failed to create WebSocket connection:', error)
-      setStatus('error')
+      setStatus('disconnected')
     }
   }, [url, onMessage, getReconnectDelay])
 

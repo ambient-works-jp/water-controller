@@ -1,0 +1,44 @@
+{
+    "wsUrl": "ws://127.0.0.1:8080/ws",
+    "debugMode": true,
+    "contents": [
+        {
+            "id": "circular-particles",
+            "name": "Circular Particles",
+            "description": "円周上を回転しながら移動するパーティクルのアニメーション"
+        },
+        {
+            "id": "wave-lines",
+            "name": "Wave Lines",
+            "description": "複数の波線が重なり合うアニメーション"
+        },
+        {
+            "id": "radial-spokes",
+            "name": "Radial Spokes",
+            "description": "中心から放射状に伸びるスポークのアニメーション"
+        },
+        {
+            "id": "rotating-cube",
+            "name": "Rotating Cube",
+            "description": "Three.js を使った回転する立方体"
+        },
+        {
+            "id": "water-controller-text",
+            "name": "Water Controller Text",
+            "description": "p5.js で \"Water Controller\" を表示"
+        },
+        {
+            "id": "interactive-pointer",
+            "name": "Interactive Pointer",
+            "description": "コントローラ入力に反応するぽわぽわポインタ"
+        }
+    ],
+    "playlist": [
+        "water-controller-text",
+        "interactive-pointer",
+        "rotating-cube",
+        "circular-particles",
+        "wave-lines",
+        "radial-spokes"
+    ]
+}

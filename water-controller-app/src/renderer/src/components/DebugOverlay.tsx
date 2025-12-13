@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { WsMessage, ConnectionStatus } from '../../../lib/types/websocket'
 import { InputLevel } from '../../../lib/types/websocket'
-import type { ControllerState, InputSource } from '../features/controller/types'
+import type { ControllerState } from '../features/controller/types'
 import { useAnimationFps } from '../hooks/useAnimationFps'
 import { useControllerFps } from '../hooks/useControllerFps'
 
@@ -12,8 +12,6 @@ interface DebugOverlayProps {
   lastMessage: WsMessage | null
   /** コントローラ状態（WebSocket + キーボード統合） */
   controllerState: ControllerState
-  /** 入力ソース */
-  inputSource: InputSource | null
   /** デバッグモードのオン・オフ */
   debugMode: boolean
   /** 現在再生中のコンテンツ情報 */
@@ -33,7 +31,6 @@ export function DebugOverlay({
   status,
   lastMessage,
   controllerState,
-  inputSource,
   debugMode,
   currentContent
 }: DebugOverlayProps): React.JSX.Element | null {
@@ -116,12 +113,6 @@ export function DebugOverlay({
             <span className="status-value" style={{ color: getStatusColor() }}>
               {status.toUpperCase()}
             </span>
-          </div>
-
-          {/* 入力ソース */}
-          <div className="input-source">
-            <span className="source-label">Input Source:</span>
-            <span className="source-value">{inputSource ? inputSource.toUpperCase() : 'NONE'}</span>
           </div>
 
           {/* コントローラの FPS: */}

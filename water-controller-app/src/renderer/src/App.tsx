@@ -88,7 +88,7 @@ function App(): React.JSX.Element {
   }, [status])
 
   // コントローラ入力の抽象化レイヤー（WebSocket + キーボード）
-  const { state: controllerState, source: inputSource } = useControllerInput(
+  const { state: controllerState } = useControllerInput(
     {
       enableWebSocket: true,
       enableKeyboard: true,
@@ -224,7 +224,6 @@ function App(): React.JSX.Element {
         status={status}
         lastMessage={lastMessage}
         controllerState={controllerState}
-        inputSource={inputSource}
         debugMode={debugMode}
         currentContent={currentContent}
       />

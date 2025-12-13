@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+@plugin "daisyui" {
+  themes: dim --default;
+}
+
+// ------------------------------------------------------------
+// daisyUI テーマカスタマイズ
+// ------------------------------------------------------------
+
+:root {
+  /* daisyUI primary color を #4ade80 に設定 */
+  --p: 142 77% 58%; /* HSL 形式: hsl(142, 77%, 58%) = #4ade80 */
+  --pc: 0 0% 100%; /* primary-content: 白 */
+}
+
+/* 接続テスト結果のフェードイン・フェードアウト */
+@keyframes alertFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes alertFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.alert-fade-in {
+  animation: alertFadeIn 0.3s ease-out;
+}
+
+.alert-fade-out {
+  animation: alertFadeOut 0.3s ease-out forwards;
+}
+
+/* SettingsPanel のアニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@import './DebugOverlay.css';

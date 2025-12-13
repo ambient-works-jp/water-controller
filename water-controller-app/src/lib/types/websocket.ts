@@ -14,12 +14,14 @@ export type ButtonInputMessage = {
  * コントローラ入力値の Enum
  * - NoInput: 入力なし
  * - Low: 低レベル入力
+ * - Middle: 中レベル入力
  * - High: 高レベル入力
  */
 export enum InputLevel {
   NoInput = 0,
   Low = 1,
-  High = 2
+  Middle = 2,
+  High = 3
 }
 
 /**

@@ -88,6 +88,8 @@ export function DebugOverlay({
       case 1:
         return 'Low'
       case 2:
+        return 'Middle'
+      case 3:
         return 'High'
       default:
         return 'Unknown'
@@ -101,6 +103,8 @@ export function DebugOverlay({
       case 1:
         return 'active-low'
       case 2:
+        return 'active-middle'
+      case 3:
         return 'active-high'
       default:
         return ''

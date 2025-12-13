@@ -36,6 +36,7 @@
 
 .content-info,
 .connection-status,
+.input-source,
 .fps-display {
   display: flex;
   justify-content: space-between;
@@ -45,12 +46,14 @@
 
 .content-info:last-child,
 .connection-status:last-child,
+.input-source:last-child,
 .fps-display:last-child {
   margin-bottom: 0;
 }
 
 .content-label,
 .status-label,
+.source-label,
 .fps-label {
   font-weight: 600;
   margin-right: 16px;
@@ -58,6 +61,7 @@
 
 .content-value,
 .status-value,
+.source-value,
 .fps-value {
   font-weight: 700;
   font-size: 18px;

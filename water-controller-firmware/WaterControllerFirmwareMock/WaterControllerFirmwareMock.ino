@@ -158,11 +158,11 @@ int updateJoystickStatus() {
   sensorValues[kFrontLowIdx] = (joystickAnalogY <= kFrontLowThreshold) ? 1 : 0;
 
   // backLow
-  sensorValues[kBackLowIdx] = (joystickAnalogY > kCenterMax && joystickAnalogY <= kBackLowThreshold) ? 1 : 0;
+  sensorValues[kBackLowIdx] = (joystickAnalogY >= kCenterMax) ? 1 : 0;
   // backMiddle
-  sensorValues[kBackMiddleIdx] = (joystickAnalogY > kCenterMax && joystickAnalogY <= kBackMiddleThreshold) ? 1 : 0;
+  sensorValues[kBackMiddleIdx] = (joystickAnalogY >= kBackLowThreshold) ? 1 : 0;
   // backHigh
-  sensorValues[kBackHighIdx] = (joystickAnalogY > kBackMiddleThreshold) ? 1 : 0;
+  sensorValues[kBackHighIdx] = (joystickAnalogY >= kBackMiddleThreshold) ? 1 : 0;
 
   // ------------------------------------------------------------
   // X 軸（左右）
@@ -175,11 +175,11 @@ int updateJoystickStatus() {
   sensorValues[kLeftLowIdx] = (joystickAnalogX <= kLeftLowThreshold) ? 1 : 0;
 
   // rightLow
-  sensorValues[kRightLowIdx] = (joystickAnalogX > kCenterMax && joystickAnalogX <= kRightLowThreshold) ? 1 : 0;
+  sensorValues[kRightLowIdx] = (joystickAnalogX >= kCenterMax) ? 1 : 0;
   // rightMiddle
-  sensorValues[kRightMiddleIdx] = (joystickAnalogX > kCenterMax && joystickAnalogX <= kRightMiddleThreshold) ? 1 : 0;
+  sensorValues[kRightMiddleIdx] = (joystickAnalogX >= kRightLowThreshold) ? 1 : 0;
   // rightHigh
-  sensorValues[kRightHighIdx] = (joystickAnalogX > kRightMiddleThreshold) ? 1 : 0;
+  sensorValues[kRightHighIdx] = (joystickAnalogX >= kRightMiddleThreshold) ? 1 : 0;
 }
 
 /**

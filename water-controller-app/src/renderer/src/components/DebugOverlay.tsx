@@ -70,11 +70,11 @@ export function DebugOverlay({
       case 0:
         return '-'
       case 1:
-        return 'L'
+        return 'LOW'
       case 2:
-        return 'M'
+        return 'MIDDLE'
       case 3:
-        return 'H'
+        return 'HIGH'
       default:
         return '?'
     }

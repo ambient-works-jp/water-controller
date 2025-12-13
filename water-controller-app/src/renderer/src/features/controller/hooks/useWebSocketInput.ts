@@ -52,6 +52,7 @@ export function useWebSocketInput(
                 ...prev.state,
                 button: lastMessage.isPushed
               },
+              source: InputSource.WebSocket, // source も更新
               timestamp: Date.now()
             }
           : {

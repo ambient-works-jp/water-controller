@@ -176,6 +176,7 @@ export const CONTENTS: ContentItem[] = [
 ## 備考
 
 ### プレイリストでの混在
+
 Canvas 2D、Three.js、p5.js のコンテンツを同じプレイリスト内で混在させることができます：
 
 ```json
@@ -193,12 +194,15 @@ Canvas 2D、Three.js、p5.js のコンテンツを同じプレイリスト内で
 ### 既存のサンプルコンテンツ
 
 #### Canvas 2D
+
 - `circular-particles`: 円周上を回転するパーティクル
 - `wave-lines`: 重なり合う波線
 - `radial-spokes`: 放射状のスポーク
 
 #### Three.js
+
 - `rotating-cube`: 回転する立方体（OrbitControls 付き）
 
 #### p5.js
+
 - `water-controller-text`: "Water Controller" テキストアニメーション

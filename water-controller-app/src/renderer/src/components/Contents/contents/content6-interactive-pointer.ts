@@ -51,7 +51,7 @@ export const interactivePointer: Content = {
     name: 'Interactive Pointer',
     description: 'コントローラ入力に反応するぽわぽわポインタ'
   },
-  render: (ctx, t, vw, vh, lastMessage) => {
+  render: (ctx, t, vw, vh, controllerState) => {
     // 初回のみパーティクルを初期化
     if (!initialized) {
       initParticles()
@@ -67,20 +67,18 @@ export const interactivePointer: Content = {
     const centerY = vh / 2
 
     // コントローラ入力から加速度を計算
-    if (lastMessage?.type === 'controller-input') {
-      const { left, right, up, down } = lastMessage
+    const { left, right, up, down } = controllerState
 
-      // 入力レベルに応じた速度（0: NoInput, 1: Low, 2: High）
-      const baseSpeed = 5
-      const leftForce = left * baseSpeed
-      const rightForce = right * baseSpeed
-      const upForce = up * baseSpeed
-      const downForce = down * baseSpeed
+    // 入力レベルに応じた速度（0: NoInput, 1: Low, 2: Middle, 3: High）
+    const baseSpeed = 5
+    const leftForce = left * baseSpeed
+    const rightForce = right * baseSpeed
+    const upForce = up * baseSpeed
+    const downForce = down * baseSpeed
 
-      // 速度に加算
-      velocityX += (rightForce - leftForce) * 0.8
-      velocityY += (downForce - upForce) * 0.8
-    }
+    // 速度に加算
+    velocityX += (rightForce - leftForce) * 0.8
+    velocityY += (downForce - upForce) * 0.8
 
     // 中央への復元力（操作しないと戻る）
     const restoreForce = 0.03

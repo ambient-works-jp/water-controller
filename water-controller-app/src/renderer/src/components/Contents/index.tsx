@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import type { WsMessage } from '../../../../lib/types/websocket'
 import type { Config } from '../../../../lib/types/config'
+import type { ControllerState } from '../../features/controller/types'
 
 /**
  * コンテンツの統括
@@ -20,6 +21,8 @@ interface ContentsProps {
   onSendPing: () => void
   /** 最新の WebSocket メッセージ */
   lastMessage: WsMessage | null
+  /** コントローラ状態（WebSocket + キーボード統合） */
+  controllerState: ControllerState
   /** 設定（プレイリスト情報を含む） */
   config: Config | null
   /** コンテンツ変更時のコールバック */
@@ -34,6 +37,7 @@ interface ContentsProps {
  */
 export function Contents({
   lastMessage,
+  controllerState,
   config,
   onContentChange
 }: ContentsProps): React.JSX.Element {
@@ -66,6 +70,8 @@ export function Contents({
   const onContentChangeRef = useRef(onContentChange)
   const setCurrentIndexRef = useRef(setCurrentIndex) // state 更新関数を ref で保持
   const lastMessageRef = useRef<WsMessage | null>(lastMessage) // lastMessage を ref で保持
+  const controllerStateRef = useRef<ControllerState>(controllerState) // controllerState を ref で保持
+  const prevButtonRef = useRef(false) // 前回のボタン状態（立ち上がりエッジ検出用）
 
   // 現在のコンテンツタイプを判定（state を使用）
   const currentContent = playlist.length > 0 ? playlist[currentIndex % playlist.length] : null
@@ -92,6 +98,11 @@ export function Contents({
     lastMessageRef.current = lastMessage
   }, [lastMessage])
 
+  // controllerState を ref に保持
+  useEffect(() => {
+    controllerStateRef.current = controllerState
+  }, [controllerState])
+
   // 初期コンテンツ情報を通知
   useEffect(() => {
     if (playlist.length > 0 && onContentChange) {
@@ -100,21 +111,23 @@ export function Contents({
     }
   }, [playlist, onContentChange])
 
-  // ButtonInput メッセージを検知してコンテンツを切り替え
+  // ボタン入力を検知してコンテンツを切り替え（立ち上がりエッジ検出）
   useEffect(() => {
-    if (!lastMessage || lastMessage.type !== 'button-input') {
-      return
-    }
+    const currentButton = controllerState.button
+    const prevButton = prevButtonRef.current
 
-    // isPushed が true のときのみ切り替え
-    if (lastMessage.isPushed && !isTransitioningRef.current) {
-      console.log('[Contents] Switching to next content')
+    // 立ち上がりエッジ（false → true）を検出
+    if (currentButton && !prevButton && !isTransitioningRef.current) {
+      console.log('[Contents] Switching to next content (button pressed)')
       isTransitioningRef.current = true
       nextIndexRef.current = (currentIndexRef.current + 1) % playlistLength
       phaseRef.current = 'out'
       fadeRef.current = 0
     }
-  }, [lastMessage, playlistLength])
+
+    // 前回の状態を更新
+    prevButtonRef.current = currentButton
+  }, [controllerState.button, playlistLength])
 
   // Canvas のリサイズ処理
   const resize = useCallback(() => {
@@ -195,7 +208,7 @@ export function Contents({
 
       // Canvas 2D コンテンツの場合のみ描画（component の場合はスキップ）
       if (content.render) {
-        content.render(ctx, t, vw, vh, lastMessageRef.current)
+        content.render(ctx, t, vw, vh, controllerStateRef.current, lastMessageRef.current)
       }
 
       // トランジション処理
@@ -331,6 +344,7 @@ export function Contents({
             width={componentDimensions.width}
             height={componentDimensions.height}
             time={componentTime}
+            controllerState={controllerState}
             lastMessage={lastMessage}
           />
         </div>

@@ -11,7 +11,7 @@ export const waveLines: Content = {
     name: 'Wave Lines',
     description: '複数の波線が重なり合うアニメーション'
   },
-  render: (ctx, t, vw, vh) => {
+  render: (ctx, t, vw, vh, _controllerState) => {
     // 背景
     ctx.fillStyle = 'rgb(10,12,18)'
     ctx.fillRect(0, 0, vw, vh)

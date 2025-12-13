@@ -9,7 +9,8 @@ import {
   waveLines,
   radialSpokes,
   rotatingCube,
-  waterControllerText
+  waterControllerText,
+  interactivePointer
 } from './contents'
 
 /**
@@ -20,7 +21,8 @@ const allContents: Record<string, Content> = {
   [CONTENT_IDS.WAVE_LINES]: waveLines,
   [CONTENT_IDS.RADIAL_SPOKES]: radialSpokes,
   [CONTENT_IDS.ROTATING_CUBE]: rotatingCube,
-  [CONTENT_IDS.WATER_CONTROLLER_TEXT]: waterControllerText
+  [CONTENT_IDS.WATER_CONTROLLER_TEXT]: waterControllerText,
+  [CONTENT_IDS.INTERACTIVE_POINTER]: interactivePointer
 }
 
 /**

@@ -2,6 +2,8 @@
  * コンテンツの型定義
  */
 
+import type { WsMessage } from '../../../../lib/types/websocket'
+
 /**
  * コンテンツのメタデータ
  */
@@ -21,12 +23,14 @@ export interface ContentMetadata {
  * @param t - 経過時間（秒）
  * @param vw - ビューポート幅
  * @param vh - ビューポート高さ
+ * @param lastMessage - 最新の WebSocket メッセージ（オプション）
  */
 export type ContentRenderer = (
   ctx: CanvasRenderingContext2D,
   t: number,
   vw: number,
-  vh: number
+  vh: number,
+  lastMessage?: WsMessage | null
 ) => void
 
 /**
@@ -39,6 +43,8 @@ export interface ContentComponentProps {
   height: number
   /** 経過時間（秒） */
   time: number
+  /** 最新の WebSocket メッセージ（オプション） */
+  lastMessage?: WsMessage | null
 }
 
 /**

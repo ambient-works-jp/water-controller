@@ -65,6 +65,7 @@ export function Contents({
   const playlistRef = useRef(playlist)
   const onContentChangeRef = useRef(onContentChange)
   const setCurrentIndexRef = useRef(setCurrentIndex) // state 更新関数を ref で保持
+  const lastMessageRef = useRef<WsMessage | null>(lastMessage) // lastMessage を ref で保持
 
   // 現在のコンテンツタイプを判定（state を使用）
   const currentContent = playlist.length > 0 ? playlist[currentIndex % playlist.length] : null
@@ -85,6 +86,11 @@ export function Contents({
   useEffect(() => {
     setCurrentIndexRef.current = setCurrentIndex
   }, [setCurrentIndex])
+
+  // lastMessage を ref に保持
+  useEffect(() => {
+    lastMessageRef.current = lastMessage
+  }, [lastMessage])
 
   // 初期コンテンツ情報を通知
   useEffect(() => {
@@ -189,7 +195,7 @@ export function Contents({
 
       // Canvas 2D コンテンツの場合のみ描画（component の場合はスキップ）
       if (content.render) {
-        content.render(ctx, t, vw, vh)
+        content.render(ctx, t, vw, vh, lastMessageRef.current)
       }
 
       // トランジション処理
@@ -325,6 +331,7 @@ export function Contents({
             width={componentDimensions.width}
             height={componentDimensions.height}
             time={componentTime}
+            lastMessage={lastMessage}
           />
         </div>
       )}

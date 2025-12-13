@@ -14,7 +14,8 @@ export const CONTENT_IDS = {
   WAVE_LINES: 'wave-lines',
   RADIAL_SPOKES: 'radial-spokes',
   ROTATING_CUBE: 'rotating-cube',
-  WATER_CONTROLLER_TEXT: 'water-controller-text'
+  WATER_CONTROLLER_TEXT: 'water-controller-text',
+  INTERACTIVE_POINTER: 'interactive-pointer'
 } as const
 
 /**
@@ -45,6 +46,11 @@ export const CONTENTS: ContentItem[] = [
     id: CONTENT_IDS.WATER_CONTROLLER_TEXT,
     name: 'Water Controller Text',
     description: 'p5.js で "Water Controller" を表示'
+  },
+  {
+    id: CONTENT_IDS.INTERACTIVE_POINTER,
+    name: 'Interactive Pointer',
+    description: 'コントローラ入力に反応するぽわぽわポインタ'
   }
 ]
 

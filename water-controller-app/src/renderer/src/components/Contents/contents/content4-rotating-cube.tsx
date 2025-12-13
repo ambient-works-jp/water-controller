@@ -39,7 +39,7 @@ function RotatingCube(): React.JSX.Element {
 /**
  * Three.js シーンコンポーネント
  */
-function ThreeScene({ width, height }: ContentComponentProps): React.JSX.Element {
+function ThreeScene({ width, height }: Omit<ContentComponentProps, 'time'>): React.JSX.Element {
   return (
     <Canvas
       style={{ width, height }}

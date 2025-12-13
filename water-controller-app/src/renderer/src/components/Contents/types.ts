@@ -3,6 +3,7 @@
  */
 
 import type { WsMessage } from '../../../../lib/types/websocket'
+import type { ControllerState } from '../../features/controller/types'
 
 /**
  * コンテンツのメタデータ
@@ -23,13 +24,15 @@ export interface ContentMetadata {
  * @param t - 経過時間（秒）
  * @param vw - ビューポート幅
  * @param vh - ビューポート高さ
- * @param lastMessage - 最新の WebSocket メッセージ（オプション）
+ * @param controllerState - コントローラ状態（WebSocket + キーボード統合）
+ * @param lastMessage - 最新の WebSocket メッセージ（オプション、互換性のため残す）
  */
 export type ContentRenderer = (
   ctx: CanvasRenderingContext2D,
   t: number,
   vw: number,
   vh: number,
+  controllerState: ControllerState,
   lastMessage?: WsMessage | null
 ) => void
 
@@ -43,7 +46,9 @@ export interface ContentComponentProps {
   height: number
   /** 経過時間（秒） */
   time: number
-  /** 最新の WebSocket メッセージ（オプション） */
+  /** コントローラ状態（WebSocket + キーボード統合） */
+  controllerState: ControllerState
+  /** 最新の WebSocket メッセージ（オプション、互換性のため残す） */
   lastMessage?: WsMessage | null
 }
 

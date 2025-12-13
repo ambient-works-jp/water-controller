@@ -2,7 +2,7 @@ use std::{error::Error, fmt, io, num::ParseIntError};
 
 use serde::Serialize;
 
-const FIELD_COUNT: usize = 9;
+const FIELD_COUNT: usize = 13;
 
 pub fn list_serial_devices() -> io::Result<()> {
     println!("Listing available serial ports:");
@@ -47,6 +47,7 @@ pub struct ControllerInput {
 pub enum ControllerValue {
     Noinput(i32),
     Low(i32),
+    Middle(i32),
     High(i32),
 }
 
@@ -66,10 +67,12 @@ pub enum ParseInputError {
         index: usize,
         value: i32,
     },
-    InvalidControllerCombination {
+    InvalidControllerTripleCombination {
         low_index: usize,
+        middle_index: usize,
         high_index: usize,
         low_value: i32,
+        middle_value: i32,
         high_value: i32,
     },
 }
@@ -96,15 +99,17 @@ impl fmt::Display for ParseInputError {
                     "invalid controller field #{index} value: {value} (expected 0 or 1)"
                 )
             }
-            Self::InvalidControllerCombination {
+            Self::InvalidControllerTripleCombination {
                 low_index,
+                middle_index,
                 high_index,
                 low_value,
+                middle_value,
                 high_value,
             } => {
                 write!(
                     f,
-                    "invalid controller combination (field #{low_index}={low_value}, field #{high_index}={high_value}): high=1 requires low=1"
+                    "invalid controller triple combination (field #{low_index}={low_value}, field #{middle_index}={middle_value}, field #{high_index}={high_value}): high=1 requires middle=1, middle=1 requires low=1"
                 )
             }
         }
@@ -160,12 +165,13 @@ pub fn parse_input_line(line: &str) -> Result<SerialInput, ParseInputError> {
     // button フィールド (0/1) を bool に変換
     let button = parse_button(values[0])?;
 
-    // front/right/back/left それぞれの Low/High ペアを評価
+    // front/right/back/left それぞれの Low/Middle/High トリプルを評価
+    // フォーマット: button,frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh
     let controller = ControllerInput {
-        up: controller_value_from_pair(values[1], values[2], 1, 2)?,
-        right: controller_value_from_pair(values[3], values[4], 3, 4)?,
-        down: controller_value_from_pair(values[5], values[6], 5, 6)?,
-        left: controller_value_from_pair(values[7], values[8], 7, 8)?,
+        up: controller_value_from_triple(values[1], values[2], values[3], 1, 2, 3)?,
+        right: controller_value_from_triple(values[4], values[5], values[6], 4, 5, 6)?,
+        down: controller_value_from_triple(values[7], values[8], values[9], 7, 8, 9)?,
+        left: controller_value_from_triple(values[10], values[11], values[12], 10, 11, 12)?,
     };
 
     Ok(SerialInput { button, controller })
@@ -189,25 +195,43 @@ fn ensure_binary_controller_value(value: i32, index: usize) -> Result<(), ParseI
     }
 }
 
-fn controller_value_from_pair(
+fn controller_value_from_triple(
     low: i32,
+    middle: i32,
     high: i32,
     low_index: usize,
+    middle_index: usize,
     high_index: usize,
 ) -> Result<ControllerValue, ParseInputError> {
-    // High が 1 なら Low も 1 である必要がある
-    if high == 1 && low == 0 {
-        return Err(ParseInputError::InvalidControllerCombination {
+    // 階層的な制約チェック
+    // High が 1 なら Middle も 1 である必要がある
+    // Middle が 1 なら Low も 1 である必要がある
+    if high == 1 && middle == 0 {
+        return Err(ParseInputError::InvalidControllerTripleCombination {
             low_index,
+            middle_index,
             high_index,
             low_value: low,
+            middle_value: middle,
+            high_value: high,
+        });
+    }
+    if middle == 1 && low == 0 {
+        return Err(ParseInputError::InvalidControllerTripleCombination {
+            low_index,
+            middle_index,
+            high_index,
+            low_value: low,
+            middle_value: middle,
             high_value: high,
         });
     }
 
-    // High が優先、次いで Low、両方 0 で Noinput
+    // High優先 > Middle優先 > Low優先 > Noinput
     let value = if high > 0 {
         ControllerValue::High(high)
+    } else if middle > 0 {
+        ControllerValue::Middle(middle)
     } else if low > 0 {
         ControllerValue::Low(low)
     } else {
@@ -252,6 +276,7 @@ impl fmt::Display for ControllerValue {
         match self {
             ControllerValue::Noinput(val) => write!(f, "Noinput({val})"),
             ControllerValue::Low(val) => write!(f, "Low({val})"),
+            ControllerValue::Middle(val) => write!(f, "Middle({val})"),
             ControllerValue::High(val) => write!(f, "High({val})"),
         }
     }
@@ -265,9 +290,9 @@ mod tests {
     fn parse_zero_line() {
         /* case
         button: 0
-        frontLow/frontHigh/rightLow/rightHigh/backLow/backHigh/leftLow/leftHigh: 全て 0
+        frontLow/frontMiddle/frontHigh/rightLow/rightMiddle/rightHigh/backLow/backMiddle/backHigh/leftLow/leftMiddle/leftHigh: 全て 0
         */
-        let line = "0,0,0,0,0,0,0,0,0";
+        let line = "0,0,0,0,0,0,0,0,0,0,0,0,0";
         let input = parse_input_line(line).unwrap();
 
         assert!(!input.button.is_pushed);
@@ -281,18 +306,18 @@ mod tests {
     fn parse_mixed_levels() {
         /* case
         button: 1
-        front: low=1, high=0
-        right: low=1, high=1
-        back: low=1, high=0
-        left: low=1, high=1
+        front: low=1, middle=0, high=0
+        right: low=1, middle=1, high=1
+        back: low=1, middle=1, high=0
+        left: low=1, middle=1, high=1
         */
-        let line = "1,1,0,1,1,1,0,1,1";
+        let line = "1,1,0,0,1,1,1,1,1,0,1,1,1";
         let input = parse_input_line(line).unwrap();
 
         assert!(input.button.is_pushed);
         assert_eq!(input.controller.up, ControllerValue::Low(1));
         assert_eq!(input.controller.right, ControllerValue::High(1));
-        assert_eq!(input.controller.down, ControllerValue::Low(1));
+        assert_eq!(input.controller.down, ControllerValue::Middle(1));
         assert_eq!(input.controller.left, ControllerValue::High(1));
     }
 
@@ -301,7 +326,7 @@ mod tests {
         /* case
         button: 2 (不正値)
         */
-        let line = "2,0,0,0,0,0,0,0,0";
+        let line = "2,0,0,0,0,0,0,0,0,0,0,0,0";
         let err = parse_input_line(line).unwrap_err();
         match err {
             ParseInputError::InvalidButtonValue(value) => assert_eq!(value, 2),
@@ -328,13 +353,13 @@ mod tests {
     #[test]
     fn invalid_controller_value_is_rejected() {
         /* case
-        rightHigh: 2 (0/1 以外)
+        rightMiddle: 2 (0/1 以外)
         */
-        let line = "0,0,0,0,2,0,0,0,0";
+        let line = "0,0,0,0,0,2,0,0,0,0,0,0,0";
         let err = parse_input_line(line).unwrap_err();
         match err {
             ParseInputError::InvalidControllerValue { index, value } => {
-                assert_eq!(index, 4);
+                assert_eq!(index, 5);
                 assert_eq!(value, 2);
             }
             other => panic!("unexpected error variant: {other}"),
@@ -344,21 +369,52 @@ mod tests {
     #[test]
     fn invalid_controller_combination_is_rejected() {
         /* case
-        right: low=0, high=1 (High だけ 1)
+        right: low=0, middle=0, high=1 (High だけ 1)
         */
-        let line = "0,0,0,0,1,0,0,0,0";
+        let line = "0,0,0,0,0,0,1,0,0,0,0,0,0";
         let err = parse_input_line(line).unwrap_err();
         match err {
-            ParseInputError::InvalidControllerCombination {
+            ParseInputError::InvalidControllerTripleCombination {
                 low_index,
+                middle_index,
                 high_index,
                 low_value,
+                middle_value,
                 high_value,
             } => {
-                assert_eq!(low_index, 3);
-                assert_eq!(high_index, 4);
+                assert_eq!(low_index, 4);
+                assert_eq!(middle_index, 5);
+                assert_eq!(high_index, 6);
                 assert_eq!(low_value, 0);
+                assert_eq!(middle_value, 0);
                 assert_eq!(high_value, 1);
+            }
+            other => panic!("unexpected error variant: {other}"),
+        }
+    }
+
+    #[test]
+    fn invalid_middle_without_low_is_rejected() {
+        /* case
+        left: low=0, middle=1, high=0 (Middle だけ 1)
+        */
+        let line = "0,0,0,0,0,0,0,0,0,0,0,1,0";
+        let err = parse_input_line(line).unwrap_err();
+        match err {
+            ParseInputError::InvalidControllerTripleCombination {
+                low_index,
+                middle_index,
+                high_index,
+                low_value,
+                middle_value,
+                high_value,
+            } => {
+                assert_eq!(low_index, 10);
+                assert_eq!(middle_index, 11);
+                assert_eq!(high_index, 12);
+                assert_eq!(low_value, 0);
+                assert_eq!(middle_value, 1);
+                assert_eq!(high_value, 0);
             }
             other => panic!("unexpected error variant: {other}"),
         }

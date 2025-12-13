@@ -11,7 +11,7 @@ export const radialSpokes: Content = {
     name: 'Radial Spokes',
     description: '中心から放射状に伸びるスポークのアニメーション'
   },
-  render: (ctx, t, vw, vh) => {
+  render: (ctx, t, vw, vh, _controllerState) => {
     // 背景
     ctx.fillStyle = 'rgb(15,8,18)'
     ctx.fillRect(0, 0, vw, vh)

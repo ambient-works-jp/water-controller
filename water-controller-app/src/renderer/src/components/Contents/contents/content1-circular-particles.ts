@@ -11,7 +11,7 @@ export const circularParticles: Content = {
     name: 'Circular Particles',
     description: '円周上を回転しながら移動するパーティクルのアニメーション'
   },
-  render: (ctx, t, vw, vh) => {
+  render: (ctx, t, vw, vh, _controllerState) => {
     // 背景
     ctx.fillStyle = 'rgb(16,18,25)'
     ctx.fillRect(0, 0, vw, vh)

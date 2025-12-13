@@ -7,6 +7,8 @@ import { ErrorDialog } from './components/ErrorDialog'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useKeyboardShortcut } from './hooks/useKeyboardShortcut'
 import { messageHandler } from './features/network/websocket'
+import { useControllerInput } from './features/controller/hooks/useControllerInput'
+import { InputSource } from './features/controller/types'
 import type { Config } from '../../lib/types/config'
 
 const FADE_ANIMATION_DURATION_MS = 300
@@ -84,6 +86,16 @@ function App(): React.JSX.Element {
   useEffect(() => {
     console.log('[WebSocket] Connection status:', status)
   }, [status])
+
+  // コントローラ入力の抽象化レイヤー（WebSocket + キーボード）
+  const { state: controllerState } = useControllerInput(
+    {
+      enableWebSocket: true,
+      enableKeyboard: true,
+      priority: [InputSource.WebSocket, InputSource.Keyboard]
+    },
+    lastMessage
+  )
 
   // debugMode 変更時に設定を保存
   const configRef = useRef<Config | null>(config)
@@ -199,6 +211,7 @@ function App(): React.JSX.Element {
       <Contents
         onSendPing={handleSendPing}
         lastMessage={lastMessage}
+        controllerState={controllerState}
         config={config}
         onContentChange={handleContentChange}
       />
@@ -210,6 +223,7 @@ function App(): React.JSX.Element {
       <DebugOverlay
         status={status}
         lastMessage={lastMessage}
+        controllerState={controllerState}
         debugMode={debugMode}
         currentContent={currentContent}
       />

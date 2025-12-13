@@ -23,7 +23,27 @@ int joystickAnalogX = 0;
 int joystickAnalogY = 0;
 
 // 定数
-constexpr size_t kSensorCount = 8;
+constexpr size_t kSensorCount = 12;
+
+// Joystick しきい値パラメータ（調整可能）
+// X軸（左右）のしきい値
+constexpr int kLeftHighThreshold = 10;      // 0 <= x <= 10: leftHigh
+constexpr int kLeftMiddleThreshold = 341;   // 11 <= x <= 341: leftMiddle
+constexpr int kLeftLowThreshold = 480;      // 342 <= x <= 480: leftLow
+constexpr int kCenterMin = 481;             // 481 <= x <= 580: center (no input)
+constexpr int kCenterMax = 580;
+constexpr int kRightLowThreshold = 681;     // 581 <= x <= 681: rightLow
+constexpr int kRightMiddleThreshold = 1000; // 682 <= x <= 1000: rightMiddle
+// 1001 <= x <= 1023: rightHigh
+
+// Y軸（前後）のしきい値
+constexpr int kFrontHighThreshold = 10;      // 0 <= y <= 10: frontHigh
+constexpr int kFrontMiddleThreshold = 341;   // 11 <= y <= 341: frontMiddle
+constexpr int kFrontLowThreshold = 480;      // 342 <= y <= 480: frontLow
+// 481 <= y <= 580: center (no input) - X軸と共通
+constexpr int kBackLowThreshold = 681;       // 581 <= y <= 681: backLow
+constexpr int kBackMiddleThreshold = 1000;   // 682 <= y <= 1000: backMiddle
+// 1001 <= y <= 1023: backHigh
 
 // 送信するデータ
 int isButtonPushed = 0; // 押していないとき 0、押してるとき 1
@@ -79,7 +99,7 @@ int updateJoystickStatus() {
   // Serial.print("joystickAnalogY: ");
   // Serial.println(joystickAnalogY);
 
-  // アナログ値を変換
+  // アナログ値を変換（3段階：Low/Middle/High）
   /* 変換ルール
 
   ## アナログ値
@@ -87,50 +107,79 @@ int updateJoystickStatus() {
   joystickAnalogX: 0 ~ 1023 (0 のとき left 方向、1023 のとき right 方向)
   joystickAnalogY: 0 ~ 1023 (0 のとき front 方向、1023 のとき back 方向)
 
-  ## 変換後
+  ## 変換後（3段階）
 
-  - X 軸
-    - leftHigh：0 <= joystickAnalog <= 255
-    - leftLow：256 <= joystickAnalog <= 511
-    - rightLow：512 <= joystickAnalog <= 767
-    - rightHigh：768 <= joystickAnalog <= 1023
+  - X 軸（左右）
+    - leftHigh：0 <= x <= kLeftHighThreshold (10)
+    - leftMiddle：kLeftHighThreshold < x <= kLeftMiddleThreshold (341)
+    - leftLow：kLeftMiddleThreshold < x <= kLeftLowThreshold (480)
+    - center (no input)：kCenterMin <= x <= kCenterMax (481-580)
+    - rightLow：kCenterMax < x <= kRightLowThreshold (681)
+    - rightMiddle：kRightLowThreshold < x <= kRightMiddleThreshold (1000)
+    - rightHigh：kRightMiddleThreshold < x <= 1023
 
-  - Y 軸
-    - frontHigh：0 <= joystickAnalog <= 255
-    - frontLow：256 <= joystickAnalog <= 511
-    - backLow：512 <= joystickAnalog <= 767
-    - backHigh：768 <= joystickAnalog <= 1023
+  - Y 軸（前後）
+    - frontHigh：0 <= y <= kFrontHighThreshold (10)
+    - frontMiddle：kFrontHighThreshold < y <= kFrontMiddleThreshold (341)
+    - frontLow：kFrontMiddleThreshold < y <= kFrontLowThreshold (480)
+    - center (no input)：kCenterMin <= y <= kCenterMax (481-580)
+    - backLow：kCenterMax < y <= kBackLowThreshold (681)
+    - backMiddle：kBackLowThreshold < y <= kBackMiddleThreshold (1000)
+    - backHigh：kBackMiddleThreshold < y <= 1023
   */
 
-  // 順序：frontLow,frontHigh,rightLow,rightHigh,backLow,backHigh,leftLow,leftHigh
+  // 順序：frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh
   //
   // NOTE: 思ったより joystick モジュールのアナログ値が 0, 1023
   // になるのが早いのでほぼギリギリでやっと high になるようにした
-  // ------------------------------------------------------------
-  // x 軸
-  // ------------------------------------------------------------
-  // leftHigh
-  sensorValues[7] = joystickAnalogX <= 10 ? 1 : 0;
-  // leftLow
-  sensorValues[6] = joystickAnalogX <= 480 ? 1 : 0;
-  // 中心は 511。幅を持って 440 ~ 580 は center とする。
-  // rightLow
-  sensorValues[2] = 580 <= joystickAnalogX ? 1 : 0;
-  // rightHigh
-  sensorValues[3] = 1000 <= joystickAnalogX ? 1 : 0;
+
+  // インデックス定義（可読性向上）
+  const int kFrontLowIdx = 0;
+  const int kFrontMiddleIdx = 1;
+  const int kFrontHighIdx = 2;
+  const int kRightLowIdx = 3;
+  const int kRightMiddleIdx = 4;
+  const int kRightHighIdx = 5;
+  const int kBackLowIdx = 6;
+  const int kBackMiddleIdx = 7;
+  const int kBackHighIdx = 8;
+  const int kLeftLowIdx = 9;
+  const int kLeftMiddleIdx = 10;
+  const int kLeftHighIdx = 11;
 
   // ------------------------------------------------------------
-  // y 軸
+  // Y 軸（前後）
   // ------------------------------------------------------------
   // frontHigh
-  sensorValues[1] = joystickAnalogY <= 10 ? 1 : 0;
+  sensorValues[kFrontHighIdx] = (joystickAnalogY <= kFrontHighThreshold) ? 1 : 0;
+  // frontMiddle
+  sensorValues[kFrontMiddleIdx] = (joystickAnalogY <= kFrontMiddleThreshold) ? 1 : 0;
   // frontLow
-  sensorValues[0] = joystickAnalogY <= 480 ? 1 : 0;
-  // 中心は 511。幅を持って 440 ~ 580 は center とする。
+  sensorValues[kFrontLowIdx] = (joystickAnalogY <= kFrontLowThreshold) ? 1 : 0;
+
   // backLow
-  sensorValues[4] = 580 <= joystickAnalogY ? 1 : 0;
+  sensorValues[kBackLowIdx] = (joystickAnalogY >= kCenterMax) ? 1 : 0;
+  // backMiddle
+  sensorValues[kBackMiddleIdx] = (joystickAnalogY >= kBackLowThreshold) ? 1 : 0;
   // backHigh
-  sensorValues[5] = 1000 <= joystickAnalogY ? 1 : 0;
+  sensorValues[kBackHighIdx] = (joystickAnalogY >= kBackMiddleThreshold) ? 1 : 0;
+
+  // ------------------------------------------------------------
+  // X 軸（左右）
+  // ------------------------------------------------------------
+  // leftHigh
+  sensorValues[kLeftHighIdx] = (joystickAnalogX <= kLeftHighThreshold) ? 1 : 0;
+  // leftMiddle
+  sensorValues[kLeftMiddleIdx] = (joystickAnalogX <= kLeftMiddleThreshold) ? 1 : 0;
+  // leftLow
+  sensorValues[kLeftLowIdx] = (joystickAnalogX <= kLeftLowThreshold) ? 1 : 0;
+
+  // rightLow
+  sensorValues[kRightLowIdx] = (joystickAnalogX >= kCenterMax) ? 1 : 0;
+  // rightMiddle
+  sensorValues[kRightMiddleIdx] = (joystickAnalogX >= kRightLowThreshold) ? 1 : 0;
+  // rightHigh
+  sensorValues[kRightHighIdx] = (joystickAnalogX >= kRightMiddleThreshold) ? 1 : 0;
 }
 
 /**
@@ -139,20 +188,20 @@ int updateJoystickStatus() {
  * ## 概要
  *
  * ボタン押下状態と水コントローラーに付けられた前後左右、
- * それぞれ high / low の 2 つずつの静電容量センサーの値 (0 / 1)
+ * それぞれ high / middle / low の 3 つずつの静電容量センサーの値 (0 / 1)
  * をカンマ区切りでシリアル・ポートに出力する。
  *
  * ## 送信されてくる文字列の形式
  *
  * ```
- * button,frontLow,frontHigh,rightLow,rightHigh,backLow,backHigh,leftLow,leftHigh\n
+ * button,frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh\n
  * ```
  *
  * （末尾に改行文字 \n を入れる必要があるので注意）
  */
 void serialOut(const int button, const int readings[kSensorCount]) {
-  // Serial.println("button,frontLow,frontHigh,rightLow,rightHigh,backLow,"
-  //                "backHigh,leftLow,leftHigh");
+  // Serial.println("button,frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,"
+  //                "backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh");
 
   // ボタンの入力値をシリアル出力
   Serial.print(button);

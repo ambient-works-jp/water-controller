@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import type { WsMessage, ConnectionStatus } from '../../../lib/types/websocket'
 import { InputLevel } from '../../../lib/types/websocket'
+import type { ControllerState } from '../features/controller/types'
 import { useAnimationFps } from '../hooks/useAnimationFps'
 import { useControllerFps } from '../hooks/useControllerFps'
 
@@ -9,6 +10,8 @@ interface DebugOverlayProps {
   status: ConnectionStatus
   /** 最後に受信したメッセージ */
   lastMessage: WsMessage | null
+  /** コントローラ状態（WebSocket + キーボード統合） */
+  controllerState: ControllerState
   /** デバッグモードのオン・オフ */
   debugMode: boolean
   /** 現在再生中のコンテンツ情報 */
@@ -27,39 +30,17 @@ interface DebugOverlayProps {
 export function DebugOverlay({
   status,
   lastMessage,
+  controllerState,
   debugMode,
   currentContent
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
-  const [buttonState, setButtonState] = useState(false)
-  const [controllerState, setControllerState] = useState({
-    left: 0 as InputLevel,
-    right: 0 as InputLevel,
-    up: 0 as InputLevel,
-    down: 0 as InputLevel
-  })
 
   // currentContent の変更をログ出力
   useEffect(() => {
     console.log('[DebugOverlay] currentContent updated:', currentContent)
   }, [currentContent])
-
-  // メッセージの状態を更新
-  useEffect(() => {
-    if (!lastMessage) return
-
-    if (lastMessage.type === 'button-input') {
-      setButtonState(lastMessage.isPushed)
-    } else if (lastMessage.type === 'controller-input') {
-      setControllerState({
-        left: lastMessage.left,
-        right: lastMessage.right,
-        up: lastMessage.up,
-        down: lastMessage.down
-      })
-    }
-  }, [lastMessage])
 
   // デバッグモードがオフの場合は非表示
   if (!debugMode) {
@@ -84,13 +65,15 @@ export function DebugOverlay({
   const getInputLevelLabel = (level: InputLevel): string => {
     switch (level) {
       case 0:
-        return 'NoInput'
+        return '-'
       case 1:
-        return 'Low'
+        return 'LOW'
       case 2:
-        return 'High'
+        return 'MIDDLE'
+      case 3:
+        return 'HIGH'
       default:
-        return 'Unknown'
+        return '?'
     }
   }
 
@@ -101,6 +84,8 @@ export function DebugOverlay({
       case 1:
         return 'active-low'
       case 2:
+        return 'active-middle'
+      case 3:
         return 'active-high'
       default:
         return ''
@@ -157,9 +142,9 @@ export function DebugOverlay({
               ←<span className="input-level">{getInputLevelLabel(controllerState.left)}</span>
             </div>
             {/* 中央にボタン */}
-            <div className={`action-button ${buttonState ? 'active' : ''}`}>
+            <div className={`action-button ${controllerState.button ? 'active' : ''}`}>
               <span className="button-label">Button</span>
-              <span className="button-state">{buttonState ? 'PUSHED' : 'RELEASED'}</span>
+              <span className="button-state">{controllerState.button ? 'PUSHED' : 'RELEASED'}</span>
             </div>
             <div className={`dpad-button ${getInputLevelClass(controllerState.right)}`}>
               →<span className="input-level">{getInputLevelLabel(controllerState.right)}</span>
@@ -186,6 +171,12 @@ export function DebugOverlay({
       <div className="keyboard-shortcuts">
         <div className="shortcuts-title">Keyboard Shortcuts</div>
         <div className="shortcuts-list">
+          <div className="shortcut-item">
+            <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> コントローラ入力
+          </div>
+          <div className="shortcut-item">
+            <kbd>Enter</kbd> ボタン入力（コンテンツ切り替え）
+          </div>
           <div className="shortcut-item">
             <kbd>⌘</kbd>+<kbd>M</kbd> 設定画面を開く
           </div>

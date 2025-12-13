@@ -154,7 +154,10 @@ const sketch: Sketch = (p5) => {
 /**
  * p5.js コンテンツコンポーネント
  */
-function WaterControllerText({ width, height }: ContentComponentProps): React.JSX.Element {
+function WaterControllerText({
+  width,
+  height
+}: Omit<ContentComponentProps, 'time'>): React.JSX.Element {
   return (
     <div style={{ width, height }}>
       <ReactP5Wrapper sketch={sketch} />

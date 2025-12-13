@@ -110,6 +110,15 @@
   box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
 }
 
+/* Middle 入力時（中程度のアニメーション） */
+.dpad-button.active-middle {
+  background: rgba(74, 222, 128, 0.225);
+  border-color: rgba(74, 222, 128, 0.8);
+  color: rgba(74, 222, 128, 0.9);
+  transform: scale(1.0375);
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+}
+
 /* High 入力時（強めのアニメーション） */
 .dpad-button.active-high {
   background: rgba(74, 222, 128, 0.3);

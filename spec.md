@@ -4,10 +4,10 @@
 
 ### シリアル通信のフォーマット
 
-文字列カンマ区切り
+文字列カンマ区切り（13フィールド）
 
 ```txt
-button,frontLow,frontHigh,rightLow,rightHigh,backLow,backHigh,leftLow,leftHigh
+button,frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh
 ```
 
 ### データ形式
@@ -32,26 +32,37 @@ button,frontLow,frontHigh,rightLow,rightHigh,backLow,backHigh,leftLow,leftHigh
     - `true`: ボタン押下あり
 - `frontXxx` ~ `leftXxx` -> `front`, `right`, `back`, `left`
   - データ型: enum
-  - データの取りうる値
+  - データの取りうる値（3段階）
     - `NOINPUT`: 入力なし
-    - `LOW`: 入力あり
-    - `HIGH`: 入力あり
+    - `LOW`: 低レベル入力
+    - `MIDDLE`: 中レベル入力
+    - `HIGH`: 高レベル入力
   - データ変換例 `left`
     - `NOINPUT`
       - 入力
         - `leftLow`: 0
+        - `leftMiddle`: 0
         - `leftHigh`: 0
       - 出力
         - `left`: `NOINPUT`
     - `LOW`
       - 入力
         - `leftLow`: 1
+        - `leftMiddle`: 0
         - `leftHigh`: 0
       - 出力
         - `left`: `LOW`
+    - `MIDDLE`
+      - 入力
+        - `leftLow`: 1
+        - `leftMiddle`: 1
+        - `leftHigh`: 0
+      - 出力
+        - `left`: `MIDDLE`
     - `HIGH`
       - 入力
         - `leftLow`: 1
+        - `leftMiddle`: 1
         - `leftHigh`: 1
       - 出力
         - `left`: `HIGH`

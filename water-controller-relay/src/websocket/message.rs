@@ -40,10 +40,16 @@ impl ButtonInputMessage {
 ///   "type": "controller-input",
 ///   "left": 0,
 ///   "right": 1,
-///   "up": 2,
-///   "down": 0
+///   "up": 3,
+///   "down": 2
 /// }
 /// ```
+///
+/// 値の意味:
+/// - 0: Noinput (入力なし)
+/// - 1: Low (低レベル入力)
+/// - 2: Middle (中レベル入力)
+/// - 3: High (高レベル入力)
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ControllerInputMessage {
@@ -70,7 +76,8 @@ impl ControllerInputMessage {
         match value {
             ControllerValue::Noinput(_) => 0,
             ControllerValue::Low(_) => 1,
-            ControllerValue::High(_) => 2,
+            ControllerValue::Middle(_) => 2,
+            ControllerValue::High(_) => 3,
         }
     }
 }
@@ -102,7 +109,7 @@ mod tests {
             left: ControllerValue::Noinput(0),
             right: ControllerValue::Low(1),
             up: ControllerValue::High(1),
-            down: ControllerValue::Noinput(0),
+            down: ControllerValue::Middle(1),
         };
 
         // when (操作):
@@ -112,7 +119,7 @@ mod tests {
         // then (期待する結果):
         assert_eq!(
             json,
-            r#"{"type":"controller-input","left":0,"right":1,"up":2,"down":0}"#
+            r#"{"type":"controller-input","left":0,"right":1,"up":3,"down":2}"#
         );
     }
 
@@ -122,16 +129,19 @@ mod tests {
         // given (前提条件):
         let noinput = ControllerValue::Noinput(0);
         let low = ControllerValue::Low(1);
+        let middle = ControllerValue::Middle(1);
         let high = ControllerValue::High(1);
 
         // when (操作):
         let noinput_int = ControllerInputMessage::value_to_int(&noinput);
         let low_int = ControllerInputMessage::value_to_int(&low);
+        let middle_int = ControllerInputMessage::value_to_int(&middle);
         let high_int = ControllerInputMessage::value_to_int(&high);
 
         // then (期待する結果):
         assert_eq!(noinput_int, 0);
         assert_eq!(low_int, 1);
-        assert_eq!(high_int, 2);
+        assert_eq!(middle_int, 2);
+        assert_eq!(high_int, 3);
     }
 }

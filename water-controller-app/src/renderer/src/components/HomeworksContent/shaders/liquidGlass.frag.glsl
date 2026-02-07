@@ -55,7 +55,10 @@ float fbm(vec2 p) {
   float amplitude = 0.5;
   float frequency = 1.0;
 
-  for (int i = 0; i < 4; i++) {
+  // オクターブの数
+  int octaves = 4;
+
+  for (int i = 0; i < octaves; i++) {
     value += amplitude * snoise(p * frequency);
     frequency *= 2.0;
     amplitude *= 0.5;

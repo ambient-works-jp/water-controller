@@ -41,7 +41,7 @@ const PHYSICS_PARAMS = {
 } as const
 
 // 波紋効果の定数
-const MAX_TRAIL_POINTS = 16;
+const MAX_TRAIL_POINTS = 24;
 const RIPPLE_PARAMS = {
   MAX_TRAIL_POINTS: MAX_TRAIL_POINTS, // 記録する軌跡点の最大数
   TRAIL_INTERVAL: 0.03, // 軌跡点を追加する間隔（秒）

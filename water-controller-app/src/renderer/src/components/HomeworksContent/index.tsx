@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { interactivePointer } from '../ContentPlaylist/contents/content1-interactive-pointer'
+import { glassBlurPointer } from '../ContentPlaylist/contents/content-glass-blur-pointer'
 import type { WsMessage } from '../../../../lib/types/websocket'
 import type { ControllerState } from '../../features/controller/types'
-import backgroundImage from '../../assets/background-lorem-ipsum-1080p.png'
 
 interface HomeworksContentProps {
   lastMessage: WsMessage | null
@@ -34,7 +33,7 @@ export function HomeworksContent({
   // マウント時にコンテンツ情報を報告
   useEffect(() => {
     if (onContentChange) {
-      onContentChange(interactivePointer.metadata.name, 0, 1)
+      onContentChange(glassBlurPointer.metadata.name, 0, 1)
     }
   }, [onContentChange])
 
@@ -79,9 +78,9 @@ export function HomeworksContent({
       const vh = rect.height
       const t = (Date.now() - startTimeRef.current) / 1000
 
-      // interactivePointer をレンダリング
-      if (interactivePointer.render) {
-        interactivePointer.render(
+      // glassBlurPointer をレンダリング
+      if (glassBlurPointer.render) {
+        glassBlurPointer.render(
           ctx,
           t,
           vw,
@@ -111,12 +110,9 @@ export function HomeworksContent({
       style={{
         width: '100%',
         height: '100vh',
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: '#000000'
       }}
     >
       <canvas

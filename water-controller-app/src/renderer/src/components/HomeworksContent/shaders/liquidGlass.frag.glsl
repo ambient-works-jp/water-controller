@@ -112,13 +112,8 @@ void main() {
     vec2 waveDirection = normalize(toPoint);
     float radialDistortion = waveInfluence * 0.3;
 
-    // ノイズによる揺らぎ（時間変化を削除して静的に）
-    vec2 noiseCoord = vUv * 3.0 + trailPos * 5.0;
-    float noiseX = fbm(noiseCoord) * 0.5;
-    float noiseY = fbm(noiseCoord + vec2(100.0, 50.0)) * 0.5;
-    vec2 noise = vec2(noiseX, noiseY);
-
-    totalDistortion += (waveDirection * radialDistortion + noise * 0.02 * waveInfluence) * uRefractionStrength;
+    // ノイズを削除してシンプルな波紋のみ
+    totalDistortion += waveDirection * radialDistortion * waveInfluence * uRefractionStrength;
     totalInfluence += waveInfluence;
   }
 

@@ -37,11 +37,7 @@ let initialized = false
 const TRAIL_MAX_POINTS = 80 // トレイル最大点数
 const TRAIL_MAX_AGE_MS = 2000 // トレイル点の最大寿命（ミリ秒）
 const BLUR_RADIUS = 40 // ブラー円の半径（ピクセル）
-const BLUR_STRENGTH = '20px' // ブラー強度
-const CURSOR_RADIUS = 30 // カーソルの半径（ピクセル）
-const CURSOR_COLOR = 'rgba(255, 255, 255, 0.3)' // カーソルの色（透明度を含む）
-const CURSOR_BORDER_COLOR = 'rgba(255, 255, 255, 0.6)' // カーソルの境界線の色
-const CURSOR_BORDER_WIDTH = 2 // カーソルの境界線の幅
+const BLUR_FILTER = 'blur(20px) saturate(160%) brightness(108%) contrast(95%)' // Apple Liquid Glass 風ブラーフィルタ
 
 /**
  * 背景画像を読み込む
@@ -58,6 +54,13 @@ function loadBackgroundImage(): void {
       console.error('[GlassBlurPointer] Failed to load background image')
     }
   }
+}
+
+/**
+ * 現在のカーソル位置を取得（中央からの相対位置）
+ */
+export function getCursorPosition(): { x: number; y: number } {
+  return { x: pointerX, y: pointerY }
 }
 
 /**
@@ -179,22 +182,36 @@ export const glassBlurPointer: Content = {
       const offCtx = offscreenCanvas.getContext('2d')
 
       if (blurCtx && offCtx) {
-        // ブラーマスクを作成（白い円でトレイルを描画）
+        // ブラーマスクを作成（3層構造で深度感を表現）
         blurCtx.clearRect(0, 0, vw, vh)
         const now = performance.now()
 
         trail.forEach((point) => {
           const age = now - point.timestamp
           const alpha = 1 - age / TRAIL_MAX_AGE_MS // 古い点ほど透明
+
+          // Layer 1: 拡張レイヤー（広く、薄く）
+          blurCtx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`
+          blurCtx.beginPath()
+          blurCtx.arc(point.x, point.y, BLUR_RADIUS * 1.5, 0, Math.PI * 2)
+          blurCtx.fill()
+
+          // Layer 2: ベースレイヤー（標準サイズ）
           blurCtx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.8})`
           blurCtx.beginPath()
           blurCtx.arc(point.x, point.y, BLUR_RADIUS, 0, Math.PI * 2)
+          blurCtx.fill()
+
+          // Layer 3: コアレイヤー（小さく、強く）
+          blurCtx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`
+          blurCtx.beginPath()
+          blurCtx.arc(point.x, point.y, BLUR_RADIUS * 0.5, 0, Math.PI * 2)
           blurCtx.fill()
         })
 
         // オフスクリーン Canvas にブラーをかけた背景を描画
         offCtx.clearRect(0, 0, vw, vh)
-        offCtx.filter = `blur(${BLUR_STRENGTH})`
+        offCtx.filter = BLUR_FILTER
         offCtx.drawImage(backgroundImage, 0, 0, vw, vh)
         offCtx.filter = 'none'
 
@@ -222,19 +239,8 @@ export const glassBlurPointer: Content = {
     }
 
     // ===================================
-    // 4. シンプルな円カーソルを描画
+    // 4. カーソルは DOM 要素として描画（Canvas からは削除）
     // ===================================
-    // カーソル本体（透明な円）
-    ctx.fillStyle = CURSOR_COLOR
-    ctx.beginPath()
-    ctx.arc(posX, posY, CURSOR_RADIUS, 0, Math.PI * 2)
-    ctx.fill()
-
-    // カーソルの境界線
-    ctx.strokeStyle = CURSOR_BORDER_COLOR
-    ctx.lineWidth = CURSOR_BORDER_WIDTH
-    ctx.beginPath()
-    ctx.arc(posX, posY, CURSOR_RADIUS, 0, Math.PI * 2)
-    ctx.stroke()
+    // カーソル位置は getCursorPosition() 関数で取得可能
   }
 }

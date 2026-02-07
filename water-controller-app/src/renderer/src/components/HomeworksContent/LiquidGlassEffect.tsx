@@ -11,11 +11,19 @@ import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import type { ControllerState } from '../../features/controller/types'
 import type { WsMessage } from '../../../../lib/types/websocket'
-import backgroundImageSrc from '../../assets/background-lorem-ipsum-1080p.png'
+import backgroundImageFullHDSrc from '../../assets/background-lorem-ipsum-1920x1080.png'
+import backgroundImageHDSrc from '../../assets/background-lorem-ipsum-1280x720.png'
 
 // Shader imports
 import vertexShader from './shaders/liquidGlass.vert.glsl?raw'
 import fragmentShader from './shaders/liquidGlass.frag.glsl?raw'
+
+enum BackgroundImageSize {
+  FULL_HD = 'FULL_HD',
+  HD = 'HD'
+}
+const backgroundImageSize = BackgroundImageSize.HD as BackgroundImageSize;
+const backgroundImageSrc = backgroundImageSize === BackgroundImageSize.FULL_HD ? backgroundImageFullHDSrc : backgroundImageHDSrc
 
 interface LiquidGlassEffectProps {
   controllerState: ControllerState

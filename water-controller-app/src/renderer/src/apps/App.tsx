@@ -1,15 +1,15 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Contents } from './components/Contents'
-import { DebugOverlay } from './components/DebugOverlay'
-import { SettingsButton } from './components/SettingsButton'
-import { SettingsPanel } from './components/SettingsPanel'
-import { ErrorDialog } from './components/ErrorDialog'
-import { useWebSocket } from './hooks/useWebSocket'
-import { useKeyboardShortcut } from './hooks/useKeyboardShortcut'
-import { messageHandler } from './features/network/websocket'
-import { useControllerInput } from './features/controller/hooks/useControllerInput'
-import { InputSource } from './features/controller/types'
-import type { Config } from '../../lib/types/config'
+import { HomeworksContent } from '../components/HomeworksContent'
+import { DebugOverlay } from '../components/DebugOverlay'
+import { SettingsButton } from '../components/SettingsButton'
+import { SettingsPanel } from '../components/SettingsPanel'
+import { ErrorDialog } from '../components/ErrorDialog'
+import { useWebSocket } from '../hooks/useWebSocket'
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut'
+import { messageHandler } from '../features/network/websocket'
+import { useControllerInput } from '../features/controller/hooks/useControllerInput'
+import { InputSource } from '../features/controller/types'
+import type { Config } from '../../../lib/types/config'
 
 const FADE_ANIMATION_DURATION_MS = 300
 
@@ -28,11 +28,6 @@ function App(): React.JSX.Element {
     index: number
     total: number
   } | null>(null)
-
-  const handleSendPing = async (): Promise<void> => {
-    const response = await window.api.ipc.sendPing()
-    console.log('IPC Response from main process: ', response)
-  }
 
   // コンテンツ変更時のコールバック
   const handleContentChange = useCallback((name: string, index: number, total: number) => {
@@ -207,12 +202,9 @@ function App(): React.JSX.Element {
         <ErrorDialog message={configLoadError.message} details={configLoadError.details} />
       )}
 
-      {/* コンテンツ画面 */}
-      <Contents
-        onSendPing={handleSendPing}
+      <HomeworksContent
         lastMessage={lastMessage}
         controllerState={controllerState}
-        config={config}
         onContentChange={handleContentChange}
       />
 

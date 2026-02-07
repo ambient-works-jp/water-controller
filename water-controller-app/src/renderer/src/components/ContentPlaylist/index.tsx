@@ -16,7 +16,7 @@ export type { Content, ContentRenderer } from './types'
 
 const FADE_DURATION_SEC = 0.6
 
-interface ContentsProps {
+interface ContentPlaylistProps {
   /** Ping 送信ハンドラ（デバッグ用） */
   onSendPing: () => void
   /** 最新の WebSocket メッセージ */
@@ -30,17 +30,17 @@ interface ContentsProps {
 }
 
 /**
- * コンテンツ表示コンポーネント
+ * プレイリスト機能を持つコンテンツ表示コンポーネント
  *
  * Canvas を使用してアニメーションコンテンツを表示し、
  * ButtonInput メッセージで無限ループ切り替えを行います
  */
-export function Contents({
+export function ContentPlaylist({
   lastMessage,
   controllerState,
   config,
   onContentChange
-}: ContentsProps): React.JSX.Element {
+}: ContentPlaylistProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 

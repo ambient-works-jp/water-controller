@@ -170,15 +170,18 @@ export function LiquidGlassEffect({
     material.uniforms.uCursorPosition.value.set(normalizedX, normalizedY)
     material.uniforms.uTime.value = currentTime
 
-    // 軌跡点の記録（一定間隔または一定距離移動した時）
+    // コントローラー入力がある時だけ軌跡点を記録（静止時のプルプルを防止）
+    const hasInput = left > 0 || right > 0 || up > 0 || down > 0
+
     const shouldAddTrail =
-      trailPoints.length === 0 ||
-      currentTime - lastTrailTime >= RIPPLE_PARAMS.TRAIL_INTERVAL ||
-      (trailPoints.length > 0 &&
-        Math.hypot(
-          normalizedX - trailPoints[trailPoints.length - 1].x,
-          normalizedY - trailPoints[trailPoints.length - 1].y
-        ) >= RIPPLE_PARAMS.MIN_DISTANCE)
+      hasInput &&
+      (trailPoints.length === 0 ||
+        currentTime - lastTrailTime >= RIPPLE_PARAMS.TRAIL_INTERVAL ||
+        (trailPoints.length > 0 &&
+          Math.hypot(
+            normalizedX - trailPoints[trailPoints.length - 1].x,
+            normalizedY - trailPoints[trailPoints.length - 1].y
+          ) >= RIPPLE_PARAMS.MIN_DISTANCE))
 
     if (shouldAddTrail) {
       trailPoints.push({ x: normalizedX, y: normalizedY, time: currentTime })

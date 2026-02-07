@@ -112,8 +112,8 @@ void main() {
     vec2 waveDirection = normalize(toPoint);
     float radialDistortion = waveInfluence * 0.3;
 
-    // ノイズによる揺らぎ
-    vec2 noiseCoord = vUv * 3.0 + trailTime * 0.5;
+    // ノイズによる揺らぎ（時間変化を削除して静的に）
+    vec2 noiseCoord = vUv * 3.0 + trailPos * 5.0;
     float noiseX = fbm(noiseCoord) * 0.5;
     float noiseY = fbm(noiseCoord + vec2(100.0, 50.0)) * 0.5;
     vec2 noise = vec2(noiseX, noiseY);
@@ -122,11 +122,21 @@ void main() {
     totalInfluence += waveInfluence;
   }
 
+  // 影響が完全にない場合は普通の画像を表示（静止時）
+  if (totalInfluence < 0.0001) {
+    gl_FragColor = texture2D(uTexture, vUv);
+    return;
+  }
+
+  // 影響が弱い時は徐々にフェードアウト（0.0001 〜 0.02 の範囲で滑らかに）
+  float fadeFactor = smoothstep(0.0001, 0.02, totalInfluence);
+  totalDistortion *= fadeFactor;
+
   // 歪みを適用
   vec2 distortedUv = vUv + totalDistortion;
 
-  // Chromatic Aberration（色収差）
-  float aberrationAmount = uChromaticAberration * totalInfluence;
+  // Chromatic Aberration（色収差）もフェードアウト
+  float aberrationAmount = uChromaticAberration * totalInfluence * fadeFactor;
   vec2 aberrationDir = normalize(totalDistortion) * aberrationAmount;
 
   float r = texture2D(uTexture, distortedUv + aberrationDir * 1.0).r;

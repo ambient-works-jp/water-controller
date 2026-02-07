@@ -228,3 +228,31 @@
   min-width: 28px;
   text-align: center;
 }
+
+/* エラーメッセージ（画面下部にバーとして表示） */
+.error-message {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(128, 128, 128, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+}
+
+.error-icon {
+  font-size: 14px;
+}
+
+.error-text {
+  font-size: 12px;
+}

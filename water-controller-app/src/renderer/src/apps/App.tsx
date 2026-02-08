@@ -206,6 +206,7 @@ function App(): React.JSX.Element {
         lastMessage={lastMessage}
         controllerState={controllerState}
         onContentChange={handleContentChange}
+        debugMode={debugMode}
       />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}

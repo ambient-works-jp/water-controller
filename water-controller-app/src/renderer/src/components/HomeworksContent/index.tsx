@@ -12,18 +12,21 @@ interface HomeworksContentProps {
   lastMessage: WsMessage | null
   controllerState: ControllerState
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
+  debugMode?: boolean
 }
 
 export function HomeworksContent({
   lastMessage,
   controllerState,
-  onContentChange
+  onContentChange,
+  debugMode = false
 }: HomeworksContentProps): React.JSX.Element {
   return (
     <LiquidGlassScene
       controllerState={controllerState}
       lastMessage={lastMessage}
       onContentChange={onContentChange}
+      debugMode={debugMode}
     />
   )
 }

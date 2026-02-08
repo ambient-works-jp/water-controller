@@ -5,8 +5,14 @@
 import { useState, useEffect } from 'react'
 import * as THREE from 'three'
 
-export function useVideoTexture(videoSrc: string): THREE.VideoTexture | null {
+export interface VideoTextureResult {
+  texture: THREE.VideoTexture | null
+  videoElement: HTMLVideoElement | null
+}
+
+export function useVideoTexture(videoSrc: string): VideoTextureResult {
   const [texture, setTexture] = useState<THREE.VideoTexture | null>(null)
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null)
 
   useEffect(() => {
     // HTML5 video要素を作成
@@ -17,6 +23,9 @@ export function useVideoTexture(videoSrc: string): THREE.VideoTexture | null {
     video.playsInline = true // iOS対応
     video.crossOrigin = 'anonymous' // CORS対応
     video.setAttribute('playsinline', 'true') // iOS対応（属性形式）
+
+    // 動画要素を状態に保存
+    setVideoElement(video)
 
     // 動画の読み込みを待つ
     const handleCanPlay = () => {
@@ -46,8 +55,9 @@ export function useVideoTexture(videoSrc: string): THREE.VideoTexture | null {
       video.src = ''
       video.load() // リソース解放
       texture?.dispose()
+      setVideoElement(null)
     }
   }, [videoSrc])
 
-  return texture
+  return { texture, videoElement }
 }

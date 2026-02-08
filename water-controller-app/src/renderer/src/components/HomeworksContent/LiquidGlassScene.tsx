@@ -8,9 +8,11 @@
  * - 高品質レンダリング
  */
 
+import { useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { LiquidGlassImageEffect } from './LiquidGlassImageEffect'
 import { LiquidGlassVideoEffect } from './LiquidGlassVideoEffect'
+import { VideoDebugUI } from './VideoDebugUI'
 import type { ControllerState } from '../../features/controller/types'
 import type { WsMessage } from '../../../../lib/types/websocket'
 
@@ -22,13 +24,17 @@ interface LiquidGlassSceneProps {
   controllerState: ControllerState
   lastMessage: WsMessage | null
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
+  debugMode?: boolean
 }
 
 export function LiquidGlassScene({
   controllerState,
   lastMessage,
-  onContentChange
+  onContentChange,
+  debugMode = false
 }: LiquidGlassSceneProps): React.JSX.Element {
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null)
+
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
       <Canvas
@@ -53,9 +59,13 @@ export function LiquidGlassScene({
             controllerState={controllerState}
             lastMessage={lastMessage}
             onContentChange={onContentChange}
+            onVideoElementReady={setVideoElement}
           />
         )}
       </Canvas>
+
+      {/* デバッグUI（動画モード＆デバッグモード時のみ表示） */}
+      {debugMode && BACKGROUND_TYPE === 'video' && <VideoDebugUI videoElement={videoElement} />}
     </div>
   )
 }

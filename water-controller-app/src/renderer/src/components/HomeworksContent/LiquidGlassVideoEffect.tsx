@@ -22,6 +22,7 @@ interface LiquidGlassVideoEffectProps {
   controllerState: ControllerState
   lastMessage: WsMessage | null
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
+  onVideoElementReady?: (videoElement: HTMLVideoElement | null) => void
 }
 
 // 物理シミュレーション定数
@@ -64,13 +65,14 @@ let lastTrailTime = 0
 
 export function LiquidGlassVideoEffect({
   controllerState,
-  onContentChange
+  onContentChange,
+  onVideoElementReady
 }: LiquidGlassVideoEffectProps): React.JSX.Element {
   const meshRef = useRef<THREE.Mesh>(null)
   const { size, viewport } = useThree()
 
   // 背景動画をVideoTextureとして読み込み
-  const backgroundTexture = useVideoTexture(videoSrc)
+  const { texture: backgroundTexture, videoElement } = useVideoTexture(videoSrc)
 
   // コンテンツ情報を報告（初回のみ）
   useEffect(() => {
@@ -78,6 +80,13 @@ export function LiquidGlassVideoEffect({
       onContentChange('Liquid Glass (Three.js/WebGL) + Video', 0, 1)
     }
   }, [onContentChange])
+
+  // ビデオ要素が準備できたら親コンポーネントに通知
+  useEffect(() => {
+    if (onVideoElementReady) {
+      onVideoElementReady(videoElement)
+    }
+  }, [videoElement, onVideoElementReady])
 
   // Liquid Glass シェーダーマテリアル
   const material = useMemo(() => {

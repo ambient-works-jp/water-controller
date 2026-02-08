@@ -9,7 +9,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { ControllerState } from '../../features/controller/types'
 import type { WsMessage } from '../../../../lib/types/websocket'
-import videoSrc from '../../assets/background-movie-720p.mp4'
+import videoSrc from '../../assets/background-movie-1080p.mp4'
 
 // Custom hooks
 import { useVideoTexture } from './hooks/useVideoTexture'

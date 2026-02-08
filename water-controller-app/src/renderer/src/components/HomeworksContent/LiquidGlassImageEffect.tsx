@@ -134,7 +134,7 @@ export function LiquidGlassImageEffect({
     // 速度に加算（timeScale を適用）
     pointerState.velocityX +=
       (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
-    pointerState.velocityY += (downForce - upForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
+    pointerState.velocityY += (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale // 修正: Y軸を反転
 
     // 中央への復元力
     pointerState.velocityX -= pointerState.x * PHYSICS_PARAMS.RESTORE_FORCE * timeScale

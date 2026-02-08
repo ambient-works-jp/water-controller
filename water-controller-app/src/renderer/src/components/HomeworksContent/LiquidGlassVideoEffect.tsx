@@ -157,7 +157,7 @@ export function LiquidGlassVideoEffect({
 
     // 速度に加算（timeScale を適用）
     pointerState.velocityX += (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
-    pointerState.velocityY += (downForce - upForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
+    pointerState.velocityY += (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale // 修正: Y軸を反転
 
     // 中央への復元力
     pointerState.velocityX -= pointerState.x * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
@@ -199,7 +199,7 @@ export function LiquidGlassVideoEffect({
     // シェーダーの uniforms を更新
     // カーソル位置を正規化座標 [0-1] に変換（中央が0.5, 0.5）
     const normalizedX = 0.5 + (pointerState.x / viewport.width)
-    const normalizedY = 0.5 - (pointerState.y / viewport.height) // Y軸反転
+    const normalizedY = 0.5 + (pointerState.y / viewport.height) // 修正: Y軸を反転させない
     const currentTime = state.clock.elapsedTime
 
     material.uniforms.uCursorPosition.value.set(normalizedX, normalizedY)

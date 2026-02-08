@@ -81,7 +81,7 @@ export function LiquidGlassScene({
           style={{
             position: 'absolute',
             left: `${cursorPosition.x * 100}%`,
-            top: `${cursorPosition.y * 100}%`,
+            top: `${(1 - cursorPosition.y) * 100}%`, // Y軸を反転（CSS座標系とWebGL座標系の違いを吸収）
             width: '24px',
             height: '24px',
             borderRadius: '50%',

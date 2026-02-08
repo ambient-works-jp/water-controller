@@ -134,25 +134,28 @@ export function LiquidGlassImageEffect({
     const upForce = up * PHYSICS_PARAMS.BASE_SPEED
     const downForce = down * PHYSICS_PARAMS.BASE_SPEED
 
-    // 速度に加算（timeScale を適用）
-    pointerState.velocityX +=
-      (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
-    pointerState.velocityY += (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale // 修正: Y軸を反転
+    // シンプルな速度制御：入力方向に直接速度を設定（慣性なし）
+    if (left > 0 || right > 0) {
+      // X軸に入力がある場合は速度を直接設定
+      pointerState.velocityX = (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
+    } else {
+      // X軸に入力がない場合は速度をゼロに
+      pointerState.velocityX = 0
+    }
 
-    // 中央への復元力
-    pointerState.velocityX -= pointerState.x * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
-    pointerState.velocityY -= pointerState.y * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
-
-    // 減衰
-    const dampingFactor = Math.pow(PHYSICS_PARAMS.DAMPING, timeScale)
-    pointerState.velocityX *= dampingFactor
-    pointerState.velocityY *= dampingFactor
+    if (up > 0 || down > 0) {
+      // Y軸に入力がある場合は速度を直接設定
+      pointerState.velocityY = (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
+    } else {
+      // Y軸に入力がない場合は速度をゼロに
+      pointerState.velocityY = 0
+    }
 
     // 位置更新
     pointerState.x += pointerState.velocityX * timeScale
     pointerState.y += pointerState.velocityY * timeScale
 
-    // 境界制限（正方形または楕円）
+    // 境界制限（正方形）
     let maxDistanceX, maxDistanceY
     if (MOVEMENT_AREA.USE_SQUARE_CONSTRAINT) {
       // 正方形制約：画面高さを基準にする
@@ -164,16 +167,21 @@ export function LiquidGlassImageEffect({
       maxDistanceY = viewport.height * PHYSICS_PARAMS.MAX_VIEWPORT_RATIO
     }
 
-    const ellipseRatio =
-      (pointerState.x / maxDistanceX) * (pointerState.x / maxDistanceX) +
-      (pointerState.y / maxDistanceY) * (pointerState.y / maxDistanceY)
+    // 正方形の境界制限（X軸とY軸を独立してクランプ）
+    if (pointerState.x > maxDistanceX) {
+      pointerState.x = maxDistanceX
+      pointerState.velocityX = 0
+    } else if (pointerState.x < -maxDistanceX) {
+      pointerState.x = -maxDistanceX
+      pointerState.velocityX = 0
+    }
 
-    if (ellipseRatio > 1) {
-      const scale = 1 / Math.sqrt(ellipseRatio)
-      pointerState.x *= scale
-      pointerState.y *= scale
-      pointerState.velocityX *= 0.5
-      pointerState.velocityY *= 0.5
+    if (pointerState.y > maxDistanceY) {
+      pointerState.y = maxDistanceY
+      pointerState.velocityY = 0
+    } else if (pointerState.y < -maxDistanceY) {
+      pointerState.y = -maxDistanceY
+      pointerState.velocityY = 0
     }
 
     // シェーダーの uniforms を更新

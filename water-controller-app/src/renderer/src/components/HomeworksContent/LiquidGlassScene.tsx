@@ -9,9 +9,14 @@
  */
 
 import { Canvas } from '@react-three/fiber'
-import { LiquidGlassEffect } from './LiquidGlassEffect'
+import { LiquidGlassImageEffect } from './LiquidGlassImageEffect'
+import { LiquidGlassVideoEffect } from './LiquidGlassVideoEffect'
 import type { ControllerState } from '../../features/controller/types'
 import type { WsMessage } from '../../../../lib/types/websocket'
+
+// 背景タイプの設定
+type BackgroundType = 'image' | 'video'
+const BACKGROUND_TYPE: BackgroundType = 'video' // 'image' または 'video'
 
 interface LiquidGlassSceneProps {
   controllerState: ControllerState
@@ -37,11 +42,19 @@ export function LiquidGlassScene({
         dpr={Math.min(window.devicePixelRatio, 2)} // パフォーマンス最適化
         style={{ width: '100%', height: '100%' }}
       >
-        <LiquidGlassEffect
-          controllerState={controllerState}
-          lastMessage={lastMessage}
-          onContentChange={onContentChange}
-        />
+        {BACKGROUND_TYPE === 'image' ? (
+          <LiquidGlassImageEffect
+            controllerState={controllerState}
+            lastMessage={lastMessage}
+            onContentChange={onContentChange}
+          />
+        ) : (
+          <LiquidGlassVideoEffect
+            controllerState={controllerState}
+            lastMessage={lastMessage}
+            onContentChange={onContentChange}
+          />
+        )}
       </Canvas>
     </div>
   )

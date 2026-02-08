@@ -14,6 +14,9 @@ uniform int uTrailCount;
 uniform float uRippleLifetime;
 uniform float uRippleSpeed;
 
+// フェード効果用
+uniform float uOpacity;
+
 varying vec2 vUv;
 
 // ============================================
@@ -119,7 +122,8 @@ void main() {
 
   // 影響が完全にない場合は普通の画像を表示（静止時）
   if (totalInfluence < 0.0001) {
-    gl_FragColor = texture2D(uTexture, vUv);
+    vec4 baseColor = texture2D(uTexture, vUv);
+    gl_FragColor = vec4(baseColor.rgb, baseColor.a * uOpacity);
     return;
   }
 
@@ -148,5 +152,5 @@ void main() {
   color = mix(vec3(gray), color, saturation);
   color *= brightness;
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color, uOpacity);
 }

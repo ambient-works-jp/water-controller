@@ -105,7 +105,9 @@ export function LiquidGlassImageEffect({
         uTrailPoints: { value: trailData },
         uTrailCount: { value: 0 },
         uRippleLifetime: { value: RIPPLE_PARAMS.RIPPLE_LIFETIME },
-        uRippleSpeed: { value: RIPPLE_PARAMS.RIPPLE_SPEED }
+        uRippleSpeed: { value: RIPPLE_PARAMS.RIPPLE_SPEED },
+        // フェード効果用のuniform（画像版は常に1.0）
+        uOpacity: { value: 1.0 }
       },
       side: THREE.DoubleSide
     })

@@ -14,6 +14,9 @@ import videoSrc from '../../assets/background-movie-720p.mp4'
 // Custom hooks
 import { useVideoTexture } from './hooks/useVideoTexture'
 
+// Constants
+import { VIDEO_FADE_PARAMS } from '../../constants'
+
 // Shader imports
 import vertexShader from './shaders/liquidGlass.vert.glsl?raw'
 import fragmentShader from './shaders/liquidGlass.frag.glsl?raw'
@@ -112,9 +115,12 @@ export function LiquidGlassVideoEffect({
         uTrailPoints: { value: trailData },
         uTrailCount: { value: 0 },
         uRippleLifetime: { value: RIPPLE_PARAMS.RIPPLE_LIFETIME },
-        uRippleSpeed: { value: RIPPLE_PARAMS.RIPPLE_SPEED }
+        uRippleSpeed: { value: RIPPLE_PARAMS.RIPPLE_SPEED },
+        // フェード効果用のuniform
+        uOpacity: { value: 1.0 }
       },
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      transparent: true
     })
   }, [backgroundTexture, size.width, size.height])
 
@@ -233,6 +239,36 @@ export function LiquidGlassVideoEffect({
       }
     }
     material.uniforms.uTrailCount.value = trailPoints.length
+
+    // フェード効果の計算（smoothstep でイージング）
+    if (videoElement && videoElement.duration > 0) {
+      const videoDuration = videoElement.duration
+      const videoCurrentTime = videoElement.currentTime
+
+      let opacity = 1.0
+
+      // smoothstep関数（より自然な曲線）
+      const smoothstep = (edge0: number, edge1: number, x: number): number => {
+        const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)))
+        return t * t * (3 - 2 * t)
+      }
+
+      // フェードアウト（終端の2.0秒前から）
+      const timeUntilEnd = videoDuration - videoCurrentTime
+      if (timeUntilEnd <= VIDEO_FADE_PARAMS.FADE_START_BEFORE_END) {
+        // 2.0秒前から0秒まで、1.0 → 0.0 にスムーズにフェード
+        const fadeProgress = timeUntilEnd / VIDEO_FADE_PARAMS.FADE_START_BEFORE_END
+        opacity = smoothstep(0, 1, fadeProgress)
+      }
+      // フェードイン（最初の1.5秒）
+      else if (videoCurrentTime <= VIDEO_FADE_PARAMS.FADE_DURATION) {
+        // 0秒から1.5秒まで、0.0 → 1.0 にスムーズにフェード
+        const fadeProgress = videoCurrentTime / VIDEO_FADE_PARAMS.FADE_DURATION
+        opacity = smoothstep(0, 1, fadeProgress)
+      }
+
+      material.uniforms.uOpacity.value = opacity
+    }
 
     // デバッグログ（開発時）
     if (Math.random() < 0.01) { // 1%の確率でログ出力

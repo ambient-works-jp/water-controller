@@ -28,6 +28,7 @@ function App(): React.JSX.Element {
     index: number
     total: number
   } | null>(null)
+  const [showCursor, setShowCursor] = useState<boolean>(true)
 
   // コンテンツ変更時のコールバック
   const handleContentChange = useCallback((name: string, index: number, total: number) => {
@@ -207,6 +208,7 @@ function App(): React.JSX.Element {
         controllerState={controllerState}
         onContentChange={handleContentChange}
         debugMode={debugMode}
+        showCursor={showCursor}
       />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
@@ -219,6 +221,8 @@ function App(): React.JSX.Element {
         controllerState={controllerState}
         debugMode={debugMode}
         currentContent={currentContent}
+        showCursor={showCursor}
+        onShowCursorChange={setShowCursor}
       />
 
       {/* 設定画面 */}

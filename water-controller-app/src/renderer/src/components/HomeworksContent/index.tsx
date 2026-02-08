@@ -13,13 +13,15 @@ interface HomeworksContentProps {
   controllerState: ControllerState
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
   debugMode?: boolean
+  showCursor?: boolean
 }
 
 export function HomeworksContent({
   lastMessage,
   controllerState,
   onContentChange,
-  debugMode = false
+  debugMode = false,
+  showCursor = false
 }: HomeworksContentProps): React.JSX.Element {
   return (
     <LiquidGlassScene
@@ -27,6 +29,7 @@ export function HomeworksContent({
       lastMessage={lastMessage}
       onContentChange={onContentChange}
       debugMode={debugMode}
+      showCursor={showCursor}
     />
   )
 }

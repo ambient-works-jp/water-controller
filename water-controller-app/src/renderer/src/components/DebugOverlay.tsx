@@ -21,6 +21,10 @@ interface DebugOverlayProps {
     index: number
     total: number
   } | null
+  /** カーソル位置の表示ON/OFF */
+  showCursor: boolean
+  /** カーソル位置の表示切り替えハンドラ */
+  onShowCursorChange: (show: boolean) => void
 }
 
 /**
@@ -33,7 +37,9 @@ export function DebugOverlay({
   lastMessage,
   controllerState,
   debugMode,
-  currentContent
+  currentContent,
+  showCursor,
+  onShowCursorChange
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
@@ -160,6 +166,32 @@ export function DebugOverlay({
             </div>
             <div className="dpad-spacer" />
           </div>
+        </div>
+
+        {/* カーソル位置表示ON/OFFチェックボックス */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 0',
+            cursor: 'pointer',
+            userSelect: 'none',
+            fontSize: '15px'
+          }}
+          onClick={() => onShowCursorChange(!showCursor)}
+        >
+          <input
+            type="checkbox"
+            checked={showCursor}
+            onChange={(e) => onShowCursorChange(e.target.checked)}
+            style={{
+              width: '18px',
+              height: '18px',
+              cursor: 'pointer'
+            }}
+          />
+          <span>カーソル位置を表示</span>
         </div>
       </div>
 

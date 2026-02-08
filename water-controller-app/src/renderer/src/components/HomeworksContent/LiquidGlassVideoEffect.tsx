@@ -26,13 +26,14 @@ interface LiquidGlassVideoEffectProps {
   lastMessage: WsMessage | null
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
   onVideoElementReady?: (videoElement: HTMLVideoElement | null) => void
+  onCursorPositionUpdate?: (normalizedX: number, normalizedY: number) => void
 }
 
 // 物理シミュレーション定数
 const PHYSICS_PARAMS = {
   BASE_SPEED: 0.01, // 基本移動速度（低いほど遅い）
   FORCE_MULTIPLIER: 0.8, // 入力力の倍率
-  RESTORE_FORCE: 0.03, // 中央への復元力
+  RESTORE_FORCE: 0.0, // 中央への復元力 [TEST: カクつき修正のため一時的に0に設定]
   DAMPING: 0.92, // 減衰係数（0-1、高いほど慣性が残る）
   MAX_VIEWPORT_RATIO: 0.4 // 画面に対する最大移動距離の比率
 } as const
@@ -69,7 +70,8 @@ let lastTrailTime = 0
 export function LiquidGlassVideoEffect({
   controllerState,
   onContentChange,
-  onVideoElementReady
+  onVideoElementReady,
+  onCursorPositionUpdate
 }: LiquidGlassVideoEffectProps): React.JSX.Element {
   const meshRef = useRef<THREE.Mesh>(null)
   const { size, viewport } = useThree()
@@ -149,6 +151,10 @@ export function LiquidGlassVideoEffect({
     const upForce = up * PHYSICS_PARAMS.BASE_SPEED
     const downForce = down * PHYSICS_PARAMS.BASE_SPEED
 
+    // 対向入力の検出
+    const isOpposingX = left > 0 && right > 0
+    const isOpposingY = up > 0 && down > 0
+
     // 速度に加算（timeScale を適用）
     pointerState.velocityX += (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
     pointerState.velocityY += (downForce - upForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
@@ -158,7 +164,16 @@ export function LiquidGlassVideoEffect({
     pointerState.velocityY -= pointerState.y * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
 
     // 減衰
-    const dampingFactor = Math.pow(PHYSICS_PARAMS.DAMPING, timeScale)
+    let dampingFactor = Math.pow(PHYSICS_PARAMS.DAMPING, timeScale)
+
+    // 対向入力時は速度を急激に減衰させる
+    if (isOpposingX) {
+      pointerState.velocityX *= 0.8 // X軸の速度を80%に減衰
+    }
+    if (isOpposingY) {
+      pointerState.velocityY *= 0.8 // Y軸の速度を80%に減衰
+    }
+
     pointerState.velocityX *= dampingFactor
     pointerState.velocityY *= dampingFactor
 
@@ -189,6 +204,11 @@ export function LiquidGlassVideoEffect({
 
     material.uniforms.uCursorPosition.value.set(normalizedX, normalizedY)
     material.uniforms.uTime.value = currentTime
+
+    // デバッグ用: カーソル位置を親コンポーネントに通知
+    if (onCursorPositionUpdate) {
+      onCursorPositionUpdate(normalizedX, normalizedY)
+    }
 
     // コントローラー入力がある時だけ軌跡点を記録（静止時のプルプルを防止）
     const hasInput = left > 0 || right > 0 || up > 0 || down > 0
@@ -271,7 +291,33 @@ export function LiquidGlassVideoEffect({
     }
 
     // デバッグログ（開発時）
-    if (Math.random() < 0.01) { // 1%の確率でログ出力
+    // 対向入力時は常にログを出力、通常時は1%の確率で出力
+    const isOpposing = isOpposingX || isOpposingY
+    if (isOpposing) {
+      console.log('[LiquidGlass] ⚠️ OPPOSING INPUT', {
+        input: {
+          left: left.toFixed(2),
+          right: right.toFixed(2),
+          up: up.toFixed(2),
+          down: down.toFixed(2)
+        },
+        opposing: { x: isOpposingX, y: isOpposingY },
+        position: {
+          x: pointerState.x.toFixed(3),
+          y: pointerState.y.toFixed(3)
+        },
+        velocity: {
+          vx: pointerState.velocityX.toFixed(4),
+          vy: pointerState.velocityY.toFixed(4)
+        },
+        forces: {
+          inputX: ((rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale).toFixed(4),
+          inputY: ((downForce - upForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale).toFixed(4),
+          restoreX: (pointerState.x * PHYSICS_PARAMS.RESTORE_FORCE * timeScale).toFixed(4),
+          restoreY: (pointerState.y * PHYSICS_PARAMS.RESTORE_FORCE * timeScale).toFixed(4)
+        }
+      })
+    } else if (Math.random() < 0.01) { // 通常時は1%の確率でログ出力
       console.log('[LiquidGlass]', {
         pointerX: pointerState.x.toFixed(2),
         pointerY: pointerState.y.toFixed(2),

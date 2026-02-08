@@ -120,23 +120,17 @@ void main() {
     totalInfluence += waveInfluence;
   }
 
-  // 影響が完全にない場合は普通の画像を表示（静止時）
-  if (totalInfluence < 0.0001) {
-    vec4 baseColor = texture2D(uTexture, vUv);
-    gl_FragColor = vec4(baseColor.rgb, baseColor.a * uOpacity);
-    return;
-  }
-
-  // 影響が弱い時は徐々にフェードアウト（0.0001 〜 0.02 の範囲で滑らかに）
-  float fadeFactor = smoothstep(0.0001, 0.02, totalInfluence);
-  totalDistortion *= fadeFactor;
-
   // 歪みを適用
   vec2 distortedUv = vUv + totalDistortion;
 
-  // Chromatic Aberration（色収差）もフェードアウト
-  float aberrationAmount = uChromaticAberration * totalInfluence * fadeFactor;
-  vec2 aberrationDir = normalize(totalDistortion) * aberrationAmount;
+  // Chromatic Aberration（色収差）控えめに
+  float aberrationAmount = uChromaticAberration * totalInfluence * 0.5;
+
+  // totalDistortion が小さい場合の normalize エラーを防ぐ
+  float distortionLength = length(totalDistortion);
+  vec2 aberrationDir = distortionLength > 0.0001
+    ? normalize(totalDistortion) * aberrationAmount
+    : vec2(0.0);
 
   float r = texture2D(uTexture, distortedUv + aberrationDir * 1.0).r;
   float g = texture2D(uTexture, distortedUv + aberrationDir * 0.5).g;

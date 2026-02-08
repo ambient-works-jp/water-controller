@@ -5,5 +5,8 @@ out
 .eslintcache
 *.log*
 
+# ignore .mov video sources
+src/renderer/src/assets/sources/**/*.mov
+
 # tailwindcss
 src/renderer/public/output.css

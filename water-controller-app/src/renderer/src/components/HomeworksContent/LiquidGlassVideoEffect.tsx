@@ -240,7 +240,7 @@ export function LiquidGlassVideoEffect({
 
   // 動画が読み込まれていない場合は何も表示しない
   if (!material) {
-    return null
+    return <></>
   }
 
   return (

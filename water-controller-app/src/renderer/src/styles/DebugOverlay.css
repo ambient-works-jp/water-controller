@@ -17,7 +17,7 @@
 /* 左下: 全体コンテナ */
 .debug-info-container {
   position: absolute;
-  bottom: 24px;
+  bottom: var(--debug-ui-bottom-offset, 80px);
   left: 24px;
   background: rgba(0, 0, 0, 0.7);
   padding: 32px;
@@ -181,7 +181,7 @@
 /* キーボードショートカット一覧 */
 .keyboard-shortcuts {
   position: absolute;
-  bottom: 24px;
+  bottom: var(--debug-ui-bottom-offset, 80px);
   right: 24px;
   background: rgba(0, 0, 0, 0.7);
   padding: 28px 36px;

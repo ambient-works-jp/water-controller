@@ -4,6 +4,7 @@ import { InputLevel } from '../../../lib/types/websocket'
 import type { ControllerState } from '../features/controller/types'
 import { useAnimationFps } from '../hooks/useAnimationFps'
 import { useControllerFps } from '../hooks/useControllerFps'
+import { DEBUG_UI_BOTTOM_OFFSET } from '../constants'
 
 interface DebugOverlayProps {
   /** WebSocket 接続状態 */
@@ -93,7 +94,10 @@ export function DebugOverlay({
   }
 
   return (
-    <div className="debug-overlay">
+    <div
+      className="debug-overlay"
+      style={{ '--debug-ui-bottom-offset': `${DEBUG_UI_BOTTOM_OFFSET}px` } as React.CSSProperties}
+    >
       {/* 左下: 全体コンテナ */}
       <div className="debug-info-container">
         {/* 接続情報と FPS */}

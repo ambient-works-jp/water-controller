@@ -29,6 +29,7 @@ function App(): React.JSX.Element {
     total: number
   } | null>(null)
   const [showCursor, setShowCursor] = useState<boolean>(true)
+  const [showMovementArea, setShowMovementArea] = useState<boolean>(false)
 
   // コンテンツ変更時のコールバック
   const handleContentChange = useCallback((name: string, index: number, total: number) => {
@@ -209,6 +210,7 @@ function App(): React.JSX.Element {
         onContentChange={handleContentChange}
         debugMode={debugMode}
         showCursor={showCursor}
+        showMovementArea={showMovementArea}
       />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
@@ -223,6 +225,8 @@ function App(): React.JSX.Element {
         currentContent={currentContent}
         showCursor={showCursor}
         onShowCursorChange={setShowCursor}
+        showMovementArea={showMovementArea}
+        onShowMovementAreaChange={setShowMovementArea}
       />
 
       {/* 設定画面 */}

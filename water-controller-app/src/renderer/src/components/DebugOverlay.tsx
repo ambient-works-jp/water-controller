@@ -25,6 +25,10 @@ interface DebugOverlayProps {
   showCursor: boolean
   /** カーソル位置の表示切り替えハンドラ */
   onShowCursorChange: (show: boolean) => void
+  /** 移動範囲の表示ON/OFF */
+  showMovementArea: boolean
+  /** 移動範囲の表示切り替えハンドラ */
+  onShowMovementAreaChange: (show: boolean) => void
 }
 
 /**
@@ -39,7 +43,9 @@ export function DebugOverlay({
   debugMode,
   currentContent,
   showCursor,
-  onShowCursorChange
+  onShowCursorChange,
+  showMovementArea,
+  onShowMovementAreaChange
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
@@ -174,7 +180,6 @@ export function DebugOverlay({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '12px 0',
             cursor: 'pointer',
             userSelect: 'none',
             fontSize: '15px'
@@ -192,6 +197,31 @@ export function DebugOverlay({
             }}
           />
           <span>カーソル位置を表示</span>
+        </div>
+
+        {/* 移動範囲表示ON/OFFチェックボックス */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            fontSize: '15px'
+          }}
+          onClick={() => onShowMovementAreaChange(!showMovementArea)}
+        >
+          <input
+            type="checkbox"
+            checked={showMovementArea}
+            onChange={(e) => onShowMovementAreaChange(e.target.checked)}
+            style={{
+              width: '18px',
+              height: '18px',
+              cursor: 'pointer'
+            }}
+          />
+          <span>移動範囲を表示</span>
         </div>
       </div>
 

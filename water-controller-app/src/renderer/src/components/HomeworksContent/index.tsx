@@ -14,6 +14,7 @@ interface HomeworksContentProps {
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
   debugMode?: boolean
   showCursor?: boolean
+  showMovementArea?: boolean
 }
 
 export function HomeworksContent({
@@ -21,7 +22,8 @@ export function HomeworksContent({
   controllerState,
   onContentChange,
   debugMode = false,
-  showCursor = false
+  showCursor = false,
+  showMovementArea = false
 }: HomeworksContentProps): React.JSX.Element {
   return (
     <LiquidGlassScene
@@ -30,6 +32,7 @@ export function HomeworksContent({
       onContentChange={onContentChange}
       debugMode={debugMode}
       showCursor={showCursor}
+      showMovementArea={showMovementArea}
     />
   )
 }

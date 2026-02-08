@@ -13,6 +13,9 @@ import type { WsMessage } from '../../../../lib/types/websocket'
 import backgroundImageFullHDSrc from '../../assets/background-lorem-ipsum-1920x1080.png'
 import backgroundImageHDSrc from '../../assets/background-lorem-ipsum-1280x720.png'
 
+// Constants
+import { MOVEMENT_AREA } from '../../constants'
+
 // Shader imports
 import vertexShader from './shaders/liquidGlass.vert.glsl?raw'
 import fragmentShader from './shaders/liquidGlass.frag.glsl?raw'
@@ -33,11 +36,11 @@ interface LiquidGlassImageEffectProps {
 
 // 物理シミュレーション定数
 const PHYSICS_PARAMS = {
-  BASE_SPEED: 0.01, // 基本移動速度（低いほど遅い）
+  BASE_SPEED: 0.006, // 基本移動速度（低いほど遅い）[調整: 0.01 → 0.006]
   FORCE_MULTIPLIER: 0.8, // 入力力の倍率
   RESTORE_FORCE: 0.03, // 中央への復元力
   DAMPING: 0.92, // 減衰係数（0-1、高いほど慣性が残る）
-  MAX_VIEWPORT_RATIO: 0.4 // 画面に対する最大移動距離の比率
+  MAX_VIEWPORT_RATIO: 0.4 // 画面に対する最大移動距離の比率（正方形制約未使用時）
 } as const
 
 // 波紋効果の定数
@@ -149,9 +152,18 @@ export function LiquidGlassImageEffect({
     pointerState.x += pointerState.velocityX * timeScale
     pointerState.y += pointerState.velocityY * timeScale
 
-    // 楕円形の境界制限
-    const maxDistanceX = viewport.width * PHYSICS_PARAMS.MAX_VIEWPORT_RATIO
-    const maxDistanceY = viewport.height * PHYSICS_PARAMS.MAX_VIEWPORT_RATIO
+    // 境界制限（正方形または楕円）
+    let maxDistanceX, maxDistanceY
+    if (MOVEMENT_AREA.USE_SQUARE_CONSTRAINT) {
+      // 正方形制約：画面高さを基準にする
+      maxDistanceX = viewport.height * MOVEMENT_AREA.WIDTH_RATIO
+      maxDistanceY = viewport.height * MOVEMENT_AREA.HEIGHT_RATIO
+    } else {
+      // 楕円制約：画面幅と高さそれぞれを基準にする
+      maxDistanceX = viewport.width * PHYSICS_PARAMS.MAX_VIEWPORT_RATIO
+      maxDistanceY = viewport.height * PHYSICS_PARAMS.MAX_VIEWPORT_RATIO
+    }
+
     const ellipseRatio =
       (pointerState.x / maxDistanceX) * (pointerState.x / maxDistanceX) +
       (pointerState.y / maxDistanceY) * (pointerState.y / maxDistanceY)

@@ -5,7 +5,8 @@
 - **優先度**: 高
 - **担当**: 開発側（調査・修正）
 - **作成日**: 2026-02-09
-- **フェーズ**: 原因調査
+- **完了日**: 2026-02-09
+- **フェーズ**: ✅ 完了
 
 ## 問題の概要
 
@@ -261,9 +262,82 @@ if (isOpposing) {
 }
 ```
 
-## 次のステップ
+## 最終的な解決策（実装完了）
 
-1. デバッグログの強化
-2. 対向入力時の挙動を詳細に観察
-3. 復元力の無効化テスト
-4. 解決策の実装と検証
+### 問題の根本原因
+
+対向入力時のカクつきの原因は、**慣性システム**そのものでした：
+
+1. 速度が蓄積される（`velocityX += force`）
+2. 復元力により中央に引き戻される
+3. 減衰が遅い（`DAMPING: 0.92`）
+4. 対向入力時に速度が急激に反転
+5. 結果: 振動・カクつき
+
+### 実装した解決策
+
+**慣性システムを完全に削除**し、入力方向に直接速度を設定する方式に変更：
+
+```typescript
+// 以前（慣性あり）
+pointerState.velocityX += (rightForce - leftForce) * FORCE_MULTIPLIER * timeScale
+pointerState.velocityX -= pointerState.x * RESTORE_FORCE * timeScale  // 復元力
+pointerState.velocityX *= dampingFactor  // 減衰
+
+// 現在（慣性なし）
+if (left > 0 || right > 0) {
+  pointerState.velocityX = (rightForce - leftForce) * FORCE_MULTIPLIER
+} else {
+  pointerState.velocityX = 0
+}
+```
+
+### 副次的な改善
+
+境界制限も**楕円から正方形**に変更：
+
+```typescript
+// 以前（楕円）
+const ellipseRatio = (x/maxX)² + (y/maxY)²
+if (ellipseRatio > 1) { scale... }
+
+// 現在（正方形）
+if (pointerState.x > maxDistanceX) {
+  pointerState.x = maxDistanceX
+  pointerState.velocityX = 0
+}
+```
+
+### 結果
+
+- ✅ **カクつきが完全に解消**
+- ✅ **円軌道が解消**（四角形の角に到達可能）
+- ✅ **入力に対する応答が直感的**
+- ✅ **対向入力時も安定**
+
+### 変更したファイル
+
+- `LiquidGlassVideoEffect.tsx:154-210` - 物理シミュレーションを簡素化
+- `LiquidGlassImageEffect.tsx:128-175` - 同様の変更
+
+### パラメータの最終値
+
+```typescript
+const PHYSICS_PARAMS = {
+  BASE_SPEED: 0.006,        // 移動速度（0.01 → 0.006に減速）
+  FORCE_MULTIPLIER: 0.8,    // 入力力の倍率
+  RESTORE_FORCE: 0.0,       // 復元力（無効化）
+  DAMPING: 0.92,            // 減衰（未使用）
+  MAX_VIEWPORT_RATIO: 0.4   // 楕円制約用（未使用）
+}
+
+const MOVEMENT_AREA = {
+  USE_SQUARE_CONSTRAINT: true,
+  WIDTH_RATIO: 0.5,   // X方向の移動範囲
+  HEIGHT_RATIO: 0.4   // Y方向の移動範囲
+}
+```
+
+## ステータス
+
+**✅ 完了** - 2026-02-09

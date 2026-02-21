@@ -15,7 +15,6 @@ export function createWindow(): void {
     titleBarStyle: 'hidden',
     titleBarOverlay: true,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

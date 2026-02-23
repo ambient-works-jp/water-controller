@@ -14,7 +14,7 @@ import backgroundImageFullHDSrc from '../../assets/background-lorem-ipsum-1920x1
 import backgroundImageHDSrc from '../../assets/background-lorem-ipsum-1280x720.png'
 
 // Constants
-import { MOVEMENT_AREA, PHYSICS_PRESETS } from '../../constants'
+import { MOVEMENT_AREA, PHYSICS_PRESETS, EDGE_DETECTION_PARAMS } from '../../constants'
 
 // Shader imports
 import vertexShader from './shaders/liquidGlass.vert.glsl?raw'
@@ -97,8 +97,8 @@ export function LiquidGlassImageEffect({
         uCursorPosition: { value: new THREE.Vector2(0.5, 0.5) },
         uResolution: { value: new THREE.Vector2(size.width, size.height) },
         uTime: { value: 0 },
-        uRefractionStrength: { value: 0.015 },
-        uChromaticAberration: { value: 0.001 },
+        uRefractionStrength: { value: 0.05 },
+        uChromaticAberration: { value: 0.002 },
         // 波紋効果用のuniforms
         uTrailPoints: { value: trailData },
         uTrailCount: { value: 0 },
@@ -210,8 +210,14 @@ export function LiquidGlassImageEffect({
     // コントローラー入力がある時だけ軌跡点を記録（静止時のプルプルを防止）
     const hasInput = left > 0 || right > 0 || up > 0 || down > 0
 
+    // ふよふよモードの場合、カーソルが端にいるかチェック
+    const isAtEdge =
+      Math.abs(pointerState.x) > maxDistanceX * EDGE_DETECTION_PARAMS.EDGE_THRESHOLD ||
+      Math.abs(pointerState.y) > maxDistanceY * EDGE_DETECTION_PARAMS.EDGE_THRESHOLD
+
     const shouldAddTrail =
       hasInput &&
+      (!useFuyofuyoPhysics || isAtEdge) && // ふよふよモードのときは端にいる場合のみ
       (trailPoints.length === 0 ||
         currentTime - lastTrailTime >= RIPPLE_PARAMS.TRAIL_INTERVAL ||
         (trailPoints.length > 0 &&

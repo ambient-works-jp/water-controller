@@ -113,7 +113,7 @@ void main() {
 
     // 波紋方向の歪み（外向き）
     vec2 waveDirection = normalize(toPoint);
-    float radialDistortion = waveInfluence * 0.3;
+    float radialDistortion = waveInfluence * 0.5;
 
     // ノイズを削除してシンプルな波紋のみ
     totalDistortion += waveDirection * radialDistortion * waveInfluence * uRefractionStrength;

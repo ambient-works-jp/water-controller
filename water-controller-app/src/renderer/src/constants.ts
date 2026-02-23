@@ -43,10 +43,17 @@ export const PHYSICS_PRESETS = {
    * ふよふよモード：中央へ戻る復元力あり、滑らかな動き
    */
   FUYOFUYO: {
-    BASE_SPEED: 0.01, // 基本移動速度（シンプルより速め）
+    BASE_SPEED: 0.008, // 基本移動速度（少し遅め）
     FORCE_MULTIPLIER: 0.8, // 入力力の倍率
     RESTORE_FORCE: 0.03, // 中央への復元力
     DAMPING: 0.92, // 減衰係数（慣性を保ちながら徐々に減速）
     MAX_VIEWPORT_RATIO: 0.4 // 画面に対する最大移動距離の比率
   }
+} as const
+
+/**
+ * 端検出パラメータ（ふよふよモード用）
+ */
+export const EDGE_DETECTION_PARAMS = {
+  EDGE_THRESHOLD: 0.4 // 移動範囲の40%以上で「端」とみなす（0.0～1.0）
 } as const

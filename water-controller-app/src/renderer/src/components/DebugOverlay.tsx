@@ -29,6 +29,10 @@ interface DebugOverlayProps {
   showMovementArea: boolean
   /** 移動範囲の表示切り替えハンドラ */
   onShowMovementAreaChange: (show: boolean) => void
+  /** ふよふよモードON/OFF */
+  useFuyofuyoPhysics: boolean
+  /** ふよふよモード切り替えハンドラ */
+  onUseFuyofuyoPhysicsChange: (use: boolean) => void
 }
 
 /**
@@ -45,7 +49,9 @@ export function DebugOverlay({
   showCursor,
   onShowCursorChange,
   showMovementArea,
-  onShowMovementAreaChange
+  onShowMovementAreaChange,
+  useFuyofuyoPhysics,
+  onUseFuyofuyoPhysicsChange
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
@@ -222,6 +228,31 @@ export function DebugOverlay({
             }}
           />
           <span>移動範囲を表示</span>
+        </div>
+
+        {/* ふよふよモードON/OFFチェックボックス */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            fontSize: '15px'
+          }}
+          onClick={() => onUseFuyofuyoPhysicsChange(!useFuyofuyoPhysics)}
+        >
+          <input
+            type="checkbox"
+            checked={useFuyofuyoPhysics}
+            onChange={(e) => onUseFuyofuyoPhysicsChange(e.target.checked)}
+            style={{
+              width: '18px',
+              height: '18px',
+              cursor: 'pointer'
+            }}
+          />
+          <span>ふよふよモード</span>
         </div>
       </div>
 

@@ -30,6 +30,7 @@ interface LiquidGlassSceneProps {
   debugMode?: boolean
   showCursor?: boolean
   showMovementArea?: boolean
+  useFuyofuyoPhysics?: boolean
 }
 
 export function LiquidGlassScene({
@@ -38,7 +39,8 @@ export function LiquidGlassScene({
   onContentChange,
   debugMode = false,
   showCursor = false,
-  showMovementArea = false
+  showMovementArea = false,
+  useFuyofuyoPhysics = false
 }: LiquidGlassSceneProps): React.JSX.Element {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null)
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 })
@@ -87,6 +89,7 @@ export function LiquidGlassScene({
             controllerState={controllerState}
             lastMessage={lastMessage}
             onContentChange={onContentChange}
+            useFuyofuyoPhysics={useFuyofuyoPhysics}
           />
         ) : (
           <LiquidGlassVideoEffect
@@ -95,6 +98,7 @@ export function LiquidGlassScene({
             onContentChange={onContentChange}
             onVideoElementReady={setVideoElement}
             onCursorPositionUpdate={handleCursorPositionUpdate}
+            useFuyofuyoPhysics={useFuyofuyoPhysics}
           />
         )}
       </Canvas>

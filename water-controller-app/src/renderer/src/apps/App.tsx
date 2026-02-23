@@ -30,6 +30,7 @@ function App(): React.JSX.Element {
   } | null>(null)
   const [showCursor, setShowCursor] = useState<boolean>(true)
   const [showMovementArea, setShowMovementArea] = useState<boolean>(false)
+  const [useFuyofuyoPhysics, setUseFuyofuyoPhysics] = useState<boolean>(false)
 
   // コンテンツ変更時のコールバック
   const handleContentChange = useCallback((name: string, index: number, total: number) => {
@@ -211,6 +212,7 @@ function App(): React.JSX.Element {
         debugMode={debugMode}
         showCursor={showCursor}
         showMovementArea={showMovementArea}
+        useFuyofuyoPhysics={useFuyofuyoPhysics}
       />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
@@ -227,6 +229,8 @@ function App(): React.JSX.Element {
         onShowCursorChange={setShowCursor}
         showMovementArea={showMovementArea}
         onShowMovementAreaChange={setShowMovementArea}
+        useFuyofuyoPhysics={useFuyofuyoPhysics}
+        onUseFuyofuyoPhysicsChange={setUseFuyofuyoPhysics}
       />
 
       {/* 設定画面 */}

@@ -15,6 +15,7 @@ interface HomeworksContentProps {
   debugMode?: boolean
   showCursor?: boolean
   showMovementArea?: boolean
+  useFuyofuyoPhysics?: boolean
 }
 
 export function HomeworksContent({
@@ -23,7 +24,8 @@ export function HomeworksContent({
   onContentChange,
   debugMode = false,
   showCursor = false,
-  showMovementArea = false
+  showMovementArea = false,
+  useFuyofuyoPhysics = false
 }: HomeworksContentProps): React.JSX.Element {
   return (
     <LiquidGlassScene
@@ -33,6 +35,7 @@ export function HomeworksContent({
       debugMode={debugMode}
       showCursor={showCursor}
       showMovementArea={showMovementArea}
+      useFuyofuyoPhysics={useFuyofuyoPhysics}
     />
   )
 }

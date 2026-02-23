@@ -15,7 +15,7 @@ import videoSrc from '../../assets/background-movie-1080p.mp4'
 import { useVideoTexture } from './hooks/useVideoTexture'
 
 // Constants
-import { VIDEO_FADE_PARAMS, MOVEMENT_AREA } from '../../constants'
+import { VIDEO_FADE_PARAMS, MOVEMENT_AREA, PHYSICS_PRESETS } from '../../constants'
 
 // Shader imports
 import vertexShader from './shaders/liquidGlass.vert.glsl?raw'
@@ -27,16 +27,10 @@ interface LiquidGlassVideoEffectProps {
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
   onVideoElementReady?: (videoElement: HTMLVideoElement | null) => void
   onCursorPositionUpdate?: (normalizedX: number, normalizedY: number) => void
+  useFuyofuyoPhysics?: boolean
 }
 
-// 物理シミュレーション定数
-const PHYSICS_PARAMS = {
-  BASE_SPEED: 0.006, // 基本移動速度（低いほど遅い）[調整: 0.01 → 0.006]
-  FORCE_MULTIPLIER: 0.8, // 入力力の倍率
-  RESTORE_FORCE: 0.0, // 中央への復元力 [TEST: カクつき修正のため一時的に0に設定]
-  DAMPING: 0.92, // 減衰係数（0-1、高いほど慣性が残る）
-  MAX_VIEWPORT_RATIO: 0.4 // 画面に対する最大移動距離の比率（正方形制約未使用時）
-} as const
+// 物理シミュレーション定数は constants.ts の PHYSICS_PRESETS から選択
 
 // 波紋効果の定数
 const MAX_TRAIL_POINTS = 24;
@@ -71,7 +65,8 @@ export function LiquidGlassVideoEffect({
   controllerState,
   onContentChange,
   onVideoElementReady,
-  onCursorPositionUpdate
+  onCursorPositionUpdate,
+  useFuyofuyoPhysics = false
 }: LiquidGlassVideoEffectProps): React.JSX.Element {
   const meshRef = useRef<THREE.Mesh>(null)
   const { size, viewport } = useThree()
@@ -142,6 +137,9 @@ export function LiquidGlassVideoEffect({
 
     const { left, right, up, down } = controllerState
 
+    // 物理パラメータの選択
+    const PHYSICS_PARAMS = useFuyofuyoPhysics ? PHYSICS_PRESETS.FUYOFUYO : PHYSICS_PRESETS.SIMPLE
+
     // フレームレート非依存の時間係数（60 FPS 基準）
     const timeScale = Math.min(delta * 60, 2) // 最大2倍に制限
 
@@ -155,29 +153,45 @@ export function LiquidGlassVideoEffect({
     const isOpposingX = left > 0 && right > 0
     const isOpposingY = up > 0 && down > 0
 
-    // シンプルな速度制御：入力方向に直接速度を設定（慣性なし）
-    if (left > 0 || right > 0) {
-      // X軸に入力がある場合は速度を直接設定
-      pointerState.velocityX = (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
-    } else {
-      // X軸に入力がない場合は速度をゼロに
-      pointerState.velocityX = 0
-    }
+    if (useFuyofuyoPhysics) {
+      // ふよふよモード：物理シミュレーション方式（慣性あり、復元力あり）
+      // 速度に加算（timeScale を適用）
+      pointerState.velocityX += (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
+      pointerState.velocityY += (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
 
-    if (up > 0 || down > 0) {
-      // Y軸に入力がある場合は速度を直接設定
-      pointerState.velocityY = (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
-    } else {
-      // Y軸に入力がない場合は速度をゼロに
-      pointerState.velocityY = 0
-    }
+      // 中央への復元力（ふよふよ戻る仕組み）
+      pointerState.velocityX -= pointerState.x * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
+      pointerState.velocityY -= pointerState.y * PHYSICS_PARAMS.RESTORE_FORCE * timeScale
 
-    // 対向入力時は速度を減衰させる
-    if (isOpposingX) {
-      pointerState.velocityX *= 0.8
-    }
-    if (isOpposingY) {
-      pointerState.velocityY *= 0.8
+      // 減衰（慣性を保ちながら徐々に減速）
+      const dampingFactor = Math.pow(PHYSICS_PARAMS.DAMPING, timeScale)
+      pointerState.velocityX *= dampingFactor
+      pointerState.velocityY *= dampingFactor
+    } else {
+      // シンプルモード：入力方向に直接速度を設定（慣性なし）
+      if (left > 0 || right > 0) {
+        // X軸に入力がある場合は速度を直接設定
+        pointerState.velocityX = (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
+      } else {
+        // X軸に入力がない場合は速度をゼロに
+        pointerState.velocityX = 0
+      }
+
+      if (up > 0 || down > 0) {
+        // Y軸に入力がある場合は速度を直接設定
+        pointerState.velocityY = (upForce - downForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER
+      } else {
+        // Y軸に入力がない場合は速度をゼロに
+        pointerState.velocityY = 0
+      }
+
+      // 対向入力時は速度を減衰させる
+      if (isOpposingX) {
+        pointerState.velocityX *= 0.8
+      }
+      if (isOpposingY) {
+        pointerState.velocityY *= 0.8
+      }
     }
 
     // 位置更新

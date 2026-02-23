@@ -1,7 +1,6 @@
 import { shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 
 const WINDOW_WIDTH = 1920
 const WINDOW_HEIGHT = 1080

@@ -168,10 +168,10 @@ pub fn parse_input_line(line: &str) -> Result<SerialInput, ParseInputError> {
     // front/right/back/left それぞれの Low/Middle/High トリプルを評価
     // フォーマット: button,frontLow,frontMiddle,frontHigh,rightLow,rightMiddle,rightHigh,backLow,backMiddle,backHigh,leftLow,leftMiddle,leftHigh
     let controller = ControllerInput {
-        up: controller_value_from_triple(values[1], values[2], values[3], 1, 2, 3)?,
-        right: controller_value_from_triple(values[4], values[5], values[6], 4, 5, 6)?,
-        down: controller_value_from_triple(values[7], values[8], values[9], 7, 8, 9)?,
-        left: controller_value_from_triple(values[10], values[11], values[12], 10, 11, 12)?,
+        down: controller_value_from_triple(values[1], values[2], values[3], 1, 2, 3)?,
+        left: controller_value_from_triple(values[4], values[5], values[6], 4, 5, 6)?,
+        right: controller_value_from_triple(values[7], values[8], values[9], 7, 8, 9)?,
+        up: controller_value_from_triple(values[10], values[11], values[12], 10, 11, 12)?,
     };
 
     Ok(SerialInput { button, controller })

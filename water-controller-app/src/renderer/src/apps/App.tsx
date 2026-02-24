@@ -14,7 +14,10 @@ import type { Config } from '../../../lib/types/config'
 const FADE_ANIMATION_DURATION_MS = 300
 
 function App(): React.JSX.Element {
-  const [debugMode, setDebugMode] = useState(false)
+  const [enableDebugMode, setEnableDebugMode] = useState(false)
+  const [showCursor, setShowCursor] = useState(false)
+  const [showMovementArea, setShowMovementArea] = useState(false)
+  const [enableCenteringCursorMode, setEnableCenteringCursorMode] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [isClosingSettings, setIsClosingSettings] = useState(false)
   const [config, setConfig] = useState<Config | null>(null)
@@ -28,9 +31,6 @@ function App(): React.JSX.Element {
     index: number
     total: number
   } | null>(null)
-  const [showCursor, setShowCursor] = useState<boolean>(true)
-  const [showMovementArea, setShowMovementArea] = useState<boolean>(false)
-  const [useFuyofuyoPhysics, setUseFuyofuyoPhysics] = useState<boolean>(false)
 
   // コンテンツ変更時のコールバック
   const handleContentChange = useCallback((name: string, index: number, total: number) => {
@@ -61,7 +61,10 @@ function App(): React.JSX.Element {
 
         // 成功時のみ設定を反映
         setConfig(response.config)
-        setDebugMode(response.config.debugMode)
+        setEnableDebugMode(response.config.debugModeOptions.enableDebugMode)
+        setShowCursor(response.config.debugModeOptions.showCursor)
+        setShowMovementArea(response.config.debugModeOptions.showMovementArea)
+        setEnableCenteringCursorMode(response.config.enableCenteringCursorMode)
         setIsInitialLoad(false)
         console.log('[Config] Config loaded successfully:', response.config)
       } catch (error) {
@@ -95,7 +98,7 @@ function App(): React.JSX.Element {
     lastMessage
   )
 
-  // debugMode 変更時に設定を保存
+  // デバッグ設定変更時に設定を保存
   const configRef = useRef<Config | null>(config)
 
   // config が変更されたら ref を更新
@@ -109,29 +112,34 @@ function App(): React.JSX.Element {
       return
     }
 
-    const saveDebugMode = async (): Promise<void> => {
+    const saveDebugOptions = async (): Promise<void> => {
       const currentConfig = configRef.current
       if (!currentConfig) return
 
       const updatedConfig: Config = {
         ...currentConfig,
-        debugMode
+        enableCenteringCursorMode,
+        debugModeOptions: {
+          enableDebugMode,
+          showCursor,
+          showMovementArea
+        }
       }
 
       try {
         const response = await window.api.ipc.saveConfig(updatedConfig)
         if (response.success) {
-          console.log('[Config] Debug mode saved:', debugMode)
+          console.log('[Config] Debug options saved')
         } else {
-          console.error('[Config] Failed to save debug mode:', response.error)
+          console.error('[Config] Failed to save debug options:', response.error)
         }
       } catch (error) {
-        console.error('[Config] Failed to save debug mode:', error)
+        console.error('[Config] Failed to save debug options:', error)
       }
     }
 
-    void saveDebugMode()
-  }, [debugMode, isInitialLoad])
+    void saveDebugOptions()
+  }, [enableDebugMode, showCursor, showMovementArea, enableCenteringCursorMode, isInitialLoad])
 
   // 設定画面を閉じる（アニメーション付き）
   const handleCloseSettings = useCallback((): void => {
@@ -175,7 +183,7 @@ function App(): React.JSX.Element {
       },
       {
         key: 'd',
-        handler: () => setDebugMode((prev) => !prev),
+        handler: () => setEnableDebugMode((prev: boolean) => !prev),
         description: 'デバッグモードをオン・オフ'
       },
       {
@@ -209,10 +217,10 @@ function App(): React.JSX.Element {
         lastMessage={lastMessage}
         controllerState={controllerState}
         onContentChange={handleContentChange}
-        debugMode={debugMode}
+        enableDebugMode={enableDebugMode}
         showCursor={showCursor}
         showMovementArea={showMovementArea}
-        useFuyofuyoPhysics={useFuyofuyoPhysics}
+        enableCenteringCursorMode={enableCenteringCursorMode}
       />
 
       {/* 設定ボタン（設定画面が閉じているときのみ表示） */}
@@ -223,14 +231,14 @@ function App(): React.JSX.Element {
         status={status}
         lastMessage={lastMessage}
         controllerState={controllerState}
-        debugMode={debugMode}
+        enableDebugMode={enableDebugMode}
         currentContent={currentContent}
         showCursor={showCursor}
         onShowCursorChange={setShowCursor}
         showMovementArea={showMovementArea}
         onShowMovementAreaChange={setShowMovementArea}
-        useFuyofuyoPhysics={useFuyofuyoPhysics}
-        onUseFuyofuyoPhysicsChange={setUseFuyofuyoPhysics}
+        enableCenteringCursorMode={enableCenteringCursorMode}
+        onEnableCenteringCursorModeChange={setEnableCenteringCursorMode}
       />
 
       {/* 設定画面 */}
@@ -238,8 +246,8 @@ function App(): React.JSX.Element {
         <SettingsPanel
           wsStatus={status}
           wsUrl={wsUrl}
-          debugMode={debugMode}
-          onDebugModeChange={setDebugMode}
+          enableDebugMode={enableDebugMode}
+          onEnableDebugModeChange={setEnableDebugMode}
           initialConfig={config}
           onClose={handleCloseSettings}
           isClosing={isClosingSettings}

@@ -9,11 +9,11 @@ interface SettingsTabProps {
   /** 読み込み中フラグ */
   isLoading: boolean
   /** デバッグモードの状態 */
-  debugMode: boolean
+  enableDebugMode: boolean
   /** 設定を再読み込み */
   onReloadConfig: () => Promise<void>
   /** デバッグモードの切り替え */
-  onDebugModeChange: (enabled: boolean) => void
+  onEnableDebugModeChange: (enabled: boolean) => void
 }
 
 /**
@@ -24,9 +24,9 @@ interface SettingsTabProps {
 export function SettingsTab({
   config,
   isLoading,
-  debugMode,
+  enableDebugMode,
   onReloadConfig,
-  onDebugModeChange
+  onEnableDebugModeChange
 }: SettingsTabProps): React.JSX.Element {
   const [contentTab, setContentTab] = useState<'playlist' | 'all'>('playlist')
 
@@ -77,8 +77,8 @@ export function SettingsTab({
                         <label className="label cursor-pointer justify-start gap-3 py-1">
                           <input
                             type="checkbox"
-                            checked={debugMode}
-                            onChange={(e) => onDebugModeChange(e.target.checked)}
+                            checked={enableDebugMode}
+                            onChange={(e) => onEnableDebugModeChange(e.target.checked)}
                             className="checkbox checkbox-primary checkbox-sm"
                           />
                           <div className="flex-1">

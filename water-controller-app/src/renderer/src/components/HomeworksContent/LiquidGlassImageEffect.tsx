@@ -32,7 +32,7 @@ interface LiquidGlassImageEffectProps {
   controllerState: ControllerState
   lastMessage: WsMessage | null
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
-  useFuyofuyoPhysics?: boolean
+  enableCenteringCursorMode?: boolean
 }
 
 // 物理シミュレーション定数は constants.ts の PHYSICS_PRESETS から選択
@@ -69,7 +69,7 @@ let lastTrailTime = 0
 export function LiquidGlassImageEffect({
   controllerState,
   onContentChange,
-  useFuyofuyoPhysics = false
+  enableCenteringCursorMode = true
 }: LiquidGlassImageEffectProps): React.JSX.Element {
   const meshRef = useRef<THREE.Mesh>(null)
   const { size, viewport } = useThree()
@@ -121,7 +121,7 @@ export function LiquidGlassImageEffect({
     const { left, right, up, down } = controllerState
 
     // 物理パラメータの選択
-    const PHYSICS_PARAMS = useFuyofuyoPhysics ? PHYSICS_PRESETS.FUYOFUYO : PHYSICS_PRESETS.SIMPLE
+    const PHYSICS_PARAMS = enableCenteringCursorMode ? PHYSICS_PRESETS.FUYOFUYO : PHYSICS_PRESETS.SIMPLE
 
     // フレームレート非依存の時間係数（60 FPS 基準）
     const timeScale = Math.min(delta * 60, 2) // 最大2倍に制限
@@ -132,7 +132,7 @@ export function LiquidGlassImageEffect({
     const upForce = up * PHYSICS_PARAMS.BASE_SPEED
     const downForce = down * PHYSICS_PARAMS.BASE_SPEED
 
-    if (useFuyofuyoPhysics) {
+    if (enableCenteringCursorMode) {
       // ふよふよモード：物理シミュレーション方式（慣性あり、復元力あり）
       // 速度に加算（timeScale を適用）
       pointerState.velocityX += (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
@@ -217,7 +217,7 @@ export function LiquidGlassImageEffect({
 
     const shouldAddTrail =
       hasInput &&
-      (!useFuyofuyoPhysics || isAtEdge) && // ふよふよモードのときは端にいる場合のみ
+      (!enableCenteringCursorMode || isAtEdge) && // ふよふよモードのときは端にいる場合のみ
       (trailPoints.length === 0 ||
         currentTime - lastTrailTime >= RIPPLE_PARAMS.TRAIL_INTERVAL ||
         (trailPoints.length > 0 &&

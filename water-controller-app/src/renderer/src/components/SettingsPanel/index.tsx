@@ -34,9 +34,9 @@ interface SettingsPanelProps {
   /** WebSocket URL */
   wsUrl: string
   /** デバッグモードの状態 */
-  debugMode: boolean
+  enableDebugMode: boolean
   /** デバッグモードの切り替え */
-  onDebugModeChange: (enabled: boolean) => void
+  onEnableDebugModeChange: (enabled: boolean) => void
   /** 初期設定 */
   initialConfig: Config | null
   /** 設定画面を閉じる */
@@ -55,8 +55,8 @@ type TabType = 'settings' | 'connection' | 'logs' | 'help'
 export function SettingsPanel({
   wsStatus,
   wsUrl,
-  debugMode,
-  onDebugModeChange,
+  enableDebugMode,
+  onEnableDebugModeChange,
   initialConfig,
   onClose,
   isClosing
@@ -181,9 +181,9 @@ export function SettingsPanel({
             <SettingsTab
               config={config}
               isLoading={isLoading}
-              debugMode={debugMode}
+              enableDebugMode={enableDebugMode}
               onReloadConfig={handleReloadConfig}
-              onDebugModeChange={onDebugModeChange}
+              onEnableDebugModeChange={onEnableDebugModeChange}
             />
           )}
 

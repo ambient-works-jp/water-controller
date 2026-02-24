@@ -12,30 +12,30 @@ interface HomeworksContentProps {
   lastMessage: WsMessage | null
   controllerState: ControllerState
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
-  debugMode?: boolean
+  enableDebugMode?: boolean
   showCursor?: boolean
   showMovementArea?: boolean
-  useFuyofuyoPhysics?: boolean
+  enableCenteringCursorMode?: boolean
 }
 
 export function HomeworksContent({
   lastMessage,
   controllerState,
   onContentChange,
-  debugMode = false,
+  enableDebugMode = false,
   showCursor = false,
   showMovementArea = false,
-  useFuyofuyoPhysics = false
+  enableCenteringCursorMode = true
 }: HomeworksContentProps): React.JSX.Element {
   return (
     <LiquidGlassScene
       controllerState={controllerState}
       lastMessage={lastMessage}
       onContentChange={onContentChange}
-      debugMode={debugMode}
+      enableDebugMode={enableDebugMode}
       showCursor={showCursor}
       showMovementArea={showMovementArea}
-      useFuyofuyoPhysics={useFuyofuyoPhysics}
+      enableCenteringCursorMode={enableCenteringCursorMode}
     />
   )
 }

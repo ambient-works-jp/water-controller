@@ -27,20 +27,20 @@ interface LiquidGlassSceneProps {
   controllerState: ControllerState
   lastMessage: WsMessage | null
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
-  debugMode?: boolean
+  enableDebugMode?: boolean
   showCursor?: boolean
   showMovementArea?: boolean
-  useFuyofuyoPhysics?: boolean
+  enableCenteringCursorMode?: boolean
 }
 
 export function LiquidGlassScene({
   controllerState,
   lastMessage,
   onContentChange,
-  debugMode = false,
+  enableDebugMode = false,
   showCursor = false,
   showMovementArea = false,
-  useFuyofuyoPhysics = false
+  enableCenteringCursorMode = true
 }: LiquidGlassSceneProps): React.JSX.Element {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null)
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 })
@@ -89,7 +89,7 @@ export function LiquidGlassScene({
             controllerState={controllerState}
             lastMessage={lastMessage}
             onContentChange={onContentChange}
-            useFuyofuyoPhysics={useFuyofuyoPhysics}
+            enableCenteringCursorMode={enableCenteringCursorMode}
           />
         ) : (
           <LiquidGlassVideoEffect
@@ -98,13 +98,13 @@ export function LiquidGlassScene({
             onContentChange={onContentChange}
             onVideoElementReady={setVideoElement}
             onCursorPositionUpdate={handleCursorPositionUpdate}
-            useFuyofuyoPhysics={useFuyofuyoPhysics}
+            enableCenteringCursorMode={enableCenteringCursorMode}
           />
         )}
       </Canvas>
 
       {/* デバッグUI（動画モード＆デバッグモード時のみ表示） */}
-      {debugMode && BACKGROUND_TYPE === 'video' && <VideoDebugUI videoElement={videoElement} />}
+      {enableDebugMode && BACKGROUND_TYPE === 'video' && <VideoDebugUI videoElement={videoElement} />}
 
       {/* 移動範囲の表示（showMovementArea が true の時のみ表示） */}
       {showMovementArea && (

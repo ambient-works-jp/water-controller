@@ -27,7 +27,7 @@ interface LiquidGlassVideoEffectProps {
   onContentChange?: (contentName: string, currentIndex: number, totalCount: number) => void
   onVideoElementReady?: (videoElement: HTMLVideoElement | null) => void
   onCursorPositionUpdate?: (normalizedX: number, normalizedY: number) => void
-  useFuyofuyoPhysics?: boolean
+  enableCenteringCursorMode?: boolean
 }
 
 // 物理シミュレーション定数は constants.ts の PHYSICS_PRESETS から選択
@@ -66,7 +66,7 @@ export function LiquidGlassVideoEffect({
   onContentChange,
   onVideoElementReady,
   onCursorPositionUpdate,
-  useFuyofuyoPhysics = false
+  enableCenteringCursorMode = true
 }: LiquidGlassVideoEffectProps): React.JSX.Element {
   const meshRef = useRef<THREE.Mesh>(null)
   const { size, viewport } = useThree()
@@ -138,7 +138,7 @@ export function LiquidGlassVideoEffect({
     const { left, right, up, down } = controllerState
 
     // 物理パラメータの選択
-    const PHYSICS_PARAMS = useFuyofuyoPhysics ? PHYSICS_PRESETS.FUYOFUYO : PHYSICS_PRESETS.SIMPLE
+    const PHYSICS_PARAMS = enableCenteringCursorMode ? PHYSICS_PRESETS.FUYOFUYO : PHYSICS_PRESETS.SIMPLE
 
     // フレームレート非依存の時間係数（60 FPS 基準）
     const timeScale = Math.min(delta * 60, 2) // 最大2倍に制限
@@ -153,7 +153,7 @@ export function LiquidGlassVideoEffect({
     const isOpposingX = left > 0 && right > 0
     const isOpposingY = up > 0 && down > 0
 
-    if (useFuyofuyoPhysics) {
+    if (enableCenteringCursorMode) {
       // ふよふよモード：物理シミュレーション方式（慣性あり、復元力あり）
       // 速度に加算（timeScale を適用）
       pointerState.velocityX += (rightForce - leftForce) * PHYSICS_PARAMS.FORCE_MULTIPLIER * timeScale
@@ -250,7 +250,7 @@ export function LiquidGlassVideoEffect({
       Math.abs(pointerState.y) > maxDistanceY * EDGE_DETECTION_PARAMS.EDGE_THRESHOLD
 
     // デバッグログ（ふよふよモードかつ入力があるとき）
-    if (useFuyofuyoPhysics && hasInput && Math.random() < 0.05) {
+    if (enableCenteringCursorMode && hasInput && Math.random() < 0.05) {
       console.log('[Edge Detection]', {
         pointerX: pointerState.x.toFixed(3),
         pointerY: pointerState.y.toFixed(3),
@@ -267,7 +267,7 @@ export function LiquidGlassVideoEffect({
 
     const shouldAddTrail =
       hasInput &&
-      (!useFuyofuyoPhysics || isAtEdge) && // ふよふよモードのときは端にいる場合のみ
+      (!enableCenteringCursorMode || isAtEdge) && // ふよふよモードのときは端にいる場合のみ
       (trailPoints.length === 0 ||
         currentTime - lastTrailTime >= RIPPLE_PARAMS.TRAIL_INTERVAL ||
         (trailPoints.length > 0 &&

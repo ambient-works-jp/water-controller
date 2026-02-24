@@ -14,13 +14,11 @@ interface DebugOverlayProps {
   /** コントローラ状態（WebSocket + キーボード統合） */
   controllerState: ControllerState
   /** デバッグモードのオン・オフ */
-  debugMode: boolean
-  /** 現在再生中のコンテンツ情報 */
-  currentContent: {
-    name: string
-    index: number
-    total: number
-  } | null
+  enableDebugMode: boolean
+  /** 中央に戻るカーソルモード（ふよふよモード）ON/OFF */
+  enableCenteringCursorMode: boolean
+  /** 中央に戻るカーソルモード切り替えハンドラ */
+  onEnableCenteringCursorModeChange: (use: boolean) => void
   /** カーソル位置の表示ON/OFF */
   showCursor: boolean
   /** カーソル位置の表示切り替えハンドラ */
@@ -29,10 +27,12 @@ interface DebugOverlayProps {
   showMovementArea: boolean
   /** 移動範囲の表示切り替えハンドラ */
   onShowMovementAreaChange: (show: boolean) => void
-  /** ふよふよモードON/OFF */
-  useFuyofuyoPhysics: boolean
-  /** ふよふよモード切り替えハンドラ */
-  onUseFuyofuyoPhysicsChange: (use: boolean) => void
+  /** 現在再生中のコンテンツ情報 */
+  currentContent: {
+    name: string
+    index: number
+    total: number
+  } | null
 }
 
 /**
@@ -44,14 +44,14 @@ export function DebugOverlay({
   status,
   lastMessage,
   controllerState,
-  debugMode,
-  currentContent,
+  enableDebugMode,
+  enableCenteringCursorMode,
+  onEnableCenteringCursorModeChange,
   showCursor,
   onShowCursorChange,
   showMovementArea,
   onShowMovementAreaChange,
-  useFuyofuyoPhysics,
-  onUseFuyofuyoPhysicsChange
+  currentContent
 }: DebugOverlayProps): React.JSX.Element | null {
   const animationFps = useAnimationFps()
   const controllerFps = useControllerFps(lastMessage)
@@ -62,7 +62,7 @@ export function DebugOverlay({
   }, [currentContent])
 
   // デバッグモードがオフの場合は非表示
-  if (!debugMode) {
+  if (!enableDebugMode) {
     return null
   }
 
@@ -180,6 +180,31 @@ export function DebugOverlay({
           </div>
         </div>
 
+        {/* 中央に戻るカーソルモードON/OFFチェックボックス */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            fontSize: '15px'
+          }}
+          onClick={() => onEnableCenteringCursorModeChange(!enableCenteringCursorMode)}
+        >
+          <input
+            type="checkbox"
+            checked={enableCenteringCursorMode}
+            onChange={(e) => onEnableCenteringCursorModeChange(e.target.checked)}
+            style={{
+              width: '18px',
+              height: '18px',
+              cursor: 'pointer'
+            }}
+          />
+          <span>ふよふよモード</span>
+        </div>
+
         {/* カーソル位置表示ON/OFFチェックボックス */}
         <div
           style={{
@@ -228,31 +253,6 @@ export function DebugOverlay({
             }}
           />
           <span>移動範囲を表示</span>
-        </div>
-
-        {/* ふよふよモードON/OFFチェックボックス */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            userSelect: 'none',
-            fontSize: '15px'
-          }}
-          onClick={() => onUseFuyofuyoPhysicsChange(!useFuyofuyoPhysics)}
-        >
-          <input
-            type="checkbox"
-            checked={useFuyofuyoPhysics}
-            onChange={(e) => onUseFuyofuyoPhysicsChange(e.target.checked)}
-            style={{
-              width: '18px',
-              height: '18px',
-              cursor: 'pointer'
-            }}
-          />
-          <span>ふよふよモード</span>
         </div>
       </div>
 

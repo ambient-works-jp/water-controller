@@ -17,13 +17,27 @@ export type ContentItem = {
 }
 
 /**
+ * デバッグモードの設定オプション
+ */
+export type DebugModeOptions = {
+  /** デバッグモードの有効・無効 */
+  enableDebugMode: boolean
+  /** カーソル位置を表示するかどうか */
+  showCursor: boolean
+  /** 移動範囲を表示するかどうか */
+  showMovementArea: boolean
+}
+
+/**
  * アプリケーション設定
  */
 export type Config = {
   /** WebSocket サーバの接続先 URL */
   wsUrl: string
-  /** デバッグモードのオン・オフ */
-  debugMode: boolean
+  /** 中央に戻るカーソルモード（ふよふよモード） */
+  enableCenteringCursorMode: boolean
+  /** デバッグモードの設定 */
+  debugModeOptions: DebugModeOptions
   /** コンテンツ一覧 */
   contents: ContentItem[]
   /** コンテンツのプレイリスト */

@@ -17,7 +17,12 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 function createDefaultConfig(): Config {
   return {
     wsUrl: 'ws://127.0.0.1:8080/ws',
-    debugMode: false,
+    enableCenteringCursorMode: true,
+    debugModeOptions: {
+      enableDebugMode: false,
+      showCursor: false,
+      showMovementArea: false
+    },
     contents: CONTENTS,
     playlist: DEFAULT_PLAYLIST_IDS
   }
@@ -92,15 +97,32 @@ export function loadConfig():
     const configStr = fs.readFileSync(CONFIG_FILE, 'utf-8')
 
     // JSON パース
-    let config = JSON.parse(configStr) as Config
+    const parsedConfig = JSON.parse(configStr)
+    let config = parsedConfig as Config
 
     // バリデーション
     if (!config.wsUrl || typeof config.wsUrl !== 'string') {
       throw new Error('Invalid config: wsUrl is required and must be a string')
     }
 
-    if (typeof config.debugMode !== 'boolean') {
-      throw new Error('Invalid config: debugMode must be a boolean')
+    if (!config.debugModeOptions || typeof config.debugModeOptions !== 'object') {
+      throw new Error('Invalid config: debugModeOptions is required and must be an object')
+    }
+
+    if (typeof config.debugModeOptions.enableDebugMode !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.enableDebugMode must be a boolean')
+    }
+
+    if (typeof config.debugModeOptions.showCursor !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.showCursor must be a boolean')
+    }
+
+    if (typeof config.debugModeOptions.showMovementArea !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.showMovementArea must be a boolean')
+    }
+
+    if (typeof config.enableCenteringCursorMode !== 'boolean') {
+      throw new Error('Invalid config: enableCenteringCursorMode must be a boolean')
     }
 
     if (!Array.isArray(config.contents)) {
@@ -194,8 +216,24 @@ export function saveConfig(
       throw new Error('Invalid config: wsUrl is required and must be a string')
     }
 
-    if (typeof config.debugMode !== 'boolean') {
-      throw new Error('Invalid config: debugMode must be a boolean')
+    if (!config.debugModeOptions || typeof config.debugModeOptions !== 'object') {
+      throw new Error('Invalid config: debugModeOptions is required and must be an object')
+    }
+
+    if (typeof config.debugModeOptions.enableDebugMode !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.enableDebugMode must be a boolean')
+    }
+
+    if (typeof config.debugModeOptions.showCursor !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.showCursor must be a boolean')
+    }
+
+    if (typeof config.debugModeOptions.showMovementArea !== 'boolean') {
+      throw new Error('Invalid config: debugModeOptions.showMovementArea must be a boolean')
+    }
+
+    if (typeof config.enableCenteringCursorMode !== 'boolean') {
+      throw new Error('Invalid config: enableCenteringCursorMode must be a boolean')
     }
 
     if (!Array.isArray(config.contents)) {

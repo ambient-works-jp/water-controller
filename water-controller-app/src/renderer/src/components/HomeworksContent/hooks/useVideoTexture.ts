@@ -39,11 +39,9 @@ export function useVideoTexture(videoSrc: string): VideoTextureResult {
       setTexture(videoTexture)
 
       // 再生開始
-      video
-        .play()
-        .catch((error) => {
-          console.error('[useVideoTexture] Video playback failed:', error)
-        })
+      video.play().catch((error) => {
+        console.error('[useVideoTexture] Video playback failed:', error)
+      })
     }
 
     video.addEventListener('canplay', handleCanPlay)

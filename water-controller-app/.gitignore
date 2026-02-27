@@ -5,6 +5,9 @@ out
 .eslintcache
 *.log*
 
+# vscode
+*.code-workspace
+
 # ignore .mov video sources
 src/renderer/src/assets/sources/**/*.mov
 src/renderer/src/assets/**/*.mp4
